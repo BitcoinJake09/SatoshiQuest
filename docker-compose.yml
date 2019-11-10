@@ -1,0 +1,24 @@
+spigot:
+  container_name: satoshiquest
+  build: .
+  volumes:
+    - "/SatoshiQuest/spigot/world:/spigot/world"
+    - "/SatoshiQuest/spigot/world_nether:/spigot/world_nether"
+    - "/SatoshiQuest/spigot/world_the_end:/spigot/world_the_end"
+  ports:
+    - "25566:25566"
+  environment:
+    - BITCOIN_PORT_8332_TCP_PORT = x
+    - SATOSHIQUEST_ENV=development
+    - ADMIN_ADDRESS = x
+    - ADMIN_UUID = x
+    - BUYIN_AMOUNT = 30000
+    - LIVES_PERBUYIN = 3
+    - ADDRESS_URL = https://www.blockchain.com/btc/address/
+    - BITCOIN_ENV_USERNAME = x
+    - BITCOIN_ENV_PASSWORD = x
+    - BITCOIN_PORT_8332_TCP_ADDR = 192.168.x
+  links:
+    - redis
+redis:
+  image: redis
