@@ -40,8 +40,8 @@ public class SatoshiQuest extends JavaPlugin {
  public static final String ADMIN_ADDRESS =
       System.getenv("ADMIN_ADDRESS") != null ? System.getenv("ADMIN_ADDRESS"): "1AABTCMd4X2Gv5tX2bisLiBQDKch8yomNM";
   public static final String BITCOIN_NODE_HOST =
-      System.getenv("BITCOIN_PORT_8332_TCP_ADDR") != null
-          ? System.getenv("BITCOIN_PORT_8332_TCP_ADDR")
+      System.getenv("BITCOIN_NODE_HOST") != null
+          ? System.getenv("BITCOIN_NODE_HOST")
           : null;
   public static final int BITCOIN_NODE_PORT =
       System.getenv("BITCOIN_PORT_8332_TCP_PORT") != null
@@ -66,6 +66,7 @@ public class SatoshiQuest extends JavaPlugin {
 
   public static final String ADDRESS_URL =
       System.getenv("ADDRESS_URL") != null ? System.getenv("ADDRESS_URL") : "https://www.blockchain.com/btc/address/";
+
 
 
   // REDIS: Look for Environment variables on hostname and port, otherwise defaults to
