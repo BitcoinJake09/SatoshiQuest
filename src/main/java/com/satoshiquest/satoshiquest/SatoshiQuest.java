@@ -84,9 +84,18 @@ public class SatoshiQuest extends JavaPlugin {
   // Default price: 10,000 satoshis or 100 bits
   public static final Long BUYIN_AMOUNT =
       System.getenv("BUYIN_AMOUNT") != null ? Long.parseLong(System.getenv("BUYIN_AMOUNT")) : 10000;
+
   public static final Long LIVES_PERBUYIN =
       System.getenv("LIVES_PERBUYIN") != null ? Long.parseLong(System.getenv("LIVES_PERBUYIN")) : 1;
-  // Minimum transaction by default is 2000 bits
+
+  public static final Long SPAWN_PROTECT_RADIUS =
+      System.getenv("SPAWN_PROTECT_RADIUS") != null ? Long.parseLong(System.getenv("SPAWN_PROTECT_RADIUS")) : 14;
+
+  public static final Long LOOT_RADIUS_MIN =
+      System.getenv("LOOT_RADIUS_MIN") != null ? Long.parseLong(System.getenv("LOOT_RADIUS_MIN")) : 1000;
+
+  public static final Long LOOT_RADIUS_MAX =
+      System.getenv("LOOT_RADIUS_MAX") != null ? Long.parseLong(System.getenv("LOOT_RADIUS_MAX")) : 10000;
 
   public static int rand(int min, int max) {
     return min + (int) (Math.random() * ((max - min) + 1));
@@ -151,7 +160,7 @@ public class SatoshiQuest extends JavaPlugin {
         wallet = new NodeWallet(this.toString());
         System.out.println("[world wallet] generated new wallet");
       } */
-        wallet = generateNewWallet(this.toString());
+        wallet = generateNewWallet(SERVERDISPLAY_NAME);
         System.out.println("[world wallet] generated new wallet");
       //System.out.println("[world wallet] address: " + wallet.getAccountAddress());
 
