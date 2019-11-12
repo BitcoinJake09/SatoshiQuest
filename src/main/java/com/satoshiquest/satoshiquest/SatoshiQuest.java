@@ -427,11 +427,24 @@ public class SatoshiQuest extends JavaPlugin {
 		double spawnz = spawn.getZ();
 		double playerx=(double)player.getLocation().getX();
                 double playerz=(double)player.getLocation().getZ();
-	        System.out.println("playerx:"+playerx+" playerz:"+playerz);  //for testing lol
-		System.out.println("spawnx:"+spawnx+" spawnz:"+spawnz);  //for testing lol
+
+	if (!((playerx<spawnx+SPAWN_PROTECT_RADIUS)&&(playerx>spawnx-SPAWN_PROTECT_RADIUS)))return true;
+	else if(!((playerz<spawnz+SPAWN_PROTECT_RADIUS)&&(playerz>spawnz-SPAWN_PROTECT_RADIUS)))return true;
+		System.out.println("You may not build at spawn.");  
+               return false;//not
+
+  }
+
+  public static boolean isNearLoot(Player player) {
+	Location spawn = Bukkit.getServer().getWorlds().get(0).getSpawnLocation();
+		double spawnx = spawn.getX();
+		double spawnz = spawn.getZ();
+		double playerx=(double)player.getLocation().getX();
+                double playerz=(double)player.getLocation().getZ();
+
 	if (!((playerx<spawnx+8)&&(playerx>spawnx-8)))return true;
 	else if(!((playerz<spawnz+8)&&(playerz>spawnz-8)))return true;
-		System.out.println("fail");  
+		System.out.println("You are near...");  
                return false;//not
 
   }
