@@ -151,7 +151,7 @@ public class SatoshiQuest extends JavaPlugin {
         wallet = new NodeWallet(this.toString());
         System.out.println("[world wallet] generated new wallet");
       } */
-        wallet = new NodeWallet(this.toString());
+        wallet = generateNewWallet(this.toString());
         System.out.println("[world wallet] generated new wallet");
       //System.out.println("[world wallet] address: " + wallet.getAccountAddress());
 
@@ -182,6 +182,53 @@ public class SatoshiQuest extends JavaPlugin {
       System.out.println("[fatal] plugin enable fails");
       Bukkit.shutdown();
     }
+  }
+
+  public static final NodeWallet generateNewWallet(String account_id)
+      throws IOException, org.json.simple.parser.ParseException {
+    JSONParser parser = new JSONParser();
+
+    final JSONObject jsonObject = new JSONObject();
+    jsonObject.put("jsonrpc", "1.0");
+    jsonObject.put("id", "satoshiquest");
+    jsonObject.put("method", "createwallet");
+    JSONArray params = new JSONArray();
+    params.add(account_id);
+    System.out.println("Creating wallet: " + account_id);
+    System.out.println(params);
+    jsonObject.put("params", params);
+    System.out.println("Checking blockchain info...");
+    URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT);
+    System.out.println(url.toString());
+    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+    String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
+    String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
+    con.setRequestProperty("Authorization", "Basic " + encoding);
+
+    con.setRequestMethod("POST");
+    con.setRequestProperty("User-Agent", "Mozilla/1.22 (compatible; MSIE 2.0; Windows 3.1)");
+    con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+    con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    con.setDoOutput(true);
+    OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
+    out.write(jsonObject.toString());
+    out.close();
+
+    int responseCode = con.getResponseCode();
+
+    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+    String inputLine;
+    StringBuffer response = new StringBuffer();
+
+    while ((inputLine = in.readLine()) != null) {
+      response.append(inputLine);
+    }
+    in.close();
+    System.out.println(response.toString());
+    JSONObject response_object = (JSONObject) parser.parse(response.toString());
+    System.out.println(response_object);
+
+    return new NodeWallet(account_id);
   }
 
   // @todo: make this just accept the endpoint name and (optional) parameters
@@ -365,28 +412,19 @@ public class SatoshiQuest extends JavaPlugin {
     Bukkit.getLogger().info(msg);
   }
 
-  public int getLevel(int exp) {
-    return (int) Math.floor(Math.sqrt(exp / (float) 256));
-  }
+  public static boolean canBuild(Player player) {
+	Location spawn = Bukkit.getServer().getWorlds().get(0).getSpawnLocation();
+		double spawnx = spawn.getX();
+		double spawnz = spawn.getZ();
+		double playerx=(double)player.getLocation().getX();
+                double playerz=(double)player.getLocation().getZ();
+	        System.out.println("playerx:"+playerx+" playerz:"+playerz);  //for testing lol
+		System.out.println("spawnx:"+spawnx+" spawnz:"+spawnz);  //for testing lol
+	if (!((playerx<spawnx+8)&&(playerx>spawnx-8)))return true;
+	else if(!((playerz<spawnz+8)&&(playerz>spawnz-8)))return true;
+		System.out.println("fail");  
+               return false;//not
 
-  public int getExpForLevel(int level) {
-    return (int) Math.pow(level, 2) * 256;
-  }
-
-  public float getExpProgress(int exp) {
-    int level = getLevel(exp);
-    int nextlevel = getExpForLevel(level + 1);
-    int prevlevel = 0;
-    if (level > 0) {
-      prevlevel = getExpForLevel(level);
-    }
-    float progress = ((exp - prevlevel) / (float) (nextlevel - prevlevel));
-    return progress;
-  }
-
-  public boolean canBuild(Player player) {
-	Location spawn = getServer().getWorlds().get(0).getSpawnLocation();        			return false;
-    
   }
 
   public boolean isModerator(Player player) {
