@@ -166,16 +166,21 @@ public class SatoshiQuest extends JavaPlugin {
   System.out.println("Loot X,Z: " + LootSpawnX + " " + LootSpawnZ);
 	
 	try {
-		wallet = loadWallet(SERVERDISPLAY_NAME);
-        	System.out.println("[world wallet] Loaded from node wallet");
+	wallet = loadWallet(SERVERDISPLAY_NAME);
+        System.out.println("[world wallet] trying to load node wallet");
+	} catch (NullPointerException npe) {
+		      npe.printStackTrace();
+      System.out.println("[world wallet] wallet not found, attempting to create.");
+	}
+
 	
 	if (wallet == null) {
 	        wallet = generateNewWallet(SERVERDISPLAY_NAME);
         System.out.println("[world wallet] generated new wallet");
+	} else { 
+		System.out.println("[world wallet] Loaded from node wallet");
 	}
-	} catch(Exception e) {
-	      e.printStackTrace();
-	}
+
       //System.out.println("[world wallet] address: " + wallet.getAccountAddress());
 
 
@@ -265,7 +270,7 @@ public class SatoshiQuest extends JavaPlugin {
     jsonObject.put("id", "satoshiquest");
     jsonObject.put("method", "dumpwallet");
     JSONArray params = new JSONArray();
-    params.add(account_id + ".dat");
+    params.add(account_id);
     System.out.println("Loading wallet: " + account_id);
     System.out.println(params);
     jsonObject.put("params", params);
