@@ -532,7 +532,7 @@ public class SatoshiQuest extends JavaPlugin {
     try {
       Long balance = user.wallet.getBalance(0);
 
-      player.sendMessage("Address: " + user.wallet.getAccountAddress());
+      player.sendMessage("Address: " + user.wallet.address);
       player.sendMessage("Balance: " + balance);
       player.sendMessage(
           "URL: " + ChatColor.BLUE + ChatColor.UNDERLINE + ChatColor.BOLD + ADDRESS_URL + user.wallet.getAccountAddress());
@@ -645,3 +645,4 @@ public class SatoshiQuest extends JavaPlugin {
     this.setEnabled(false);
   }
 }
+

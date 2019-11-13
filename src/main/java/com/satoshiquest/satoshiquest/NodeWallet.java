@@ -14,9 +14,20 @@ import org.json.simple.parser.ParseException;
 
 public class NodeWallet {
   String account_id;
+  public String address = null;
 
   public NodeWallet(String _account_id) {
     this.account_id = _account_id;
+    
+    try {
+    	address = this.getAccountAddress();
+	if (address == null) {
+	    address = this.getNewAccountAddress();
+	}
+
+    } catch (Exception e) {
+        System.out.println(e);
+    }
   }
 
   public String sendFrom(String address, Long sat) throws IOException, ParseException {

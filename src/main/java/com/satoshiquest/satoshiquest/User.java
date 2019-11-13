@@ -15,7 +15,20 @@ public class User {
   public User(Player player)
       throws ParseException, org.json.simple.parser.ParseException, IOException {
     this.player = player;
-    this.wallet = new NodeWallet(this.player.getUniqueId().toString());
+	if (satoshiQuest.REDIS.exists("nodeWallet"+this.player.getUniqueId().toString())) {
+		try {
+			this.wallet = satoshiQuest.loadWallet(satoshiQuest.REDIS.get("nodeWallet"+this.player.getUniqueId().toString()));
+		        System.out.println("[user wallet] trying to load node wallet");
+		} catch (NullPointerException npe) {
+			npe.printStackTrace();
+			System.out.println("[user wallet] wallet not found, attempting to create.");
+		}
+	} else if(!satoshiQuest.REDIS.exists("nodeWallet"+this.player.getUniqueId().toString()))
+	{
+	        this.wallet = satoshiQuest.generateNewWallet(this.player.getUniqueId().toString());
+        	System.out.println("[user wallet] generated new wallet");
+		satoshiQuest.REDIS.set("nodeWallet"+this.player.getUniqueId().toString(),this.player.getUniqueId().toString());
+	}
   }
 
 }
