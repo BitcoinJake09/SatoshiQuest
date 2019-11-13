@@ -164,21 +164,19 @@ public class SatoshiQuest extends JavaPlugin {
       } */
 
   System.out.println("Loot X,Z: " + LootSpawnX + " " + LootSpawnZ);
-	
-	try {
-	wallet = loadWallet(SERVERDISPLAY_NAME);
-        System.out.println("[world wallet] trying to load node wallet");
-	} catch (NullPointerException npe) {
-		      npe.printStackTrace();
-      System.out.println("[world wallet] wallet not found, attempting to create.");
-	}
-
-	
-	if (wallet == null) {
+	if (REDIS.exists("nodeWallet")) {
+		try {
+			wallet = loadWallet(REDIS.get("nodeWallet"));
+		        System.out.println("[world wallet] trying to load node wallet");
+		} catch (NullPointerException npe) {
+			npe.printStackTrace();
+			System.out.println("[world wallet] wallet not found, attempting to create.");
+		}
+	} else if(!REDIS.exists("nodeWallet"))
+	{
 	        wallet = generateNewWallet(SERVERDISPLAY_NAME);
-        System.out.println("[world wallet] generated new wallet");
-	} else { 
-		System.out.println("[world wallet] Loaded from node wallet");
+        	System.out.println("[world wallet] generated new wallet");
+		REDIS.set("nodeWallet",SERVERDISPLAY_NAME);
 	}
 
       //System.out.println("[world wallet] address: " + wallet.getAccountAddress());
