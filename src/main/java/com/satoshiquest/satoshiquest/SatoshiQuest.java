@@ -101,6 +101,8 @@ public class SatoshiQuest extends JavaPlugin {
     return min + (int) (Math.random() * ((max - min) + 1));
   }
 
+  public Long LootSpawnX = new Long(rand(LOOT_RADIUS_MIN.intValue(),LOOT_RADIUS_MAX.intValue()));
+  public Long LootSpawnZ = new Long(rand(LOOT_RADIUS_MIN.intValue(),LOOT_RADIUS_MAX.intValue()));
   public NodeWallet wallet = null;
   public Player last_loot_player;
 
@@ -160,9 +162,23 @@ public class SatoshiQuest extends JavaPlugin {
         wallet = new NodeWallet(this.toString());
         System.out.println("[world wallet] generated new wallet");
       } */
-        wallet = generateNewWallet(SERVERDISPLAY_NAME);
+
+  System.out.println("Loot X,Z: " + LootSpawnX + " " + LootSpawnZ);
+	
+	try {
+		wallet = loadWallet(SERVERDISPLAY_NAME);
+        	System.out.println("[world wallet] Loaded from node wallet");
+	
+	if (wallet == null) {
+	        wallet = generateNewWallet(SERVERDISPLAY_NAME);
         System.out.println("[world wallet] generated new wallet");
+	}
+	} catch(Exception e) {
+	      e.printStackTrace();
+	}
       //System.out.println("[world wallet] address: " + wallet.getAccountAddress());
+
+
 
       if (BITCOIN_NODE_HOST != null) {
         System.out.println("[startup] checking bitcoin node connection");
@@ -240,6 +256,52 @@ public class SatoshiQuest extends JavaPlugin {
     return new NodeWallet(account_id);
   }
 
+  public static final NodeWallet loadWallet(String account_id)
+      throws IOException, org.json.simple.parser.ParseException {
+    JSONParser parser = new JSONParser();
+
+    final JSONObject jsonObject = new JSONObject();
+    jsonObject.put("jsonrpc", "1.0");
+    jsonObject.put("id", "satoshiquest");
+    jsonObject.put("method", "dumpwallet");
+    JSONArray params = new JSONArray();
+    params.add(account_id + ".dat");
+    System.out.println("Loading wallet: " + account_id);
+    System.out.println(params);
+    jsonObject.put("params", params);
+    System.out.println("Checking blockchain info...");
+    URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT);
+    System.out.println(url.toString());
+    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+    String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
+    String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
+    con.setRequestProperty("Authorization", "Basic " + encoding);
+
+    con.setRequestMethod("POST");
+    con.setRequestProperty("User-Agent", "Mozilla/1.22 (compatible; MSIE 2.0; Windows 3.1)");
+    con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+    con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    con.setDoOutput(true);
+    OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
+    out.write(jsonObject.toString());
+    out.close();
+
+    int responseCode = con.getResponseCode();
+
+    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+    String inputLine;
+    StringBuffer response = new StringBuffer();
+
+    while ((inputLine = in.readLine()) != null) {
+      response.append(inputLine);
+    }
+    in.close();
+    System.out.println(response.toString());
+    JSONObject response_object = (JSONObject) parser.parse(response.toString());
+    System.out.println(response_object);
+
+    return new NodeWallet(account_id);
+  }
   // @todo: make this just accept the endpoint name and (optional) parameters
   public JSONObject getBlockChainInfo() throws org.json.simple.parser.ParseException {
     JSONParser parser = new JSONParser();
