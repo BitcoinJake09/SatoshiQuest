@@ -266,7 +266,7 @@ public class SatoshiQuest extends JavaPlugin {
     final JSONObject jsonObject = new JSONObject();
     jsonObject.put("jsonrpc", "1.0");
     jsonObject.put("id", "satoshiquest");
-    jsonObject.put("method", "dumpwallet");
+    jsonObject.put("method", "loadwallet");
     JSONArray params = new JSONArray();
     params.add(account_id);
     System.out.println("Loading wallet: " + account_id);
