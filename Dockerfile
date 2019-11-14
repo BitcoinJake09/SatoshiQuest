@@ -3,6 +3,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update
 RUN apt-get install -y software-properties-common dirmngr maven git build-essential gnupg default-jre default-jdk
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y curl wget
 # RUN echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main" | tee /etc/apt/sources.list.d/webupd8team-java.list
 # RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys EEA14886  && \
 # RUN apt-get update
