@@ -2,9 +2,9 @@ spigot:
   container_name: satoshiquest
   build: .
   volumes:
-    - "/SatoshiQuest/spigot/world:/spigot/world"
-    - "/SatoshiQuest/spigot/world_nether:/spigot/world_nether"
-    - "/SatoshiQuest/spigot/world_the_end:/spigot/world_the_end"
+    - "./world:/spigot/world"
+    - "./world_nether:/spigot/world_nether"
+    - "./world_the_end:/spigot/world_the_end"
   ports:
     - "25566:25566"
   environment:
