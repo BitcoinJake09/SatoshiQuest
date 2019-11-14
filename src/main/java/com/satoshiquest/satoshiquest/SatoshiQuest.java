@@ -162,23 +162,29 @@ public class SatoshiQuest extends JavaPlugin {
         wallet = new NodeWallet(this.toString());
         System.out.println("[world wallet] generated new wallet");
       } */
-
-  System.out.println("Loot X,Z: " + LootSpawnX + " " + LootSpawnZ);
+	if (!REDIS.exists("lootX")) {
+		REDIS.set("lootX",LootSpawnX.toString());
+		REDIS.set("lootZ",LootSpawnZ.toString());
+  		System.out.println("Loot X,Z: " + REDIS.get("lootX") + " " + REDIS.get("lootZ"));
+	} else {
+		System.out.println("Loot X,Z: " + REDIS.get("lootX") + " " + REDIS.get("lootZ"));
+	}
+try {
 	if (REDIS.exists("nodeWallet")) {
-		try {
+		
 			wallet = loadWallet(REDIS.get("nodeWallet"));
 		        System.out.println("[world wallet] trying to load node wallet");
-		} catch (NullPointerException npe) {
-			npe.printStackTrace();
-			System.out.println("[world wallet] wallet not found, attempting to create.");
-		}
+		
 	} else if(!REDIS.exists("nodeWallet"))
 	{
 	        wallet = generateNewWallet(SERVERDISPLAY_NAME);
         	System.out.println("[world wallet] generated new wallet");
 		REDIS.set("nodeWallet",SERVERDISPLAY_NAME);
 	}
-
+} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("[world wallet] wallet error.");
+		}
       //System.out.println("[world wallet] address: " + wallet.getAccountAddress());
 
 
@@ -228,23 +234,15 @@ public class SatoshiQuest extends JavaPlugin {
     System.out.println("Checking blockchain info...");
     URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT);
     System.out.println(url.toString());
-    HttpURLConnection con = (HttpURLConnection) url.openConnection();
     String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
     String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
-    con.setRequestProperty("Authorization", "Basic " + encoding);
+try
+        { 
+	String command = "curl --user " + userPassword + " --data-binary '" + jsonObject + "' -H 'content-type: text/plain;' " + url.toString();
+	Process process = Runtime.getRuntime().exec(command);
 
-    con.setRequestMethod("POST");
-    con.setRequestProperty("User-Agent", "Mozilla/1.22 (compatible; MSIE 2.0; Windows 3.1)");
-    con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-    con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-    con.setDoOutput(true);
-    OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
-    out.write(jsonObject.toString());
-    out.close();
 
-    int responseCode = con.getResponseCode();
-
-    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+    BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
     String inputLine;
     StringBuffer response = new StringBuffer();
 
@@ -255,6 +253,15 @@ public class SatoshiQuest extends JavaPlugin {
     System.out.println(response.toString());
     JSONObject response_object = (JSONObject) parser.parse(response.toString());
     System.out.println(response_object);
+	} 
+        catch (Exception e) 
+        { 
+            System.out.println("HEY Buddy ! U r Doing Something Wrong "); 
+            e.printStackTrace(); 
+        } 
+
+
+
 
     return new NodeWallet(account_id);
   }
@@ -275,23 +282,15 @@ public class SatoshiQuest extends JavaPlugin {
     System.out.println("Checking blockchain info...");
     URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT);
     System.out.println(url.toString());
-    HttpURLConnection con = (HttpURLConnection) url.openConnection();
     String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
     String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
-    con.setRequestProperty("Authorization", "Basic " + encoding);
+try
+        { 
+	String command = "curl --user " + userPassword + " --data-binary '" + jsonObject + "' -H 'content-type: text/plain;' " + url.toString();
+	Process process = Runtime.getRuntime().exec(command);
 
-    con.setRequestMethod("POST");
-    con.setRequestProperty("User-Agent", "Mozilla/1.22 (compatible; MSIE 2.0; Windows 3.1)");
-    con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-    con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-    con.setDoOutput(true);
-    OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
-    out.write(jsonObject.toString());
-    out.close();
 
-    int responseCode = con.getResponseCode();
-
-    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+    BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
     String inputLine;
     StringBuffer response = new StringBuffer();
 
@@ -302,6 +301,15 @@ public class SatoshiQuest extends JavaPlugin {
     System.out.println(response.toString());
     JSONObject response_object = (JSONObject) parser.parse(response.toString());
     System.out.println(response_object);
+	} 
+        catch (Exception e) 
+        { 
+            System.out.println("HEY Buddy ! U r Doing Something Wrong "); 
+            e.printStackTrace(); 
+        } 
+
+
+
 
     return new NodeWallet(account_id);
   }
@@ -502,13 +510,13 @@ public class SatoshiQuest extends JavaPlugin {
 
   public static boolean isNearLoot(Player player) {
 	Location spawn = Bukkit.getServer().getWorlds().get(0).getSpawnLocation();
-		double spawnx = spawn.getX();
-		double spawnz = spawn.getZ();
+		double lootx = Double.valueOf(REDIS.get("lootX"));
+		double lootz = Double.valueOf(REDIS.get("lootZ"));
 		double playerx=(double)player.getLocation().getX();
                 double playerz=(double)player.getLocation().getZ();
 
-	if (!((playerx<spawnx+8)&&(playerx>spawnx-8)))return true;
-	else if(!((playerz<spawnz+8)&&(playerz>spawnz-8)))return true;
+	if (!((playerx<lootx+50)&&(playerx>lootx-50)))return true;
+	else if(!((playerz<lootz+50)&&(playerz>lootz-50)))return true;
 		System.out.println("You are near...");  
                return false;//not
 
@@ -645,4 +653,3 @@ public class SatoshiQuest extends JavaPlugin {
     this.setEnabled(false);
   }
 }
-
