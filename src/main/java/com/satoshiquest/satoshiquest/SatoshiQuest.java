@@ -164,7 +164,10 @@ public class SatoshiQuest extends JavaPlugin {
       } */
 
   System.out.println("Loot X,Z: " + LootSpawnX + " " + LootSpawnZ);
-	if (REDIS.exists("nodeWallet")) {
+  listWallets();
+        getWalletInfo(SERVERDISPLAY_NAME);
+
+	if (loadWallet(SERVERDISPLAY_NAME)!=null) {
 		try {
 			wallet = loadWallet(REDIS.get("nodeWallet"));
 		        System.out.println("[world wallet] trying to load node wallet");
@@ -172,7 +175,7 @@ public class SatoshiQuest extends JavaPlugin {
 			npe.printStackTrace();
 			System.out.println("[world wallet] wallet not found, attempting to create.");
 		}
-	} else if(!REDIS.exists("nodeWallet"))
+	} else
 	{
 	        wallet = generateNewWallet(SERVERDISPLAY_NAME);
         	System.out.println("[world wallet] generated new wallet");
@@ -202,7 +205,6 @@ public class SatoshiQuest extends JavaPlugin {
       modCommands.put("spectate", new SpectateCommand(this));
       modCommands.put("emergencystop", new EmergencystopCommand());
       modCommands.put("motd", new MOTDCommand(this));
-      publish_stats();
       System.out.println("[startup] finished");
 
     } catch (Exception e) {
@@ -239,25 +241,157 @@ public class SatoshiQuest extends JavaPlugin {
     con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
     con.setDoOutput(true);
     OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
+    System.out.println(jsonObject.toString());
     out.write(jsonObject.toString());
     out.close();
 
-    int responseCode = con.getResponseCode();
+    if(con.getResponseCode()==200) {
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
 
-    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-    String inputLine;
-    StringBuffer response = new StringBuffer();
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        System.out.println(response.toString());
+        JSONObject response_object = (JSONObject) parser.parse(response.toString());
+        System.out.println(response_object);
 
-    while ((inputLine = in.readLine()) != null) {
-      response.append(inputLine);
+        return new NodeWallet(account_id);
+    } else {
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        System.out.println(response.toString());
+        JSONObject response_object = (JSONObject) parser.parse(response.toString());
+        System.out.println(response_object);
+        return null;
     }
-    in.close();
-    System.out.println(response.toString());
-    JSONObject response_object = (JSONObject) parser.parse(response.toString());
-    System.out.println(response_object);
 
-    return new NodeWallet(account_id);
+
   }
+
+    public static final void listWallets()
+            throws IOException, org.json.simple.parser.ParseException {
+        JSONParser parser = new JSONParser();
+
+        final JSONObject jsonObject = new JSONObject();
+        jsonObject.put("jsonrpc", "1.0");
+        jsonObject.put("id", "satoshiquest");
+        jsonObject.put("method", "listwallets");
+        JSONArray params = new JSONArray();
+        System.out.println(params);
+        jsonObject.put("params", params);
+        URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT);
+        System.out.println(url.toString());
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
+        String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
+        con.setRequestProperty("Authorization", "Basic " + encoding);
+
+        con.setRequestMethod("POST");
+        con.setRequestProperty("User-Agent", "Mozilla/1.22 (compatible; MSIE 2.0; Windows 3.1)");
+        con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+        con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+        con.setDoOutput(true);
+        OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
+        System.out.println(jsonObject.toString());
+        out.write(jsonObject.toString());
+        out.close();
+
+        if(con.getResponseCode()==200) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+            System.out.println(response.toString());
+            JSONObject response_object = (JSONObject) parser.parse(response.toString());
+            System.out.println(response_object);
+
+        } else {
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+            System.out.println(response.toString());
+            JSONObject response_object = (JSONObject) parser.parse(response.toString());
+            System.out.println(response_object);
+        }
+
+
+    }
+
+    public static final void getWalletInfo(String account_id)
+            throws IOException, org.json.simple.parser.ParseException {
+        JSONParser parser = new JSONParser();
+
+        final JSONObject jsonObject = new JSONObject();
+        jsonObject.put("jsonrpc", "1.0");
+        jsonObject.put("id", "satoshiquest");
+        jsonObject.put("method", "getwalletinfo");
+        JSONArray params = new JSONArray();
+        System.out.println(params);
+        jsonObject.put("params", params);
+        URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT + "/wallet/" + account_id);
+        System.out.println(url.toString());
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
+        String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
+        con.setRequestProperty("Authorization", "Basic " + encoding);
+
+        con.setRequestMethod("POST");
+        con.setRequestProperty("User-Agent", "Mozilla/1.22 (compatible; MSIE 2.0; Windows 3.1)");
+        con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+        con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+        con.setDoOutput(true);
+        OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
+        System.out.println(jsonObject.toString());
+        out.write(jsonObject.toString());
+        out.close();
+
+        if(con.getResponseCode()==200) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+            System.out.println(response.toString());
+            JSONObject response_object = (JSONObject) parser.parse(response.toString());
+            System.out.println(response_object);
+
+        } else {
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+            System.out.println(response.toString());
+            JSONObject response_object = (JSONObject) parser.parse(response.toString());
+            System.out.println(response_object);
+        }
+
+
+    }
 
   public static final NodeWallet loadWallet(String account_id)
       throws IOException, org.json.simple.parser.ParseException {
@@ -273,9 +407,11 @@ public class SatoshiQuest extends JavaPlugin {
     System.out.println(params);
     jsonObject.put("params", params);
     System.out.println("Checking blockchain info...");
-    URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT);
+    URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT + "/wallet/" + account_id);
     System.out.println(url.toString());
-    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+    System.out.println(jsonObject.toString());
+
+      HttpURLConnection con = (HttpURLConnection) url.openConnection();
     String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
     String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
     con.setRequestProperty("Authorization", "Basic " + encoding);
@@ -289,21 +425,34 @@ public class SatoshiQuest extends JavaPlugin {
     out.write(jsonObject.toString());
     out.close();
 
-    int responseCode = con.getResponseCode();
+    if(con.getResponseCode()==200) {
 
-    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-    String inputLine;
-    StringBuffer response = new StringBuffer();
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
 
-    while ((inputLine = in.readLine()) != null) {
-      response.append(inputLine);
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        System.out.println(response.toString());
+        JSONObject response_object = (JSONObject) parser.parse(response.toString());
+        System.out.println(response_object);
+
+        return new NodeWallet(account_id);
+    } else {
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        System.out.println(response.toString());
+        JSONObject response_object = (JSONObject) parser.parse(response.toString());
+        return null;
     }
-    in.close();
-    System.out.println(response.toString());
-    JSONObject response_object = (JSONObject) parser.parse(response.toString());
-    System.out.println(response_object);
-
-    return new NodeWallet(account_id);
   }
   // @todo: make this just accept the endpoint name and (optional) parameters
   public JSONObject getBlockChainInfo() throws org.json.simple.parser.ParseException {
