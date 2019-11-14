@@ -5,6 +5,7 @@ spigot:
     - "./world:/spigot/world"
     - "./world_nether:/spigot/world_nether"
     - "./world_the_end:/spigot/world_the_end"
+    - "./target/SatoshiQuest.jar:/spigot/plugins/SatoshiQuest.jar"
   ports:
     - "25566:25566"
   environment:
