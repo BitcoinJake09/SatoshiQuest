@@ -187,7 +187,11 @@ getWalletInfo(SERVERDISPLAY_NAME);
 	}//nodewallet
 	if (!REDIS.exists("nodeAddress"+SERVERDISPLAY_NAME)) {
 	try {
-		REDIS.set("nodeAddress"+SERVERDISPLAY_NAME,wallet.getNewAccountAddress());
+		if (wallet.getAccountAddress()!=null) {
+			REDIS.set("nodeAddress"+SERVERDISPLAY_NAME,wallet.getAccountAddress());
+		} else {
+			REDIS.set("nodeAddress"+SERVERDISPLAY_NAME,wallet.getNewAccountAddress());
+		}
 	} catch (NullPointerException npe2) {
 			npe2.printStackTrace();
 			System.out.println("[world address] address not found, attempting to create.");
