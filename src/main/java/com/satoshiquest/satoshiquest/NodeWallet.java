@@ -22,6 +22,7 @@ public class NodeWallet {
 	try {
 	if (!SatoshiQuest.REDIS.exists("nodeAddress"+account_id)) {
     		this.address = getNewAccountAddress();
+		SatoshiQuest.REDIS.set("nodeAddress"+account_id,this.address);
 	} else {
 	    	this.address = SatoshiQuest.REDIS.get("nodeAddress"+account_id);
 	}
