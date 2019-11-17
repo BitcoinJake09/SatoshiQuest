@@ -13,13 +13,18 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class NodeWallet {
+  private SatoshiQuest satoshiQuest;
   public String account_id;
   public String address;
 
   public NodeWallet(String _account_id) {
     this.account_id = _account_id;
 	try {
-    this.address = this.getAccountAddress();
+	if (!SatoshiQuest.REDIS.exists("nodeAddress"+account_id)) {
+    		this.address = getNewAccountAddress();
+	} else {
+	    	this.address = SatoshiQuest.REDIS.get("nodeAddress"+account_id);
+	}
 	} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("[address] error.");
