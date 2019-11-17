@@ -167,10 +167,10 @@ public class SatoshiQuest extends JavaPlugin {
   //listWallets();
 
 getWalletInfo(SERVERDISPLAY_NAME);
-	if (!REDIS.exists("nodeWallet")) {
+	if (!REDIS.exists("nodeWallet"+SERVERDISPLAY_NAME)) {
 	if (loadWallet(SERVERDISPLAY_NAME)!=null) {
 		try {
-			wallet = loadWallet(REDIS.get("nodeWallet"));
+			wallet = loadWallet(REDIS.get("nodeWallet"+SERVERDISPLAY_NAME));
 		        System.out.println("[world wallet] trying to load node wallet");
 		} catch (NullPointerException npe) {
 			npe.printStackTrace();
@@ -180,14 +180,14 @@ getWalletInfo(SERVERDISPLAY_NAME);
 	{
 	        wallet = generateNewWallet(SERVERDISPLAY_NAME);
         	System.out.println("[world wallet] generated new wallet");
-		REDIS.set("nodeWallet",SERVERDISPLAY_NAME);
+		REDIS.set("nodeWallet"+SERVERDISPLAY_NAME,SERVERDISPLAY_NAME);
 	} 
-	} //nodewallet
-	wallet = new NodeWallet(REDIS.get("nodeWallet"));
-
-	if (!REDIS.exists("nodeAddress")) {
+	} else { 
+	wallet = loadWallet(REDIS.get("nodeWallet"+SERVERDISPLAY_NAME));
+	}//nodewallet
+	if (!REDIS.exists("nodeAddress"+SERVERDISPLAY_NAME)) {
 	try {
-		REDIS.set("nodeAddress",wallet.getNewAccountAddress());
+		REDIS.set("nodeAddress"+SERVERDISPLAY_NAME,wallet.getNewAccountAddress());
 	} catch (NullPointerException npe2) {
 			npe2.printStackTrace();
 			System.out.println("[world address] address not found, attempting to create.");
@@ -196,7 +196,7 @@ getWalletInfo(SERVERDISPLAY_NAME);
 
 
 	System.out.println("[Admin address] address: " + ADMIN_ADDRESS);      
-        System.out.println("[world wallet] address: " + REDIS.get("nodeAddress"));
+        System.out.println("[world wallet] address: " + REDIS.get("nodeAddress"+SERVERDISPLAY_NAME));
 	//System.out.println("[world address] address: " + REDIS.get("nodeAddress"));
         //System.out.println("The loot pool is: " + (int)(wallet.getBalance(0)/DENOMINATION_FACTOR));
 
