@@ -100,7 +100,7 @@ public class EntityEvents implements Listener {
     if (satoshiQuest.isModerator(player)) {
       player.sendMessage(ChatColor.GREEN + "You are a moderator on this server.");
 	try {
-      String url = satoshiQuest.ADDRESS_URL + satoshiQuest.REDIS.get("nodeAddress");
+      String url = satoshiQuest.ADDRESS_URL + satoshiQuest.REDIS.get("nodeAddress"+satoshiQuest.SERVERDISPLAY_NAME);
       player.sendMessage(ChatColor.WHITE + "" + ChatColor.UNDERLINE + url);
 	} catch(Exception E) {
 		    System.out.println(E);
@@ -112,7 +112,13 @@ public class EntityEvents implements Listener {
 	}
 
     if (satoshiQuest.REDIS.exists("nodeAddress"+ player.getUniqueId().toString())) {
-	player.sendMessage(ChatColor.GREEN + "Your Deposit address on this server:");
+	player.sendMessage(ChatColor.GREEN + "Your Deposit address on this server: " + satoshiQuest.REDIS.exists("nodeAddress"+ player.getUniqueId().toString()));
+	try {
+      String url = satoshiQuest.ADDRESS_URL + satoshiQuest.REDIS.get("nodeAddress"+ player.getUniqueId().toString());
+      player.sendMessage(ChatColor.WHITE + "" + ChatColor.UNDERLINE + url);
+	} catch(Exception E) {
+		    System.out.println(E);
+	}
     }
 
 
