@@ -164,9 +164,10 @@ public class SatoshiQuest extends JavaPlugin {
       } */
 
   System.out.println("Loot X,Z: " + LootSpawnX + " " + LootSpawnZ);
-  listWallets();
-        getWalletInfo(SERVERDISPLAY_NAME);
+  //listWallets();
 
+getWalletInfo(SERVERDISPLAY_NAME);
+	if (!REDIS.exists("nodeWallet")) {
 	if (loadWallet(SERVERDISPLAY_NAME)!=null) {
 		try {
 			wallet = loadWallet(REDIS.get("nodeWallet"));
@@ -180,10 +181,24 @@ public class SatoshiQuest extends JavaPlugin {
 	        wallet = generateNewWallet(SERVERDISPLAY_NAME);
         	System.out.println("[world wallet] generated new wallet");
 		REDIS.set("nodeWallet",SERVERDISPLAY_NAME);
-	}
+	} 
+	} //nodewallet
+	wallet = new NodeWallet(REDIS.get("nodeWallet"));
 
-      //System.out.println("[world wallet] address: " + wallet.getAccountAddress());
+	if (!REDIS.exists("nodeAddress")) {
+	try {
+		REDIS.set("nodeAddress",wallet.getNewAccountAddress());
+	} catch (NullPointerException npe2) {
+			npe2.printStackTrace();
+			System.out.println("[world address] address not found, attempting to create.");
+		}
+	}//endAddress
 
+
+	System.out.println("[Admin address] address: " + ADMIN_ADDRESS);      
+        System.out.println("[world wallet] address: " + REDIS.get("nodeAddress"));
+	//System.out.println("[world address] address: " + REDIS.get("nodeAddress"));
+        //System.out.println("The loot pool is: " + (int)(wallet.getBalance(0)/DENOMINATION_FACTOR));
 
 
       if (BITCOIN_NODE_HOST != null) {
@@ -288,7 +303,7 @@ public class SatoshiQuest extends JavaPlugin {
         JSONArray params = new JSONArray();
         System.out.println(params);
         jsonObject.put("params", params);
-        URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT);
+        URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT+ "/wallet/");
         System.out.println(url.toString());
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
