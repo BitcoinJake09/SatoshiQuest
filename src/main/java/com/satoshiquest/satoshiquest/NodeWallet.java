@@ -13,21 +13,17 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class NodeWallet {
-  String account_id;
-  public String address = null;
+  public String account_id;
+  public String address;
 
   public NodeWallet(String _account_id) {
     this.account_id = _account_id;
-    
-    try {
-    	address = this.getAccountAddress();
-	if (address == null) {
-	    address = this.getNewAccountAddress();
-	}
-
-    } catch (Exception e) {
-        System.out.println(e);
-    }
+	try {
+    this.address = this.getAccountAddress();
+	} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("[address] error.");
+		}
   }
 
   public String sendFrom(String address, Long sat) throws IOException, ParseException {
@@ -48,7 +44,7 @@ public class NodeWallet {
     System.out.println(params);
     jsonObject.put("params", params);
     System.out.println("Checking blockchain info...");
-    URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT);
+    URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT + "/wallet/" + account_id);
     System.out.println(url.toString());
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
     String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
@@ -93,7 +89,7 @@ public class NodeWallet {
     if (SatoshiQuest.SATOSHIQUEST_ENV == "development")
       System.out.println("[getaddressesbylabel] " + account_id);
     jsonObject.put("params", params);
-    URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT);
+    URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT + "/wallet/" + account_id);
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
     String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
     String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
@@ -124,7 +120,6 @@ public class NodeWallet {
   }
 
   public String getNewAccountAddress() throws IOException, ParseException {
-
     JSONParser parser = new JSONParser();
 
     final JSONObject jsonObject = new JSONObject();
@@ -133,10 +128,11 @@ public class NodeWallet {
     jsonObject.put("method", "getnewaddress");
     JSONArray params = new JSONArray();
     params.add(account_id);
+    params.add("p2sh-segwit");
     if (SatoshiQuest.SATOSHIQUEST_ENV == "development")
-      System.out.println("[getaddressesbylabel] " + account_id);
+      System.out.println("[getnewaddress] " + account_id);
     jsonObject.put("params", params);
-    URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT);
+    URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT + "/wallet/" + account_id);
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
     String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
     String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
@@ -162,23 +158,25 @@ public class NodeWallet {
     }
     in.close();
     JSONObject response_object = (JSONObject) parser.parse(response.toString());
+    this.address = response_object.get("result").toString();
     if (SatoshiQuest.SATOSHIQUEST_ENV == "development") System.out.println(response_object);
+	this.address = response_object.get("result").toString();
     return response_object.get("result").toString();
   }
 
   public Long getBalance(int confirmations) {
-    System.out.println(account_id);
+    System.out.println("getbalance: " + account_id);
     try {
       JSONParser parser = new JSONParser();
       final JSONObject jsonObject = new JSONObject();
       jsonObject.put("jsonrpc", "1.0");
-      jsonObject.put("id", "satoshiquest");
+      jsonObject.put("id", this.account_id);
       jsonObject.put("method", "getbalance");
       JSONArray params = new JSONArray();
       params.add("*");
       params.add(confirmations);
       jsonObject.put("params", params);
-      URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT);
+      URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT + "/wallet/" + this.account_id);
       HttpURLConnection con = (HttpURLConnection) url.openConnection();
       con.setConnectTimeout(5000);
       String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
