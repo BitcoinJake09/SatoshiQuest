@@ -107,8 +107,8 @@ public class EntityEvents implements Listener {
 	}
     }
         
-    if (!SatoshiQuest.REDIS.exists("LivesLeft:" + player.getUniqueId().toString())) {
-		SatoshiQuest.REDIS.set("LivesLeft:" +player.getUniqueId().toString(),"0");
+    if (!SatoshiQuest.REDIS.exists("LivesLeft" + player.getUniqueId().toString())) {
+		SatoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(),"0");
 	}
 
     if (satoshiQuest.REDIS.exists("nodeAddress"+ player.getUniqueId().toString())) {
@@ -172,8 +172,8 @@ public class EntityEvents implements Listener {
 		double playerx=(double)location.getX();
                 double playerz=(double)location.getZ();
 	        //System.out.println("x:"+playerx+" z:"+playerz);  //for testing lol
-	if (!((playerx<spawnx+8)&&(playerx>spawnx-8)))return true;
-	else if(!((playerz<spawnz+8)&&(playerz>spawnz-8)))return true;
+	if (!((playerx<spawnx+SatoshiQuest.SPAWN_PROTECT_RADIUS)&&(playerx>spawnx-SatoshiQuest.SPAWN_PROTECT_RADIUS)))return true;
+	else if(!((playerz<spawnz+SatoshiQuest.SPAWN_PROTECT_RADIUS)&&(playerz>spawnz-SatoshiQuest.SPAWN_PROTECT_RADIUS)))return true;
 
                return false;//not
 	}
@@ -181,29 +181,50 @@ public class EntityEvents implements Listener {
   @EventHandler
   public void onPlayerMove(PlayerMoveEvent event)
       throws ParseException, org.json.simple.parser.ParseException, IOException {
-  if (SatoshiQuest.REDIS.get("LivesLeft:" + event.getPlayer().getUniqueId().toString()) == "0") {
+  if (SatoshiQuest.REDIS.get("LivesLeft" + event.getPlayer().getUniqueId().toString()) == "0") {
 		if (isNotAtSpawn(event.getPlayer().getLocation())) {
-				event.getPlayer().sendMessage(ChatColor.RED + "you cant leave spawn.");
+			event.getPlayer().sendMessage(ChatColor.RED + "you cant leave spawn.");
+			satoshiQuest.teleportToSpawn(event.getPlayer());
 		}
 	}
   }
 
- 
+  @EventHandler
+  public void onPlayerInteract(PlayerInteractEvent event)
+      throws ParseException, org.json.simple.parser.ParseException, IOException {
+
+      // If player doesn't have permission, disallow the player to interact with it.
+      if (!satoshiQuest.canBuild(event.getPlayer())) {
+        event.setCancelled(true);
+        event.getPlayer().sendMessage(ChatColor.DARK_RED + "You don't have permission to do that!");
+      }
+      if (SatoshiQuest.REDIS.get("LivesLeft" + event.getPlayer().getUniqueId().toString()) == "0") {
+		if (isNotAtSpawn(event.getPlayer().getLocation())) {
+			event.getPlayer().sendMessage(ChatColor.RED + "you cant leave spawn.");
+			satoshiQuest.teleportToSpawn(event.getPlayer());
+		}
+	}
+    
+  }
+
 
   @EventHandler
   public void onPlayerDeath(PlayerDeathEvent event) {
 	if(event instanceof Player ){
 		Player p = event.getEntity();
 		Player player = (Player) p;
-	if (Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft:" + player.getUniqueId().toString())) >= 1)	{
-		int livesLeft = Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft:" + player.getUniqueId().toString())) - 1;
-		SatoshiQuest.REDIS.set("LivesLeft:" +player.getUniqueId().toString(),String.valueOf(livesLeft));
+if (!isNotAtSpawn(player.getLocation())) {
+	if (Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())) >= 1)	{
+		int livesLeft = Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())) - 1;
+		SatoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(),String.valueOf(livesLeft));
 
-            player.sendMessage(ChatColor.RED + "You Lost a life. You have " + SatoshiQuest.REDIS.get("LivesLeft:" + player.getUniqueId().toString())  + " lives left.");
+            player.sendMessage(ChatColor.RED + "You Lost a life. You have " + SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())  + " lives left.");
 	}
-	if (Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft:" + player.getUniqueId().toString())) == 0)	{
+	if (Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())) == 0)	{
 		//tp player to spawn
+		   satoshiQuest.teleportToSpawn(player);
 	}
+	}//end spawncheck
 	}
   }
 

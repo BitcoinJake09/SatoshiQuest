@@ -41,11 +41,10 @@ public class BlockEvents implements Listener {
 		// first, we check if the player has permission to build
 		Block b = event.getBlock();
 		Material m = b.getType();
-		if (!satoshiQuest.canBuild(event.getPlayer())) {
+		if (m.equals(Material.BEDROCK)) {
 			event.setCancelled(true);
-			event.getPlayer().sendMessage(ChatColor.DARK_RED + "You may not place blocks here!");
-		} else if (m.equals(Material.BEDROCK)) {
-			event.getPlayer().sendMessage(ChatColor.DARK_RED + "Placing that block is not allowed!");
+			// If player is in a no-build zone, cancel the event
+		} else if (!satoshiQuest.canBuild(event.getPlayer())) {
 			event.setCancelled(true);
 		} else {
 			event.setCancelled(false);
