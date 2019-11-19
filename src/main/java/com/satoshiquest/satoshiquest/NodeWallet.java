@@ -176,7 +176,7 @@ public class NodeWallet {
       JSONParser parser = new JSONParser();
       final JSONObject jsonObject = new JSONObject();
       jsonObject.put("jsonrpc", "1.0");
-      jsonObject.put("id", this.account_id);
+      jsonObject.put("id", "satoshiquest");
       jsonObject.put("method", "getbalance");
       JSONArray params = new JSONArray();
       params.add("*");
@@ -219,3 +219,4 @@ public class NodeWallet {
     }
   }
 }
+

@@ -609,7 +609,7 @@ getWalletInfo(SERVERDISPLAY_NAME);
 
   public void publish_stats() {
     try {
-      Long balance = wallet.getBalance(0);
+      Long balance = wallet.getBalance(0); //error here
       REDIS.set("loot:pool", Long.toString(balance));
       if (System.getenv("ELASTICSEARCH_ENDPOINT") != null) {
         JSONParser parser = new JSONParser();
@@ -663,7 +663,9 @@ getWalletInfo(SERVERDISPLAY_NAME);
 
 	if (!((playerx<spawnx+SPAWN_PROTECT_RADIUS)&&(playerx>spawnx-SPAWN_PROTECT_RADIUS)))return true;
 	else if(!((playerz<spawnz+SPAWN_PROTECT_RADIUS)&&(playerz>spawnz-SPAWN_PROTECT_RADIUS)))return true;
-		System.out.println("You may not build at spawn.");  
+	
+		//System.out.println("You may not build at spawn.");  
+		player.sendMessage(ChatColor.RED + "you cant build at spawn.");
                return false;//not
 
   }
@@ -813,4 +815,5 @@ getWalletInfo(SERVERDISPLAY_NAME);
     this.setEnabled(false);
   }
 }
+
 
