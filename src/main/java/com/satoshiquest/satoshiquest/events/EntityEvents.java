@@ -112,7 +112,7 @@ public class EntityEvents implements Listener {
 	}
 
     if (satoshiQuest.REDIS.exists("nodeAddress"+ player.getUniqueId().toString())) {
-	player.sendMessage(ChatColor.GREEN + "Your Deposit address on this server: " + satoshiQuest.REDIS.exists("nodeAddress"+ player.getUniqueId().toString()));
+	player.sendMessage(ChatColor.GREEN + "Your Deposit address on this server: " + satoshiQuest.REDIS.get("nodeAddress"+ player.getUniqueId().toString()));
 	try {
       String url = satoshiQuest.ADDRESS_URL + satoshiQuest.REDIS.get("nodeAddress"+ player.getUniqueId().toString());
       player.sendMessage(ChatColor.WHITE + "" + ChatColor.UNDERLINE + url);
@@ -172,18 +172,18 @@ public class EntityEvents implements Listener {
 		double playerx=(double)location.getX();
                 double playerz=(double)location.getZ();
 	        //System.out.println("x:"+playerx+" z:"+playerz);  //for testing lol
-	if (!((playerx<spawnx+SatoshiQuest.SPAWN_PROTECT_RADIUS)&&(playerx>spawnx-SatoshiQuest.SPAWN_PROTECT_RADIUS)))return true;
-	else if(!((playerz<spawnz+SatoshiQuest.SPAWN_PROTECT_RADIUS)&&(playerz>spawnz-SatoshiQuest.SPAWN_PROTECT_RADIUS)))return true;
-
-               return false;//not
+	if ((((playerx<spawnx+SatoshiQuest.SPAWN_PROTECT_RADIUS)&&(playerx>spawnx-SatoshiQuest.SPAWN_PROTECT_RADIUS))) && (((playerz<spawnz+SatoshiQuest.SPAWN_PROTECT_RADIUS)&&(playerz>spawnz-SatoshiQuest.SPAWN_PROTECT_RADIUS))))return false;
+	else
+               return true;//not
 	}
 
   @EventHandler
   public void onPlayerMove(PlayerMoveEvent event)
       throws ParseException, org.json.simple.parser.ParseException, IOException {
-  if (SatoshiQuest.REDIS.get("LivesLeft" + event.getPlayer().getUniqueId().toString()) == "0") {
+      if (Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + event.getPlayer().getUniqueId().toString())) == 0) {
 		if (isNotAtSpawn(event.getPlayer().getLocation())) {
-			event.getPlayer().sendMessage(ChatColor.RED + "you cant leave spawn.");
+			event.getPlayer().sendMessage(ChatColor.RED + "you cant leave spawn with 0 lives!");
+			event.getPlayer().sendMessage(ChatColor.GREEN + "try /wallet for your deposite & life info.");
 			satoshiQuest.teleportToSpawn(event.getPlayer());
 		}
 	}
@@ -198,12 +198,7 @@ public class EntityEvents implements Listener {
         event.setCancelled(true);
         event.getPlayer().sendMessage(ChatColor.DARK_RED + "You don't have permission to do that!");
       }
-      if (SatoshiQuest.REDIS.get("LivesLeft" + event.getPlayer().getUniqueId().toString()) == "0") {
-		if (isNotAtSpawn(event.getPlayer().getLocation())) {
-			event.getPlayer().sendMessage(ChatColor.RED + "you cant leave spawn.");
-			satoshiQuest.teleportToSpawn(event.getPlayer());
-		}
-	}
+
     
   }
 
