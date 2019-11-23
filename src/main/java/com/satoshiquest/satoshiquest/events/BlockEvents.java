@@ -28,7 +28,9 @@ public class BlockEvents implements Listener {
 		if (m.equals(Material.BEDROCK)) {
 			event.setCancelled(true);
 			// If player is in a no-build zone, cancel the event
-		} else if (!satoshiQuest.canBuild(event.getPlayer())) {
+		}
+		if (!satoshiQuest.canBuild(event.getPlayer())) {
+			event.getPlayer().sendMessage(ChatColor.RED + "you cant break blocks at spawn.");
 			event.setCancelled(true);
 		} else {
 			event.setCancelled(false);
@@ -44,7 +46,9 @@ public class BlockEvents implements Listener {
 		if (m.equals(Material.BEDROCK)) {
 			event.setCancelled(true);
 			// If player is in a no-build zone, cancel the event
-		} else if (!satoshiQuest.canBuild(event.getPlayer())) {
+		} 
+		if (!satoshiQuest.canBuild(event.getPlayer())) {
+			event.getPlayer().sendMessage(ChatColor.RED + "you cant build at spawn.");
 			event.setCancelled(true);
 		} else {
 			event.setCancelled(false);
