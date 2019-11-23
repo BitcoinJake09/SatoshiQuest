@@ -522,6 +522,75 @@ getWalletInfo(SERVERDISPLAY_NAME);
     return new JSONObject(); // just give them an empty object
   }
 
+  public Long getReceivedByAddress(String account_id, int confirmations) throws IOException, org.json.simple.parser.ParseException {
+	try {
+	String address = REDIS.get("nodeAddress" + account_id);
+        JSONParser parser = new JSONParser();
+
+        final JSONObject jsonObject = new JSONObject();
+        jsonObject.put("jsonrpc", "1.0");
+        jsonObject.put("id", "satoshiquest");
+        jsonObject.put("method", "getreceivedbyaddress");
+        JSONArray params = new JSONArray();
+	params.add(address);
+	params.add(confirmations);
+        System.out.println("Parms: " + params);
+        jsonObject.put("params", params);
+        URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT + "/wallet/" + account_id);
+        System.out.println(url.toString());
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
+        String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
+        con.setRequestProperty("Authorization", "Basic " + encoding);
+
+        con.setRequestMethod("POST");
+        con.setRequestProperty("User-Agent", "Mozilla/1.22 (compatible; MSIE 2.0; Windows 3.1)");
+        con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+        con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+        con.setDoOutput(true);
+        OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
+        System.out.println(jsonObject.toString());
+        out.write(jsonObject.toString());
+        out.close();
+
+        if(con.getResponseCode()==200) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+            System.out.println(response.toString());
+            JSONObject response_object = (JSONObject) parser.parse(response.toString());
+	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * 100000000L;
+	    final Long balance = d.longValue();
+            System.out.println(balance);
+	    return balance;
+
+        } else {
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+            System.out.println(response.toString());
+            JSONObject response_object = (JSONObject) parser.parse(response.toString());
+	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * 100000000L;
+	    final Long balance = d.longValue();
+            System.out.println(balance);
+	    return balance;
+        }
+	} catch(Exception e) {
+		e.printStackTrace();
+	}
+	return 0L;
+   }
+
   public void announce(final String message) {
     for (Player player : Bukkit.getOnlinePlayers()) {
       player.sendMessage(message);
@@ -609,7 +678,7 @@ getWalletInfo(SERVERDISPLAY_NAME);
 
   public void publish_stats() {
     try {
-      Long balance = wallet.getBalance(0); //error here
+      Long balance = getReceivedByAddress(SERVERDISPLAY_NAME,1); //error here
       REDIS.set("loot:pool", Long.toString(balance));
       if (System.getenv("ELASTICSEARCH_ENDPOINT") != null) {
         JSONParser parser = new JSONParser();
@@ -665,7 +734,7 @@ getWalletInfo(SERVERDISPLAY_NAME);
 	else if(!((playerz<spawnz+SPAWN_PROTECT_RADIUS)&&(playerz>spawnz-SPAWN_PROTECT_RADIUS)))return true;
 	
 		//System.out.println("You may not build at spawn.");  
-		player.sendMessage(ChatColor.RED + "you cant build at spawn.");
+		//player.sendMessage(ChatColor.RED + "you cant build at spawn.");
                return false;//not
 
   }
@@ -815,5 +884,4 @@ getWalletInfo(SERVERDISPLAY_NAME);
     this.setEnabled(false);
   }
 }
-
 
