@@ -19,8 +19,10 @@ public class WalletCommand extends CommandAction {
 
     try {
       User user = new User(player);
-      satoshiQuest.sendWalletInfo(player, user);
+      satoshiQuest.getWalletInfo(player.getUniqueId().toString());
+      Long balance = satoshiQuest.getReceivedByAddress(player.getUniqueId().toString(),1);
       satoshiQuest.updateScoreboard(player);
+      player.sendMessage(ChatColor.RED + "wallet balance: " + balance);
     } catch (Exception e) {
       e.printStackTrace();
       player.sendMessage(ChatColor.RED + "There was a problem reading your wallet.");
