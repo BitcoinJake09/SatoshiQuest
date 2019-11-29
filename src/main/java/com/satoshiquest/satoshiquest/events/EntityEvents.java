@@ -147,8 +147,7 @@ public class EntityEvents implements Listener {
     try {
       player.sendMessage(
               "The loot pool is: "
-                      + (int)
-                      (satoshiQuest.wallet.getBalance(1)/satoshiQuest.DENOMINATION_FACTOR)
+                      + Integer.parseInt(Long.toString(satoshiQuest.getBalance(satoshiQuest.SERVERDISPLAY_NAME,1)))
                       + " "
                       + satoshiQuest.DENOMINATION_NAME);
     } catch(Exception e) {
@@ -205,10 +204,10 @@ public class EntityEvents implements Listener {
 
   @EventHandler
   public void onPlayerDeath(PlayerDeathEvent event) {
-	if(event instanceof Player ){
+
 		Player p = event.getEntity();
 		Player player = (Player) p;
-if (!isNotAtSpawn(player.getLocation())) {
+if (isNotAtSpawn(player.getLocation())) {
 	if (Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())) >= 1)	{
 		int livesLeft = Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())) - 1;
 		SatoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(),String.valueOf(livesLeft));
@@ -220,6 +219,10 @@ if (!isNotAtSpawn(player.getLocation())) {
 		   satoshiQuest.teleportToSpawn(player);
 	}
 	}//end spawncheck
+	try {
+	satoshiQuest.updateScoreboard(player);	
+	} catch (Exception e){
+		e.printStackTrace();
 	}
   }
 
