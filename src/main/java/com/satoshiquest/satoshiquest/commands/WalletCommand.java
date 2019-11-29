@@ -20,9 +20,15 @@ public class WalletCommand extends CommandAction {
     try {
       User user = new User(player);
       satoshiQuest.getWalletInfo(player.getUniqueId().toString());
-      Long balance = satoshiQuest.getReceivedByAddress(player.getUniqueId().toString(),1);
+      Long balance1 = satoshiQuest.getBalance(player.getUniqueId().toString(),1);
+      Long balance6 = satoshiQuest.getBalance(player.getUniqueId().toString(),6);
+      Long unconfirmedBalance = satoshiQuest.getUnconfirmedBalance(player.getUniqueId().toString());
+      player.sendMessage(ChatColor.GREEN + "wallet balance with 1-conf+: " + balance1);
+      player.sendMessage(ChatColor.GREEN + "wallet balance with 6-conf+: " + balance6);
+      player.sendMessage(ChatColor.DARK_GREEN + "wallet unconfirmed: " + unconfirmedBalance);
+
+
       satoshiQuest.updateScoreboard(player);
-      player.sendMessage(ChatColor.RED + "wallet balance: " + balance);
     } catch (Exception e) {
       e.printStackTrace();
       player.sendMessage(ChatColor.RED + "There was a problem reading your wallet.");
