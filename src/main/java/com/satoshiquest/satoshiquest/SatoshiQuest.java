@@ -9,6 +9,7 @@ import java.net.*;
 import java.sql.DriverManager;
 import java.text.ParseException;
 import java.util.*;
+import java.math.BigDecimal;
 import javax.net.ssl.HttpsURLConnection;
 import org.bukkit.*;
 import org.bukkit.command.Command;
@@ -59,7 +60,7 @@ public class SatoshiQuest extends JavaPlugin {
   public static final String BITCOIN_NODE_PASSWORD = System.getenv("BITCOIN_ENV_PASSWORD");
   public static final String DISCORD_HOOK_URL = System.getenv("DISCORD_HOOK_URL");
   public static final Long MINER_FEE =
-          System.getenv("MINER_FEE") != null ? Long.parseLong(System.getenv("MINER_FEE")) : 10000;
+          System.getenv("MINER_FEE") != null ? Long.parseLong(System.getenv("MINER_FEE")) : 1000;
 
   public static final String SERVER_NAME =
       System.getenv("SERVER_NAME") != null ? System.getenv("SERVER_NAME") : "SatoshiQuest";
@@ -85,8 +86,8 @@ public class SatoshiQuest extends JavaPlugin {
   public static final Long BUYIN_AMOUNT =
       System.getenv("BUYIN_AMOUNT") != null ? Long.parseLong(System.getenv("BUYIN_AMOUNT")) : 10000;
 
-  public static final Long LIVES_PERBUYIN =
-      System.getenv("LIVES_PERBUYIN") != null ? Long.parseLong(System.getenv("LIVES_PERBUYIN")) : 1;
+  public static final int LIVES_PERBUYIN =
+      System.getenv("LIVES_PERBUYIN") != null ? Integer.parseInt(System.getenv("LIVES_PERBUYIN")) : 1;
 
   public static final Long SPAWN_PROTECT_RADIUS =
       System.getenv("SPAWN_PROTECT_RADIUS") != null ? Long.parseLong(System.getenv("SPAWN_PROTECT_RADIUS")) : 14;
@@ -215,6 +216,7 @@ getWalletInfo(SERVERDISPLAY_NAME);
       createScheduledTimers();
       commands = new HashMap<String, CommandAction>();
       commands.put("wallet", new WalletCommand(this));
+      commands.put("lives", new LivesCommand(this));
       modCommands = new HashMap<String, CommandAction>();
       modCommands.put("crashTest", new CrashtestCommand(this));
       modCommands.put("mod", new ModCommand());
@@ -591,6 +593,262 @@ getWalletInfo(SERVERDISPLAY_NAME);
 	return 0L;
    }
 
+  public Long getBalance(String account_id, int confirmations) throws IOException, org.json.simple.parser.ParseException {
+	try {
+	String address = REDIS.get("nodeAddress" + account_id);
+        JSONParser parser = new JSONParser();
+
+        final JSONObject jsonObject = new JSONObject();
+        jsonObject.put("jsonrpc", "1.0");
+        jsonObject.put("id", "satoshiquest");
+        jsonObject.put("method", "getbalance");
+        JSONArray params = new JSONArray();
+	params.add("*");
+	params.add(confirmations);
+        System.out.println("Parms: " + params);
+        jsonObject.put("params", params);
+        URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT + "/wallet/" + account_id);
+        System.out.println(url.toString());
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
+        String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
+        con.setRequestProperty("Authorization", "Basic " + encoding);
+
+        con.setRequestMethod("POST");
+        con.setRequestProperty("User-Agent", "Mozilla/1.22 (compatible; MSIE 2.0; Windows 3.1)");
+        con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+        con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+        con.setDoOutput(true);
+        OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
+        System.out.println(jsonObject.toString());
+        out.write(jsonObject.toString());
+        out.close();
+
+        if(con.getResponseCode()==200) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+            System.out.println(response.toString());
+            JSONObject response_object = (JSONObject) parser.parse(response.toString());
+	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * 100000000L;
+	    final Long balance = d.longValue();
+            System.out.println(balance);
+	    return balance;
+
+        } else {
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+            System.out.println(response.toString());
+            JSONObject response_object = (JSONObject) parser.parse(response.toString());
+	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * 100000000L;
+	    final Long balance = d.longValue();
+            System.out.println(balance);
+	    return balance;
+        }
+	} catch(Exception e) {
+		e.printStackTrace();
+	}
+	return 0L;
+   }
+
+  public Long getUnconfirmedBalance(String account_id) throws IOException, org.json.simple.parser.ParseException {
+	try {
+	String address = REDIS.get("nodeAddress" + account_id);
+        JSONParser parser = new JSONParser();
+
+        final JSONObject jsonObject = new JSONObject();
+        jsonObject.put("jsonrpc", "1.0");
+        jsonObject.put("id", "satoshiquest");
+        jsonObject.put("method", "getunconfirmedbalance");
+        URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT + "/wallet/" + account_id);
+        System.out.println(url.toString());
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
+        String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
+        con.setRequestProperty("Authorization", "Basic " + encoding);
+
+        con.setRequestMethod("POST");
+        con.setRequestProperty("User-Agent", "Mozilla/1.22 (compatible; MSIE 2.0; Windows 3.1)");
+        con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+        con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+        con.setDoOutput(true);
+        OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
+        System.out.println(jsonObject.toString());
+        out.write(jsonObject.toString());
+        out.close();
+
+        if(con.getResponseCode()==200) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+            System.out.println(response.toString());
+            JSONObject response_object = (JSONObject) parser.parse(response.toString());
+	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * 100000000L;
+	    final Long balance = d.longValue();
+            System.out.println(balance);
+	    return balance;
+
+        } else {
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+            System.out.println(response.toString());
+            JSONObject response_object = (JSONObject) parser.parse(response.toString());
+	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * 100000000L;
+	    final Long balance = d.longValue();
+            System.out.println(balance);
+	    return balance;
+        }
+	} catch(Exception e) {
+		e.printStackTrace();
+	}
+	return 0L;
+   }
+
+
+  public String sendToAddress(String account_id, String address, Long sat) throws IOException, ParseException {
+try {
+    JSONParser parser = new JSONParser();
+
+    final JSONObject jsonObject = new JSONObject();
+    jsonObject.put("jsonrpc", "1.0");
+    jsonObject.put("id", "satoshiquest");
+    jsonObject.put("method", "sendtoaddress");
+    JSONArray params = new JSONArray();
+    params.add(address);
+    System.out.println(sat);
+    BigDecimal decimalSat = new BigDecimal(sat * 0.00000001);
+    decimalSat = decimalSat.setScale(8, BigDecimal.ROUND_DOWN);
+    System.out.println(decimalSat);
+    params.add(decimalSat);
+    System.out.println(params);
+    jsonObject.put("params", params);
+    System.out.println("Checking blockchain info...");
+    URL url = new URL("http://" + BITCOIN_NODE_HOST + ":" + BITCOIN_NODE_PORT + "/wallet/" + account_id);
+    System.out.println(url.toString());
+    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+    String userPassword = BITCOIN_NODE_USERNAME + ":" + BITCOIN_NODE_PASSWORD;
+    String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
+    con.setRequestProperty("Authorization", "Basic " + encoding);
+
+    con.setRequestMethod("POST");
+    con.setRequestProperty("User-Agent", "Mozilla/1.22 (compatible; MSIE 2.0; Windows 3.1)");
+    con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+    con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    con.setDoOutput(true);
+    OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
+    out.write(jsonObject.toString());
+    out.close();
+
+    int responseCode = con.getResponseCode();
+
+    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+    String inputLine;
+    StringBuffer response = new StringBuffer();
+
+    while ((inputLine = in.readLine()) != null) {
+      response.append(inputLine);
+    }
+    in.close();
+    System.out.println(response.toString());
+    JSONObject response_object = (JSONObject) parser.parse(response.toString());
+    System.out.println(response_object);
+    return (String) response_object.get("result");
+	} catch(Exception e) {
+		e.printStackTrace();
+	}
+    return "failed";
+  }
+
+  public String sendMany(String account_id, String address1, String address2, Long sat1, Long sat2, int confirmations) throws IOException, ParseException {
+try {
+    JSONParser parser = new JSONParser();
+
+    final JSONObject jsonObject = new JSONObject();
+    jsonObject.put("jsonrpc", "1.0");
+    jsonObject.put("id", "satoshiquest");
+    jsonObject.put("method", "sendmany");
+    JSONArray params = new JSONArray();
+    params.add("");
+    final JSONObject addresses = new JSONObject();
+
+    System.out.println(sat1);
+    BigDecimal decimalSat1 = new BigDecimal(sat1 * 0.00000001);
+    decimalSat1 = decimalSat1.setScale(8, BigDecimal.ROUND_DOWN);
+    System.out.println(decimalSat1);
+    addresses.put(address1,decimalSat1);
+
+
+    System.out.println(sat2);
+    BigDecimal decimalSat2 = new BigDecimal(sat2 * 0.00000001);
+    decimalSat2 = decimalSat2.setScale(8, BigDecimal.ROUND_DOWN);
+    System.out.println(decimalSat2);
+    addresses.put(address2,decimalSat2);
+    params.add(addresses);
+
+    params.add(confirmations);
+    params.add("SatoshiQuest");//the comment :p
+
+    System.out.println(params);
+    jsonObject.put("params", params);
+    System.out.println("Checking blockchain info...");
+    URL url = new URL("http://" + BITCOIN_NODE_HOST + ":" + BITCOIN_NODE_PORT + "/wallet/" + account_id);
+    System.out.println(url.toString());
+    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+    String userPassword = BITCOIN_NODE_USERNAME + ":" + BITCOIN_NODE_PASSWORD;
+    String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
+    con.setRequestProperty("Authorization", "Basic " + encoding);
+
+    con.setRequestMethod("POST");
+    con.setRequestProperty("User-Agent", "Mozilla/1.22 (compatible; MSIE 2.0; Windows 3.1)");
+    con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+    con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    con.setDoOutput(true);
+    OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
+    out.write(jsonObject.toString());
+    out.close();
+
+    int responseCode = con.getResponseCode();
+
+    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+    String inputLine;
+    StringBuffer response = new StringBuffer();
+
+    while ((inputLine = in.readLine()) != null) {
+      response.append(inputLine);
+    }
+    in.close();
+    System.out.println(response.toString());
+    JSONObject response_object = (JSONObject) parser.parse(response.toString());
+    System.out.println(response_object);
+    return (String) response_object.get("result");
+	} catch(Exception e) {
+		e.printStackTrace();
+	}
+    return "failed";
+  }
+
   public void announce(final String message) {
     for (Player player : Bukkit.getOnlinePlayers()) {
       player.sendMessage(message);
@@ -612,9 +870,13 @@ getWalletInfo(SERVERDISPLAY_NAME);
 
                 playSBoardObj.setDisplayName(ChatColor.GREEN + ChatColor.BOLD.toString() + "Satoshi" + ChatColor.GOLD + ChatColor.BOLD.toString() + "Quest");
 
-                Score score = playSBoardObj.getScore(ChatColor.GREEN + SatoshiQuest.DENOMINATION_NAME);
-		
-		score.setScore(Integer.parseInt(REDIS.get("LivesLeft:" + player.getUniqueId().toString())));
+
+		Score score2 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: " + Long.toString(getBalance(SERVERDISPLAY_NAME,0)));
+		score2.setScore(0);
+		Score score3 = playSBoardObj.getScore(ChatColor.GREEN + "Balance: " + Long.toString(getBalance(player.getUniqueId().toString(),0)));
+		score3.setScore(1);
+                Score score = playSBoardObj.getScore(ChatColor.GREEN + "Lives: " + REDIS.get("LivesLeft" + player.getUniqueId().toString()));
+		score.setScore(2);
       		  player.setScoreboard(playSBoard);
             
        
@@ -678,7 +940,7 @@ getWalletInfo(SERVERDISPLAY_NAME);
 
   public void publish_stats() {
     try {
-      Long balance = getReceivedByAddress(SERVERDISPLAY_NAME,1); //error here
+      Long balance = getBalance(SERVERDISPLAY_NAME,1); //error here
       REDIS.set("loot:pool", Long.toString(balance));
       if (System.getenv("ELASTICSEARCH_ENDPOINT") != null) {
         JSONParser parser = new JSONParser();
@@ -884,4 +1146,5 @@ getWalletInfo(SERVERDISPLAY_NAME);
     this.setEnabled(false);
   }
 }
+
 
