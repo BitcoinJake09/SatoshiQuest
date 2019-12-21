@@ -18,3 +18,10 @@ BITCOIN_NODE_HOST=192.168.0.11
 
 3. run docker-compose up
 --------------------------
+
+port to docker
+----------------------
+sudo iptables -t nat -L -n
+
+sudo iptables -t nat -A POSTROUTING --source 172.17.0.3 --destination 172.17.0.3 -p tcp --dport 25564 -j MASQUERADE
+
