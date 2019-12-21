@@ -20,6 +20,9 @@ commands:
   mod:
     description: "Utility to add/remove/list moderators"
     usage: "/mod <add|remove|list>"
+  setlives:
+    description: "Utility to set/correct lives used by mods only"
+    usage: "/setlives set <playername> <amount>"
   motd:
     description: "Change the message of the day"
     usage: "/motd <message>"
@@ -35,6 +38,15 @@ commands:
   wallet:
     description: "Displays your SatoshiQuest wallet info"
     usage: "/wallet"
+  tip:
+    description: "Tip is used for player to player transactions"
+    usage: "/tip <amount> <playername>"
+  send:
+    description: "Send is used for External transactions to an address"
+    usage: "/send <amount> <address>"
+  lives:
+    description: "Get lives prices and buy or transfer lives to other players"
+    usage: "/lives <help|orLives#> <buy>"
   crashtest:
     description: "Crashes the plugin on purpose, hell breaks loose. Don't try this at home"
     usage: "/crashtest"
