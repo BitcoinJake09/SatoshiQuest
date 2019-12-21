@@ -12,8 +12,8 @@ spigot:
     - variables.env
   environment:
     - SATOSHIQUEST_ENV=development
-    - BUYIN_AMOUNT=30000
-    - LIVES_PERBUYIN=3
+    - BUYIN_AMOUNT=1.00
+    - LIVES_PERBUYIN=1
     - ADDRESS_URL=https://www.blockchain.com/btc/address/
   links:
     - redis
