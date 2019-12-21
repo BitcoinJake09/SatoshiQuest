@@ -23,6 +23,7 @@ import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.player.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -73,6 +74,22 @@ public class EntityEvents implements Listener {
             PlayerLoginEvent.Result.KICK_OTHER,
             "You are temporarily banned. Please contact satoshiquest@satoshiquest.co");
       }
+      if (SatoshiQuest.REDIS.exists("winner")) {
+        System.out.println("kicking player " + event.getPlayer().getDisplayName() + " while world resets");
+        event.disallow(
+            PlayerLoginEvent.Result.KICK_OTHER,
+            "World is resetting for new game, please try again in a moment.");
+      }
+	if (!SatoshiQuest.REDIS.exists("winner")) {
+	if (player.getWorld() == Bukkit.getServer().getWorld("world")) {
+	    Location location = Bukkit
+                                .getServer()
+                                .getWorld(SatoshiQuest.SERVERDISPLAY_NAME).getSpawnLocation();
+                        player.teleport(location);
+			//player.sendMessage(ChatColor.WHITE + "Welcome to " + SatoshiQuest.SERVERDISPLAY_NAME);
+	}
+	}
+
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -89,6 +106,17 @@ public class EntityEvents implements Listener {
     // On dev environment, admin gets op. In production, nobody gets op.
 
     player.setGameMode(GameMode.SURVIVAL);
+
+	if (!SatoshiQuest.REDIS.exists("winner")) {
+	if (player.getWorld() == Bukkit.getServer().getWorld("world")) {
+	    Location location = Bukkit
+                                .getServer()
+                                .getWorld(SatoshiQuest.SERVERDISPLAY_NAME).getSpawnLocation();
+                        player.teleport(location);
+			//player.sendMessage(ChatColor.WHITE + "Welcome to " + SatoshiQuest.SERVERDISPLAY_NAME);
+	}
+	}
+
     final String ip = player.getAddress().toString().split("/")[1].split(":")[0];
     System.out.println("User " + player.getName() + "logged in with IP " + ip);
     SatoshiQuest.REDIS.set("ip" + player.getUniqueId().toString(), ip);
@@ -110,6 +138,23 @@ public class EntityEvents implements Listener {
     if (!SatoshiQuest.REDIS.exists("LivesLeft" + player.getUniqueId().toString())) {
 		SatoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(),"0");
 	}
+    if (satoshiQuest.REDIS.exists("ClearInv" +player.getUniqueId().toString())) {
+		PlayerInventory pli2 = player.getInventory();
+		pli2.clear(); //delete player world datas
+		pli2.setArmorContents(new ItemStack[4]);
+		Inventory pe2 = player.getEnderChest();
+		pe2.clear();
+		player.setLevel(0);
+		player.setExp(0);
+		player.setExhaustion(0);
+		player.setFoodLevel(20);
+player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+int tempLives = Integer.parseInt(satoshiQuest.REDIS.get("LivesLeft" +player.getUniqueId().toString()));
+		if (tempLives >= 1) {
+		satoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(), Integer.toString(tempLives-1));
+		}
+		satoshiQuest.REDIS.del("ClearInv" +player.getUniqueId().toString());
+	}
 
     if (satoshiQuest.REDIS.exists("nodeAddress"+ player.getUniqueId().toString())) {
 	player.sendMessage(ChatColor.GREEN + "Your Deposit address on this server: " + satoshiQuest.REDIS.get("nodeAddress"+ player.getUniqueId().toString()));
@@ -125,7 +170,11 @@ public class EntityEvents implements Listener {
 
     player.sendMessage("you have " + SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString()) + " lives!");
 
-
+		try {
+		satoshiQuest.updateScoreboard(player);
+		} catch (Exception excep) {
+			System.out.println(excep);
+		}
 
 
     String welcome = rawwelcome.toString();
@@ -147,7 +196,12 @@ public class EntityEvents implements Listener {
     try {
       player.sendMessage(
               "The loot pool is: "
-                      + Integer.parseInt(Long.toString(satoshiQuest.getBalance(satoshiQuest.SERVERDISPLAY_NAME,1)))
+                      + Integer.parseInt(Long.toString(satoshiQuest.getBalance(satoshiQuest.SERVERDISPLAY_NAME,1) - (long)((double)satoshiQuest.getBalance(satoshiQuest.SERVERDISPLAY_NAME,1) * 0.05)))
+                      + " "
+                      + satoshiQuest.DENOMINATION_NAME);
+	player.sendMessage(
+              "The loot pool unconfirmed is: "
+                      + Integer.parseInt(Long.toString(satoshiQuest.getBalance(satoshiQuest.SERVERDISPLAY_NAME,0) - (long)((double)satoshiQuest.getBalance(satoshiQuest.SERVERDISPLAY_NAME,0) * 0.05)))
                       + " "
                       + satoshiQuest.DENOMINATION_NAME);
     } catch(Exception e) {
@@ -176,17 +230,48 @@ public class EntityEvents implements Listener {
                return true;//not
 	}
 
+    public boolean isAtSpawn(Location location)
+	{
+		Location spawn = Bukkit.getServer().getWorlds().get(0).getSpawnLocation();
+		double spawnx = spawn.getX();
+		double spawnz = spawn.getZ();
+		double playerx=(double)location.getX();
+                double playerz=(double)location.getZ();
+	        //System.out.println("x:"+playerx+" z:"+playerz);  //for testing lol
+	if ((((playerx<spawnx+SatoshiQuest.SPAWN_PROTECT_RADIUS)&&(playerx>spawnx-SatoshiQuest.SPAWN_PROTECT_RADIUS))) && (((playerz<spawnz+SatoshiQuest.SPAWN_PROTECT_RADIUS)&&(playerz>spawnz-SatoshiQuest.SPAWN_PROTECT_RADIUS))))return true;
+	else
+               return false;//not
+	}
+
   @EventHandler
   public void onPlayerMove(PlayerMoveEvent event)
       throws ParseException, org.json.simple.parser.ParseException, IOException {
-      if (Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + event.getPlayer().getUniqueId().toString())) == 0) {
+
+	if (!SatoshiQuest.REDIS.exists("winner")) {
+	if (event.getPlayer().getWorld() == Bukkit.getServer().getWorld("world")) {
+	    		satoshiQuest.teleportToLootSpawn(event.getPlayer());
+	}
+//event.getPlayer().sendMessage(ChatColor.WHITE + "Welcome to " + SatoshiQuest.SERVERDISPLAY_NAME);
+	}
+	if (event.getFrom().getBlock() != event.getTo().getBlock()) {
+      if (Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + event.getPlayer().getUniqueId().toString())) <= 0) {
 		if (isNotAtSpawn(event.getPlayer().getLocation())) {
 			event.getPlayer().sendMessage(ChatColor.RED + "you cant leave spawn with 0 lives!");
 			event.getPlayer().sendMessage(ChatColor.GREEN + "try /wallet for your deposite & life info.");
 			satoshiQuest.teleportToSpawn(event.getPlayer());
 		}
 	}
+	satoshiQuest.didFindLoot(event.getPlayer());
+	if (event.getFrom().getChunk() != event.getTo().getChunk()) {
+		if (satoshiQuest.isNearLoot(event.getPlayer())) {
+			event.getPlayer().sendMessage(ChatColor.GREEN + "You are getting near... stay focused!");
+		}
+		satoshiQuest.updateScoreboard(event.getPlayer());
+	}
+	}
   }
+
+
 
   @EventHandler
   public void onPlayerInteract(PlayerInteractEvent event)
