@@ -8,6 +8,7 @@ import java.io.*;
 import java.net.*;
 import java.sql.DriverManager;
 import java.text.ParseException;
+import java.text.*;
 import java.util.*;
 import java.math.BigDecimal;
 import java.util.concurrent.TimeUnit;
@@ -160,7 +161,6 @@ public class SatoshiQuest extends JavaPlugin {
 		iter++;
   }
       // registers listener classes
-      getServer().getPluginManager().registerEvents(new ChatEvents(this), this);
       getServer().getPluginManager().registerEvents(new BlockEvents(this), this);
       getServer().getPluginManager().registerEvents(new EntityEvents(this), this);
       getServer().getPluginManager().registerEvents(new ServerEvents(this), this);
@@ -200,11 +200,11 @@ public class SatoshiQuest extends JavaPlugin {
 
   //listWallets();
 
-getWalletInfo(SERVERDISPLAY_NAME);
-	if (!REDIS.exists("nodeWallet"+SERVERDISPLAY_NAME)) {
-	if (loadWallet(SERVERDISPLAY_NAME)!=null) {
+	//getWalletInfo(SERVERDISPLAY_NAME);
+	if (!REDIS.exists("nodeAddress"+SERVERDISPLAY_NAME)) {
+	if (getWalletInfo(SERVERDISPLAY_NAME)!=false) {
 		try {
-			wallet = loadWallet(REDIS.get("nodeWallet"+SERVERDISPLAY_NAME));
+			wallet = loadWallet(SERVERDISPLAY_NAME);
 		        System.out.println("[world wallet] trying to load node wallet");
 		} catch (NullPointerException npe) {
 			npe.printStackTrace();
@@ -214,15 +214,15 @@ getWalletInfo(SERVERDISPLAY_NAME);
 	{
 	        wallet = generateNewWallet(SERVERDISPLAY_NAME);
         	System.out.println("[world wallet] generated new wallet");
-		REDIS.set("nodeWallet"+SERVERDISPLAY_NAME,SERVERDISPLAY_NAME);
+		//REDIS.set("nodeWallet"+SERVERDISPLAY_NAME,SERVERDISPLAY_NAME);
 	} 
 	} else { 
-	wallet = loadWallet(REDIS.get("nodeWallet"+SERVERDISPLAY_NAME));
+	wallet = loadWallet(SERVERDISPLAY_NAME);
 	}//nodewallet
 	if (!REDIS.exists("nodeAddress"+SERVERDISPLAY_NAME)) {
 	try {
-		if (wallet.getAccountAddress()!=null) {
-			REDIS.set("nodeAddress"+SERVERDISPLAY_NAME,wallet.getAccountAddress());
+		if (getAccountAddress(SERVERDISPLAY_NAME)!=null) {
+			REDIS.set("nodeAddress"+SERVERDISPLAY_NAME,getAccountAddress(SERVERDISPLAY_NAME));
 		} else {
 			REDIS.set("nodeAddress"+SERVERDISPLAY_NAME,wallet.getNewAccountAddress());
 		}
@@ -426,7 +426,7 @@ getWalletInfo(SERVERDISPLAY_NAME);
 
     }
 
-    public static final void getWalletInfo(String account_id)
+    public static final boolean getWalletInfo(String account_id)
             throws IOException, org.json.simple.parser.ParseException {
         JSONParser parser = new JSONParser();
 
@@ -466,6 +466,7 @@ getWalletInfo(SERVERDISPLAY_NAME);
             System.out.println(response.toString());
             JSONObject response_object = (JSONObject) parser.parse(response.toString());
             System.out.println(response_object);
+		return true;
 
         } else {
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
@@ -479,6 +480,7 @@ getWalletInfo(SERVERDISPLAY_NAME);
             System.out.println(response.toString());
             JSONObject response_object = (JSONObject) parser.parse(response.toString());
             System.out.println(response_object);
+		return false;
         }
 
 
@@ -498,7 +500,7 @@ getWalletInfo(SERVERDISPLAY_NAME);
     System.out.println(params);
     jsonObject.put("params", params);
     System.out.println("Checking blockchain info...");
-    URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT + "/wallet/" + account_id);
+    URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT + "/wallet/");
     System.out.println(url.toString());
     System.out.println(jsonObject.toString());
 
@@ -542,6 +544,7 @@ getWalletInfo(SERVERDISPLAY_NAME);
         in.close();
         System.out.println(response.toString());
         JSONObject response_object = (JSONObject) parser.parse(response.toString());
+	
         return null;
     }
   }
@@ -665,7 +668,7 @@ getWalletInfo(SERVERDISPLAY_NAME);
 
   public Long getBalance(String account_id, int confirmations) throws IOException, org.json.simple.parser.ParseException {
 	try {
-	String address = REDIS.get("nodeAddress" + account_id);
+	//String address = REDIS.get("nodeAddress" + account_id);
         JSONParser parser = new JSONParser();
 
         final JSONObject jsonObject = new JSONObject();
@@ -734,7 +737,7 @@ getWalletInfo(SERVERDISPLAY_NAME);
 
   public Long getUnconfirmedBalance(String account_id) throws IOException, org.json.simple.parser.ParseException {
 	try {
-	String address = REDIS.get("nodeAddress" + account_id);
+	//String address = REDIS.get("nodeAddress" + account_id);
         JSONParser parser = new JSONParser();
 
         final JSONObject jsonObject = new JSONObject();
@@ -796,6 +799,65 @@ getWalletInfo(SERVERDISPLAY_NAME);
 	return 0L;
    }
 
+  public String getAccountAddress(String account_id) throws IOException, ParseException {
+
+    JSONParser parser = new JSONParser();
+
+    final JSONObject jsonObject = new JSONObject();
+    jsonObject.put("jsonrpc", "1.0");
+    jsonObject.put("id", "satoshiquest");
+    jsonObject.put("method", "getaddressesbylabel");
+    JSONArray params = new JSONArray();
+    params.add(account_id);
+    if (SATOSHIQUEST_ENV == "development")
+      System.out.println("[getaddressesbylabel] " + account_id);
+    jsonObject.put("params", params);
+    URL url = new URL("http://" + BITCOIN_NODE_HOST + ":" + BITCOIN_NODE_PORT + "/wallet/" + account_id);
+    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+    String userPassword = BITCOIN_NODE_USERNAME + ":" + BITCOIN_NODE_PASSWORD;
+    String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
+    con.setRequestProperty("Authorization", "Basic " + encoding);
+    con.setConnectTimeout(5000);
+    con.setRequestMethod("POST");
+    con.setRequestProperty("User-Agent", "Mozilla/1.22 (compatible; MSIE 2.0; Windows 3.1)");
+    con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+    con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    con.setDoOutput(true);
+    OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
+    out.write(jsonObject.toString());
+    out.close();
+
+    int responseCode = con.getResponseCode();
+
+    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+    String inputLine;
+    StringBuffer response = new StringBuffer();
+
+    while ((inputLine = in.readLine()) != null) {
+      response.append(inputLine);
+    }
+    in.close();
+	try {
+    JSONObject response_object = (JSONObject) parser.parse(response.toString());
+    if (SATOSHIQUEST_ENV == "development") System.out.println(response_object);
+
+	String stringToSplit = response_object.get("result").toString();
+        String[] tempArray;
+        tempArray = stringToSplit.split("\"");
+	int tempAddy = 0;
+        for (int i = 0; i < tempArray.length; i++)
+		if (tempArray[i].length() > 16) {
+          	  System.out.println(tempArray[i]);
+		  tempAddy = i;
+		}
+
+
+    return tempArray[tempAddy];
+	} catch(Exception e) {
+		e.printStackTrace();
+	}
+	return null;
+  }
 
   public String sendToAddress(String account_id, String address, Long sat) throws IOException, ParseException {
 try {
@@ -931,7 +993,7 @@ try {
   }
 
     public void updateScoreboard(final Player player) throws ParseException, org.json.simple.parser.ParseException, IOException {
-            User user=new User(player);
+            //User user=new User(player);
  	
 		
                 ScoreboardManager scoreboardManager;
@@ -947,13 +1009,21 @@ try {
 
 
 		long lootBalance = (long)(getBalance(SERVERDISPLAY_NAME,1) * 0.85);
-		Score score2 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: " + Long.toString(lootBalance) + " -txFee");
+		double lootAmount =  (double)(exRate * (lootBalance * 0.00000001));        
+		DecimalFormat df = new DecimalFormat("#.##");
+        	System.out.print(df.format(lootAmount));
+		Score score4 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: $" + df.format(lootAmount));
+		score4.setScore(0);
+
+		Score score2 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: " + Long.toString(lootBalance) + "sats -txFee");
 		score2.setScore(1);
 
 		Score score3 = playSBoardObj.getScore(ChatColor.GREEN + "Balance: " + Long.toString(getBalance(player.getUniqueId().toString(),1)));
 		score3.setScore(2);
+
                 Score score = playSBoardObj.getScore(ChatColor.GREEN + "Lives: " + REDIS.get("LivesLeft" + player.getUniqueId().toString()));
 		score.setScore(3);
+
       		  player.setScoreboard(playSBoard);
             
        
@@ -1105,8 +1175,8 @@ try {
 	double announceRadius = (double)LOOT_ANNOUNCE_RADIUS;
 
 	if ((((playerx<lootX+announceRadius)&&(playerx>lootX-announceRadius))) || (((playerz<lootZ+announceRadius)&&(playerz>lootZ-announceRadius)))) {
-		System.out.println("You are near...");
-		String toAnnounce = (player.getName() + "is near the loot! their current location is: X:" + playerx.intValue() + " Z:" + playerz.intValue());
+		//System.out.println("You are near...");
+		String toAnnounce = (player.getName() + " - X:" + playerx.intValue() + " Z:" + playerz.intValue());
 		announce(toAnnounce);
 		//setLootBlocks();
 		return true;
@@ -1256,10 +1326,10 @@ public void teleportToLootSpawn(Player player) {
 	double spawnz = spawn.getZ();
 	double spawny = spawn.getY();
 	double spawnRadius = SPAWN_PROTECT_RADIUS;
-	double posX = spawnx + (spawnRadius-2);
-	double negX = spawnx - (spawnRadius+2);
-	double posZ = spawnz + (spawnRadius-2);
-	double negZ = spawnz - (spawnRadius+2);
+	double posX = spawnx + (spawnRadius);
+	double negX = spawnx - (spawnRadius);
+	double posZ = spawnz + (spawnRadius);
+	double negZ = spawnz - (spawnRadius);
 		for(double x = negX; x <= posX; x++) {
 			for(double z = negZ; z <= posZ; z++) {
 	                Block tempblock = spawnBlock.getWorld().getBlockAt((int)x,((int)spawnBlock.getWorld().getHighestBlockAt((int)x, (int)z).getY()-1), (int)z);
@@ -1347,17 +1417,17 @@ public void teleportToLootSpawn(Player player) {
     }
   }
 
-  public void sendWalletInfo(final Player player, final User user) {
+  public void sendWalletInfo(final Player player) {
     if (BITCOIN_NODE_HOST != null) {
       // TODO: Rewrite send wallet info
     }
     try {
-      Long balance = user.wallet.getBalance(0);
+      Long balance = getBalance(player.getUniqueId().toString(),1);
 
-      player.sendMessage("Address: " + user.wallet.address);
+      player.sendMessage("Address: " + getAccountAddress(player.getUniqueId().toString()));
       player.sendMessage("Balance: " + balance);
       player.sendMessage(
-          "URL: " + ChatColor.BLUE + ChatColor.UNDERLINE + ChatColor.BOLD + ADDRESS_URL + user.wallet.getAccountAddress());
+          "URL: " + ChatColor.BLUE + ChatColor.UNDERLINE + ChatColor.BOLD + ADDRESS_URL + getAccountAddress(player.getUniqueId().toString()));
       player.sendMessage("-----------");
 
     } catch (Exception e) {
