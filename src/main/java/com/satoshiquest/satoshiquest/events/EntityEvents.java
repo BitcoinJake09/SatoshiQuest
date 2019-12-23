@@ -2,7 +2,7 @@ package com.satoshiquest.satoshiquest.events;
 
 import com.satoshiquest.satoshiquest.SatoshiQuest;
 import com.satoshiquest.satoshiquest.NodeWallet;
-import com.satoshiquest.satoshiquest.User;
+//import com.satoshiquest.satoshiquest.User;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -65,7 +65,27 @@ public class EntityEvents implements Listener {
   public void onPlayerLogin(PlayerLoginEvent event) {
     try {
       Player player = event.getPlayer();
-      final User user = new User(player);
+	NodeWallet tempWallet=null;
+	if (!satoshiQuest.REDIS.exists("nodeAddress"+player.getUniqueId().toString())) {
+	if (satoshiQuest.getWalletInfo(player.getUniqueId().toString())!=false) {
+		try {
+			tempWallet = satoshiQuest.loadWallet(player.getUniqueId().toString());
+		        System.out.println("[player wallet] trying to load node wallet");
+		} catch (NullPointerException npe) {
+			npe.printStackTrace();
+			System.out.println("[player wallet] wallet not found, attempting to create.");
+		}
+	} else
+	{
+	        tempWallet = satoshiQuest.generateNewWallet(player.getUniqueId().toString());
+        	System.out.println("[player wallet] generated new wallet");
+		//REDIS.set("nodeWallet"+SERVERDISPLAY_NAME,SERVERDISPLAY_NAME);
+	} 
+	} else { 
+	tempWallet = satoshiQuest.loadWallet(player.getUniqueId().toString());
+	}//nodewallet
+//final User user = new User(player);
+	
       SatoshiQuest.REDIS.set("name:" + player.getUniqueId().toString(), player.getName());
       SatoshiQuest.REDIS.set("uuid:" + player.getName().toString(), player.getUniqueId().toString());
       if (SatoshiQuest.REDIS.sismember("banlist", event.getPlayer().getUniqueId().toString())) {
@@ -155,17 +175,25 @@ int tempLives = Integer.parseInt(satoshiQuest.REDIS.get("LivesLeft" +player.getU
 		}
 		satoshiQuest.REDIS.del("ClearInv" +player.getUniqueId().toString());
 	}
-
+	try {
     if (satoshiQuest.REDIS.exists("nodeAddress"+ player.getUniqueId().toString())) {
 	player.sendMessage(ChatColor.GREEN + "Your Deposit address on this server: " + satoshiQuest.REDIS.get("nodeAddress"+ player.getUniqueId().toString()));
-	try {
+
       String url = satoshiQuest.ADDRESS_URL + satoshiQuest.REDIS.get("nodeAddress"+ player.getUniqueId().toString());
       player.sendMessage(ChatColor.WHITE + "" + ChatColor.UNDERLINE + url);
+
+    } else {
+
+	satoshiQuest.REDIS.set("nodeAddress"+ player.getUniqueId().toString(),satoshiQuest.getAccountAddress(player.getUniqueId().toString()));
+	player.sendMessage(ChatColor.GREEN + "Your Deposit address on this server: " + satoshiQuest.REDIS.get("nodeAddress"+ player.getUniqueId().toString()));
+
+      String url2 = satoshiQuest.ADDRESS_URL + satoshiQuest.REDIS.get("nodeAddress"+ player.getUniqueId().toString());
+      player.sendMessage(ChatColor.WHITE + "" + ChatColor.UNDERLINE + url2);
+
+	}
 	} catch(Exception E) {
 		    System.out.println(E);
 	}
-    }
-
 
 
     player.sendMessage("you have " + SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString()) + " lives!");
@@ -196,12 +224,12 @@ int tempLives = Integer.parseInt(satoshiQuest.REDIS.get("LivesLeft" +player.getU
     try {
       player.sendMessage(
               "The loot pool is: "
-                      + Integer.parseInt(Long.toString(satoshiQuest.getBalance(satoshiQuest.SERVERDISPLAY_NAME,1) - (long)((double)satoshiQuest.getBalance(satoshiQuest.SERVERDISPLAY_NAME,1) * 0.05)))
+                      + Long.toString((long)(satoshiQuest.getBalance(satoshiQuest.SERVERDISPLAY_NAME,1) * 0.85))
                       + " "
                       + satoshiQuest.DENOMINATION_NAME);
 	player.sendMessage(
               "The loot pool unconfirmed is: "
-                      + Integer.parseInt(Long.toString(satoshiQuest.getBalance(satoshiQuest.SERVERDISPLAY_NAME,0) - (long)((double)satoshiQuest.getBalance(satoshiQuest.SERVERDISPLAY_NAME,0) * 0.05)))
+                      + Long.toString((long)(satoshiQuest.getBalance(satoshiQuest.SERVERDISPLAY_NAME,0) * 0.85))
                       + " "
                       + satoshiQuest.DENOMINATION_NAME);
     } catch(Exception e) {
@@ -217,28 +245,15 @@ int tempLives = Integer.parseInt(satoshiQuest.REDIS.get("LivesLeft" +player.getU
     }
   }
 
-    public boolean isNotAtSpawn(Location location)
-	{
-		Location spawn = Bukkit.getServer().getWorlds().get(0).getSpawnLocation();
-		double spawnx = spawn.getX();
-		double spawnz = spawn.getZ();
-		double playerx=(double)location.getX();
-                double playerz=(double)location.getZ();
-	        //System.out.println("x:"+playerx+" z:"+playerz);  //for testing lol
-	if ((((playerx<spawnx+SatoshiQuest.SPAWN_PROTECT_RADIUS)&&(playerx>spawnx-SatoshiQuest.SPAWN_PROTECT_RADIUS))) && (((playerz<spawnz+SatoshiQuest.SPAWN_PROTECT_RADIUS)&&(playerz>spawnz-SatoshiQuest.SPAWN_PROTECT_RADIUS))))return false;
-	else
-               return true;//not
-	}
-
     public boolean isAtSpawn(Location location)
 	{
-		Location spawn = Bukkit.getServer().getWorlds().get(0).getSpawnLocation();
+		Location spawn = Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME).getSpawnLocation();
 		double spawnx = spawn.getX();
 		double spawnz = spawn.getZ();
 		double playerx=(double)location.getX();
                 double playerz=(double)location.getZ();
 	        //System.out.println("x:"+playerx+" z:"+playerz);  //for testing lol
-	if ((((playerx<spawnx+SatoshiQuest.SPAWN_PROTECT_RADIUS)&&(playerx>spawnx-SatoshiQuest.SPAWN_PROTECT_RADIUS))) && (((playerz<spawnz+SatoshiQuest.SPAWN_PROTECT_RADIUS)&&(playerz>spawnz-SatoshiQuest.SPAWN_PROTECT_RADIUS))))return true;
+	if ((((playerx<spawnx+SatoshiQuest.SPAWN_PROTECT_RADIUS+1)&&(playerx>spawnx-SatoshiQuest.SPAWN_PROTECT_RADIUS-1))) && (((playerz<spawnz+SatoshiQuest.SPAWN_PROTECT_RADIUS+1)&&(playerz>spawnz-SatoshiQuest.SPAWN_PROTECT_RADIUS-1))))return true;
 	else
                return false;//not
 	}
@@ -255,7 +270,7 @@ int tempLives = Integer.parseInt(satoshiQuest.REDIS.get("LivesLeft" +player.getU
 	}
 	if (event.getFrom().getBlock() != event.getTo().getBlock()) {
       if (Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + event.getPlayer().getUniqueId().toString())) <= 0) {
-		if (isNotAtSpawn(event.getPlayer().getLocation())) {
+		if (isAtSpawn(event.getPlayer().getLocation()) == false) {
 			event.getPlayer().sendMessage(ChatColor.RED + "you cant leave spawn with 0 lives!");
 			event.getPlayer().sendMessage(ChatColor.GREEN + "try /wallet for your deposite & life info.");
 			satoshiQuest.teleportToSpawn(event.getPlayer());
@@ -292,16 +307,17 @@ int tempLives = Integer.parseInt(satoshiQuest.REDIS.get("LivesLeft" +player.getU
 
 		Player p = event.getEntity();
 		Player player = (Player) p;
-if (isNotAtSpawn(player.getLocation())) {
+if (isAtSpawn(player.getLocation()) == false) {
 	if (Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())) >= 1)	{
 		int livesLeft = Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())) - 1;
 		SatoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(),String.valueOf(livesLeft));
 
             player.sendMessage(ChatColor.RED + "You Lost a life. You have " + SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())  + " lives left.");
 	}
-	if (Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())) == 0)	{
+	if (Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())) <= 0)	{
 		//tp player to spawn
 		   satoshiQuest.teleportToSpawn(player);
+	SatoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(),"0");
 	}
 	}//end spawncheck
 	try {
