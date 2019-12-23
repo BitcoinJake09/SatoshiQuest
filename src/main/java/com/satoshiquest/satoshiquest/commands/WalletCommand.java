@@ -1,7 +1,7 @@
 package com.satoshiquest.satoshiquest.commands;
 
 import com.satoshiquest.satoshiquest.SatoshiQuest;
-import com.satoshiquest.satoshiquest.User;
+//import com.satoshiquest.satoshiquest.User;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -18,8 +18,11 @@ public class WalletCommand extends CommandAction {
       CommandSender sender, Command cmd, String label, String[] args, Player player) {
 
     try {
-      User user = new User(player);
-      satoshiQuest.getWalletInfo(player.getUniqueId().toString());
+      //User user = new User(player);
+      //satoshiQuest.getWalletInfo(player.getUniqueId().toString());
+player.sendMessage(ChatColor.GREEN + "Your Deposit address on this server: " + satoshiQuest.getAccountAddress(player.getUniqueId().toString()));
+String url = satoshiQuest.ADDRESS_URL + satoshiQuest.REDIS.get("nodeAddress"+ player.getUniqueId().toString());
+      player.sendMessage(ChatColor.WHITE + "" + ChatColor.UNDERLINE + url);
       Long balance1 = satoshiQuest.getBalance(player.getUniqueId().toString(),1);
       Long unconfirmedBalance = satoshiQuest.getUnconfirmedBalance(player.getUniqueId().toString());
       player.sendMessage(ChatColor.GREEN + "wallet balance with 1-conf+: " + balance1);

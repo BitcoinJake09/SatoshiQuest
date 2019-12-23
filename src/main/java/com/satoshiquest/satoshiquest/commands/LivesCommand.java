@@ -1,7 +1,6 @@
 package com.satoshiquest.satoshiquest.commands;
 
 import com.satoshiquest.satoshiquest.SatoshiQuest;
-import com.satoshiquest.satoshiquest.User;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -24,7 +23,6 @@ public class LivesCommand extends CommandAction {
       if (args[0].equals("help")) {
 
     try {
-      User user = new User(player);
       satoshiQuest.getWalletInfo(player.getUniqueId().toString());
       balance = satoshiQuest.getBalance(player.getUniqueId().toString(),1);
       player.sendMessage(ChatColor.GREEN + "wallet balance: " + balance);

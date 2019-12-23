@@ -1,7 +1,6 @@
 package com.satoshiquest.satoshiquest.commands;
 
 import com.satoshiquest.satoshiquest.SatoshiQuest;
-import com.satoshiquest.satoshiquest.User;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
