@@ -1335,12 +1335,31 @@ public void teleportToLootSpawn(Player player) {
 	double negX = spawnx - (spawnRadius);
 	double posZ = spawnz + (spawnRadius);
 	double negZ = spawnz - (spawnRadius);
+	double lowPoint = spawny;
+	double highPoint = spawny;
+
+	for(double x = negX; x <= posX; x++) {
+			for(double z = negZ; z <= posZ; z++) {
+	                double tempSpawnBlock = spawnBlock.getWorld().getBlockAt((int)x,((int)spawnBlock.getWorld().getHighestBlockAt((int)x, (int)z).getY()-1), (int)z).getY();
+			if (tempSpawnBlock < lowPoint) {
+				lowPoint = tempSpawnBlock;
+			} else if (tempSpawnBlock > highPoint) {
+				highPoint = tempSpawnBlock;
+			}
+			}
+
+	}
 		for(double x = negX; x <= posX; x++) {
 			for(double z = negZ; z <= posZ; z++) {
-	                Block tempblock = spawnBlock.getWorld().getBlockAt((int)x,((int)spawnBlock.getWorld().getHighestBlockAt((int)x, (int)z).getY()-1), (int)z);
+				for(double y = lowPoint; y <= highPoint; y++) {
+	                Block tempblock = spawnBlock.getWorld().getBlockAt((int)x,(int)y, (int)z);
 			tempblock.setType(Material.EMERALD_BLOCK);
+				}
 			}
 		}
+	Block tempSetSpawnBlock = spawnBlock.getWorld().getBlockAt((int)spawnx,((int)spawnBlock.getWorld().getHighestBlockAt((int)spawnx, (int)spawnz).getY()-1), (int)spawnz);
+	Location setSpawnBlock = tempSetSpawnBlock.getLocation();
+Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.getBlockX(), setSpawnBlock.getBlockY() + 1, setSpawnBlock.getBlockZ());
    }
 
    private static void setLootBlocks() {
