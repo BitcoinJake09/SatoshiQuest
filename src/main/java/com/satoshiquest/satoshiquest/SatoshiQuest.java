@@ -1178,7 +1178,7 @@ try {
                 Double playerz=(double)player.getLocation().getZ();
 	double announceRadius = (double)LOOT_ANNOUNCE_RADIUS;
 
-	if ((((playerx<lootX+announceRadius)&&(playerx>lootX-announceRadius))) || (((playerz<lootZ+announceRadius)&&(playerz>lootZ-announceRadius)))) {
+	if ((((playerx<lootX+announceRadius)&&(playerx>lootX-announceRadius))) && (((playerz<lootZ+announceRadius)&&(playerz>lootZ-announceRadius)))) {
 		//System.out.println("You are near...");
 		String toAnnounce = (player.getName() + " - X:" + playerx.intValue() + " Z:" + playerz.intValue());
 		announce(toAnnounce);
