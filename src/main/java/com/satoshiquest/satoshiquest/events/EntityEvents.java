@@ -245,6 +245,15 @@ int tempLives = Integer.parseInt(satoshiQuest.REDIS.get("LivesLeft" +player.getU
     }
   }
 
+	@EventHandler
+	public void onPlayerGameModeChange(PlayerGameModeChangeEvent event) throws ParseException, org.json.simple.parser.ParseException, IOException {
+                final Player player=event.getPlayer();
+		if (player.getUniqueId().toString().equals(satoshiQuest.ADMIN_UUID.toString()))		
+		event.setCancelled(false);
+		else 
+		event.setCancelled(true);
+	}
+
     public boolean isAtSpawn(Location location)
 	{
 		Location spawn = Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME).getSpawnLocation();
@@ -272,7 +281,7 @@ int tempLives = Integer.parseInt(satoshiQuest.REDIS.get("LivesLeft" +player.getU
       if (Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + event.getPlayer().getUniqueId().toString())) <= 0) {
 		if (isAtSpawn(event.getPlayer().getLocation()) == false) {
 			event.getPlayer().sendMessage(ChatColor.RED + "you cant leave spawn with 0 lives!");
-			event.getPlayer().sendMessage(ChatColor.GREEN + "try /wallet for your deposite & life info.");
+			event.getPlayer().sendMessage(ChatColor.GREEN + "try /wallet for your deposit & life info.");
 			satoshiQuest.teleportToSpawn(event.getPlayer());
 		}
 	}
@@ -326,19 +335,6 @@ if (isAtSpawn(player.getLocation()) == false) {
 		e.printStackTrace();
 	}
   }
-
-    @EventHandler
-    public void onPlayerGameModeChange(PlayerGameModeChangeEvent event)
-            throws ParseException, org.json.simple.parser.ParseException, IOException {
-        if (satoshiQuest.SATOSHIQUEST_ENV.equals("production")) {
-            event.getPlayer().sendMessage(ChatColor.RED + "Sorry changing gamemode are not allowed.");
-            event.setCancelled(true);
-        } else if (satoshiQuest.SATOSHIQUEST_ENV.equals("development") == true && satoshiQuest.ADMIN_UUID == event.getPlayer().getUniqueId()) {
-    		event.getPlayer().setOp(true);
-                event.setCancelled(false);
-        } else
-                event.setCancelled(false);
-    } 
 
   String spawnKey(Location location) {
     return location.getWorld().getName()
