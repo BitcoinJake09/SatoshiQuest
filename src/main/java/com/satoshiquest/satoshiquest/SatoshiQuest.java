@@ -134,6 +134,7 @@ public class SatoshiQuest extends JavaPlugin {
   public Long livesRate = 0L;
   public Long adminRate = 0L;
   public Long totalLifeRate = 0L;
+  public boolean eventsLoaded = false;
 
   // when true, server is closed for maintenance and not allowing players to join in.
   public boolean maintenance_mode = false;
@@ -161,9 +162,12 @@ public class SatoshiQuest extends JavaPlugin {
 		iter++;
   }
       // registers listener classes
+	if (eventsLoaded == false) {
       getServer().getPluginManager().registerEvents(new BlockEvents(this), this);
       getServer().getPluginManager().registerEvents(new EntityEvents(this), this);
       getServer().getPluginManager().registerEvents(new ServerEvents(this), this);
+	eventsLoaded = true;	
+	}
 
       // player does not lose inventory on death
       System.out.println("[startup] Starting " + SERVERDISPLAY_NAME);
@@ -1597,5 +1601,4 @@ public void teleportToLootSpawn(Player player) {
 
 
 }
-
 
