@@ -50,19 +50,22 @@ public class LivesCommand extends CommandAction {
 			Long sendLoot = satoshiQuest.livesRate * livesAmount;
 			Long sendAdmin = satoshiQuest.adminRate * livesAmount;
 			Long totalBuyingBTC = satoshiQuest.totalLifeRate * livesAmount;
-
+			if (args.length == 3) {
+			player.sendMessage(ChatColor.YELLOW + "Bought " + livesAmount + " Lives for " + totalBuyingBTC + " with " + sendLoot + " going into the loot treasure and " + sendAdmin + " going to the admin");
+			} else {
 			player.sendMessage(ChatColor.YELLOW + "Buy " + livesAmount + " Lives for " + totalBuyingBTC + " with " + sendLoot + " going into the loot treasure and " + sendAdmin + " going to the admin");
+			}
 			if (args.length == 2) {
 			if (args[1].equalsIgnoreCase("buy")) {
 			try {
 			String result = satoshiQuest.sendMany(player.getUniqueId().toString(), satoshiQuest.REDIS.get("nodeAddress"+satoshiQuest.SERVERDISPLAY_NAME), satoshiQuest.ADMIN_ADDRESS, sendLoot, sendAdmin, 24);
-      			Long newBalance = satoshiQuest.getBalance(player.getUniqueId().toString(),1);
-			if ((result != "failed") && (balance > newBalance)) {
+      			//Long newBalance = satoshiQuest.getBalance(player.getUniqueId().toString(),1);
+			if (result != "failed") {
 				String setLives = Integer.toString(((Integer.valueOf(satoshiQuest.REDIS.get("LivesLeft" +player.getUniqueId().toString()))) + (satoshiQuest.LIVES_PERBUYIN * livesAmount)));
 				satoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(), setLives);
 			player.sendMessage(ChatColor.GREEN + "You just got " + (satoshiQuest.LIVES_PERBUYIN * livesAmount) + " lives!");
 			} else if (result == "failed") {
-				player.sendMessage(ChatColor.RED + "Buy lives failed, may be due to not enough confirmed balance. try /wallet to check.");
+				player.sendMessage(ChatColor.RED + "Buy lives failed, may be due to not enough confirmed balance or enought to pay tx fee. try /wallet to check balance and confirmations.");
 			}
 			System.out.println("[LivesBuy] " + result);
      			satoshiQuest.updateScoreboard(player);
@@ -81,9 +84,9 @@ public class LivesCommand extends CommandAction {
 							if (Integer.valueOf(args[1]) <= Integer.valueOf(satoshiQuest.REDIS.get("LivesLeft" +player.getUniqueId().toString()))) {
 							player.sendMessage(ChatColor.GREEN + "Sending " + args[1] + " lives to " + sendWho);
 							String minusLives = Integer.toString((Integer.valueOf(satoshiQuest.REDIS.get("LivesLeft" +player.getUniqueId().toString())) - livesAmount));
-							String plusLives = Integer.toString((Integer.valueOf(satoshiQuest.REDIS.get("LivesLeft" +Bukkit.getServer().getPlayer(sendWho).getUniqueId())) + livesAmount));
+							String plusLives = Integer.toString((Integer.valueOf(satoshiQuest.REDIS.get("LivesLeft" +Bukkit.getServer().getPlayer(sendWho).getUniqueId().toString())) + livesAmount));
 							satoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(), minusLives);
-							satoshiQuest.REDIS.set("LivesLeft" + Bukkit.getServer().getPlayer(sendWho).getUniqueId(),plusLives);
+							satoshiQuest.REDIS.set("LivesLeft" + Bukkit.getServer().getPlayer(sendWho).getUniqueId().toString(),plusLives);
 							}
 						} else {
 							player.sendMessage(ChatColor.RED + "You need 2 or more lives to be able to send to another player");
