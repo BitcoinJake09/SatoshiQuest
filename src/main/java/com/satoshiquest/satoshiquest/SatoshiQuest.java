@@ -166,6 +166,8 @@ public class SatoshiQuest extends JavaPlugin {
       getServer().getPluginManager().registerEvents(new BlockEvents(this), this);
       getServer().getPluginManager().registerEvents(new EntityEvents(this), this);
       getServer().getPluginManager().registerEvents(new ServerEvents(this), this);
+	REDIS.del("spawnCreated");
+	REDIS.del("lootSpawnY");
 	eventsLoaded = true;	
 	}
 
@@ -1601,4 +1603,5 @@ public void teleportToLootSpawn(Player player) {
 
 
 }
+
 
