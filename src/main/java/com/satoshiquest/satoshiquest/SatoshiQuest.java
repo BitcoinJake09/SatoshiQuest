@@ -1017,17 +1017,21 @@ try {
 		DecimalFormat df = new DecimalFormat("#.##");
         	System.out.print(df.format(lootAmount));
 		Score score4 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: $" + df.format(lootAmount));
-		score4.setScore(0);
+		score4.setScore(1);
 
 		Score score2 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: " + Long.toString(lootBalance) + "sats -txFee");
-		score2.setScore(1);
+		score2.setScore(2);
 
 		Score score3 = playSBoardObj.getScore(ChatColor.GREEN + "Balance: " + Long.toString(getBalance(player.getUniqueId().toString(),1)));
-		score3.setScore(2);
+		score3.setScore(3);
 
                 Score score = playSBoardObj.getScore(ChatColor.GREEN + "Lives: " + REDIS.get("LivesLeft" + player.getUniqueId().toString()));
-		score.setScore(3);
-
+		score.setScore(4);
+	    	if isNearLoot(player) {
+                	Score score4 = playSBoardObj.getScore(ChatColor.ORANGE + ChatColor.BOLD + "Loot Nearby!");
+			score.setScore(0);
+			
+		}
       		  player.setScoreboard(playSBoard);
             
        
