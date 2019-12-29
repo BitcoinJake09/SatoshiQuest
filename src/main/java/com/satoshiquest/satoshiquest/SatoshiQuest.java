@@ -150,6 +150,15 @@ public class SatoshiQuest extends JavaPlugin {
   public void onEnable() {
     log("[startup] SatoshiQuest starting");
 	getServer().createWorld(new WorldCreator(SERVERDISPLAY_NAME));
+
+	WorldCreator nc = new WorldCreator(SERVERDISPLAY_NAME+"_nether");
+	nc.environment(World.Environment.NETHER); //Change type of world eg; Normal, Nether, End.
+	nc.createWorld();
+
+	WorldCreator ec = new WorldCreator(SERVERDISPLAY_NAME+"_the_end");
+	ec.environment(World.Environment.THE_END); //Change type of world eg; Normal, Nether, End.
+	ec.createWorld();
+
     try {
   
       if (ADMIN_UUID == null) {
@@ -1020,7 +1029,7 @@ try {
 		Score score4 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: $" + df.format(lootAmount));
 		score4.setScore(0);
 
-		Score score2 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: " + Long.toString(lootBalance) + "sats -txFee");
+		Score score2 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: " + Long.toString(lootBalance) + "sats");
 		score2.setScore(1);
 
 		Score score3 = playSBoardObj.getScore(ChatColor.GREEN + "Balance: " + Long.toString(getBalance(player.getUniqueId().toString(),1)));
@@ -1162,8 +1171,8 @@ try {
 		double playerx=(double)player.getLocation().getX();
                 double playerz=(double)player.getLocation().getZ();
 
-	if (!((playerx<spawnx+SPAWN_PROTECT_RADIUS)&&(playerx>spawnx-SPAWN_PROTECT_RADIUS)))return true;
-	else if(!((playerz<spawnz+SPAWN_PROTECT_RADIUS)&&(playerz>spawnz-SPAWN_PROTECT_RADIUS)))return true;
+	if (!((playerx<=spawnx+SPAWN_PROTECT_RADIUS+1)&&(playerx>=spawnx-SPAWN_PROTECT_RADIUS-1)))return true;
+	else if(!((playerz<=spawnz+SPAWN_PROTECT_RADIUS+1)&&(playerz>=spawnz-SPAWN_PROTECT_RADIUS-1)))return true;
 	
 		//System.out.println("You may not build at spawn.");  
 		//player.sendMessage(ChatColor.RED + "you cant build at spawn.");
@@ -1272,11 +1281,7 @@ File BaseFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "players"
             Bukkit.getServer().unloadWorld(world, false);
             System.out.println(world.getName() + " unloaded!");
         }
-	File dir = new File(getServer().getWorldContainer().getAbsolutePath() + "/" + SERVERDISPLAY_NAME);
-	boolean deld = deleteWorld(dir);
-		if (deld == true) {
-			System.out.println(SERVERDISPLAY_NAME + " world deleted and ready for reset!");
-		}
+		deleteLootWorlds();
 		REDIS.del("winner");
 		REDIS.del("lootSpawnY");
 		REDIS.del("spawnCreated");
@@ -1285,9 +1290,31 @@ File BaseFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "players"
 	} 
   }
 
+public void deleteLootWorlds() {
+
+	File dir = new File(getServer().getWorldContainer().getAbsolutePath() + "/" + SERVERDISPLAY_NAME);
+	boolean deld = deleteWorld(dir);
+		if (deld == true) {
+			System.out.println(SERVERDISPLAY_NAME + " world deleted and ready for reset!");
+		}
+
+File dir2 = new File(getServer().getWorldContainer().getAbsolutePath() + "/" + SERVERDISPLAY_NAME+"_nether");
+	boolean deld2 = deleteWorld(dir2);
+		if (deld2 == true) {
+			System.out.println(SERVERDISPLAY_NAME + " nether deleted and ready for reset!");
+		}
+
+File dir3 = new File(getServer().getWorldContainer().getAbsolutePath() + "/" + SERVERDISPLAY_NAME+"_the_end");
+	boolean deld3 = deleteWorld(dir3);
+		if (deld3 == true) {
+			System.out.println(SERVERDISPLAY_NAME + " end deleted and ready for reset!");
+		}
+	}
+
+
 public void teleportToLootSpawn(Player player) {
         if (!player.hasMetadata("teleporting")) {
-            player.sendMessage(ChatColor.GREEN + "Teleporting back now that world is reset...");
+            player.sendMessage(ChatColor.GREEN + "Teleporting back now that world is loading...");
             player.setMetadata("teleporting", new FixedMetadataValue(this, true));
             Location location= getServer().createWorld(new WorldCreator(SERVERDISPLAY_NAME)).getSpawnLocation();
             System.out.println("location: " + location);
@@ -1351,12 +1378,26 @@ public void teleportToLootSpawn(Player player) {
 	}
 		for(double x = negX; x <= posX; x++) {
 			for(double z = negZ; z <= posZ; z++) {
-				for(double y = lowPoint; y <= highPoint; y++) {
+				for(double y = lowPoint; y <= highPoint-1; y++) {
 	                Block tempblock = spawnBlock.getWorld().getBlockAt((int)x,(int)y, (int)z);
 			tempblock.setType(Material.EMERALD_BLOCK);
 				}
 			}
 		}
+		double midX = negX + posX;
+		double midZ = negZ + posZ;
+		for(double y = lowPoint; y <= highPoint-1; y++) {
+	                Block tempblock = spawnBlock.getWorld().getBlockAt((int)negX,(int)y, (int)negZ);
+			tempblock.setType(Material.WATER);
+	                tempblock = spawnBlock.getWorld().getBlockAt((int)posX,(int)y, (int)posZ);
+			tempblock.setType(Material.WATER);
+	                tempblock = spawnBlock.getWorld().getBlockAt((int)negX,(int)y, (int)posZ);
+			tempblock.setType(Material.WATER);
+	                tempblock = spawnBlock.getWorld().getBlockAt((int)posX,(int)y, (int)negZ);
+			tempblock.setType(Material.WATER);
+				}
+
+
 	Block tempSetSpawnBlock = spawnBlock.getWorld().getBlockAt((int)spawnx,((int)spawnBlock.getWorld().getHighestBlockAt((int)spawnx, (int)spawnz).getY()-1), (int)spawnz);
 	Location setSpawnBlock = tempSetSpawnBlock.getLocation();
 Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.getBlockX(), setSpawnBlock.getBlockY() + 1, setSpawnBlock.getBlockZ());
