@@ -6,6 +6,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.Bukkit;
+import java.util.UUID;
 
 public class LivesCommand extends CommandAction {
   private SatoshiQuest satoshiQuest;
@@ -42,7 +43,7 @@ public class LivesCommand extends CommandAction {
 	} else if ((satoshiQuest.isStringInt(args[0])) && (args.length <= 2)) {  //end help
 		if (Integer.parseInt(args[0]) > 0) {
 			try {
-     			balance = satoshiQuest.getBalance(player.getUniqueId().toString(),1);
+     				balance = satoshiQuest.getBalance(player.getUniqueId().toString(),1);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -51,54 +52,54 @@ public class LivesCommand extends CommandAction {
 			Long sendAdmin = satoshiQuest.adminRate * livesAmount;
 			Long totalBuyingBTC = satoshiQuest.totalLifeRate * livesAmount;
 			if (args.length == 3) {
-			player.sendMessage(ChatColor.YELLOW + "Bought " + livesAmount + " Lives for " + totalBuyingBTC + " with " + sendLoot + " going into the loot treasure and " + sendAdmin + " going to the admin");
+				player.sendMessage(ChatColor.YELLOW + "Bought " + livesAmount + " Lives for " + totalBuyingBTC + " with " + sendLoot + " going into the loot treasure and " + sendAdmin + " going to the admin");
 			} else {
-			player.sendMessage(ChatColor.YELLOW + "Buy " + livesAmount + " Lives for " + totalBuyingBTC + " with " + sendLoot + " going into the loot treasure and " + sendAdmin + " going to the admin");
+				player.sendMessage(ChatColor.YELLOW + "Buy " + livesAmount + " Lives for " + totalBuyingBTC + " with " + sendLoot + " going into the loot treasure and " + sendAdmin + " going to the admin");
 			}
 			if (args.length == 2) {
-			if (args[1].equalsIgnoreCase("buy")) {
-			try {
-			String result = satoshiQuest.sendMany(player.getUniqueId().toString(), satoshiQuest.REDIS.get("nodeAddress"+satoshiQuest.SERVERDISPLAY_NAME), satoshiQuest.ADMIN_ADDRESS, sendLoot, sendAdmin, 24);
+				if (args[1].equalsIgnoreCase("buy")) {
+				try {
+					String result = satoshiQuest.sendMany(player.getUniqueId().toString(), satoshiQuest.REDIS.get("nodeAddress"+satoshiQuest.SERVERDISPLAY_NAME), satoshiQuest.ADMIN_ADDRESS, sendLoot, sendAdmin, 24);
       			//Long newBalance = satoshiQuest.getBalance(player.getUniqueId().toString(),1);
-			if (result != "failed") {
-				String setLives = Integer.toString(((Integer.valueOf(satoshiQuest.REDIS.get("LivesLeft" +player.getUniqueId().toString()))) + (satoshiQuest.LIVES_PERBUYIN * livesAmount)));
-				satoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(), setLives);
-			player.sendMessage(ChatColor.GREEN + "You just got " + (satoshiQuest.LIVES_PERBUYIN * livesAmount) + " lives!");
-			} else if (result == "failed") {
-				player.sendMessage(ChatColor.RED + "Buy lives failed, may be due to not enough confirmed balance or enought to pay tx fee. try /wallet to check balance and confirmations.");
-			}
-			System.out.println("[LivesBuy] " + result);
-     			satoshiQuest.updateScoreboard(player);
-			} catch(Exception e) {
-				e.printStackTrace();
-			}
-			}//end true
+				if (result != "failed") {
+					String setLives = Integer.toString(((Integer.valueOf(satoshiQuest.REDIS.get("LivesLeft" +player.getUniqueId().toString()))) + (satoshiQuest.LIVES_PERBUYIN * livesAmount)));
+					satoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(), setLives);
+					player.sendMessage(ChatColor.GREEN + "You just got " + (satoshiQuest.LIVES_PERBUYIN * livesAmount) + " lives!");
+				} else if (result == "failed") {
+					player.sendMessage(ChatColor.RED + "Buy lives failed, may be due to not enough confirmed balance or enought to pay tx fee. try /wallet to check balance and confirmations.");
+				}
+				System.out.println("[LivesBuy] " + result);
+     				satoshiQuest.updateScoreboard(player);
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
+			}//end buy
 			}//end args.length == 2
-			if (args.length == 3) {
+			
+		}//end is args[0] > 0
+	} //end isStringInt
+
+		if (args.length == 3) {
 			if (args[1].equalsIgnoreCase("send")) {
 				String sendWho = args[2];
-				for (final Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-          			if (onlinePlayer.getName().equalsIgnoreCase(sendWho)) {
-	            			if (!sendWho.equalsIgnoreCase(player.getDisplayName())) {
+	            			//if (!sendWho.equalsIgnoreCase(player.getDisplayName())) {
 						if (Integer.valueOf(satoshiQuest.REDIS.get("LivesLeft" +player.getUniqueId().toString())) >= 2) {
-							if (Integer.valueOf(args[1]) <= Integer.valueOf(satoshiQuest.REDIS.get("LivesLeft" +player.getUniqueId().toString()))) {
-							player.sendMessage(ChatColor.GREEN + "Sending " + args[1] + " lives to " + sendWho);
+							if (Integer.valueOf(args[0]) <= Integer.valueOf(satoshiQuest.REDIS.get("LivesLeft" +player.getUniqueId().toString()))) {
+							int livesAmount = Integer.valueOf(args[0]);
+							UUID uuid = UUID.fromString(SatoshiQuest.REDIS.get("uuid:" + args[2]));
+							player.sendMessage(ChatColor.GREEN + "Sending " + args[0] + " lives to " + sendWho);
 							String minusLives = Integer.toString((Integer.valueOf(satoshiQuest.REDIS.get("LivesLeft" +player.getUniqueId().toString())) - livesAmount));
-							String plusLives = Integer.toString((Integer.valueOf(satoshiQuest.REDIS.get("LivesLeft" +Bukkit.getServer().getPlayer(sendWho).getUniqueId().toString())) + livesAmount));
 							satoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(), minusLives);
-							satoshiQuest.REDIS.set("LivesLeft" + Bukkit.getServer().getPlayer(sendWho).getUniqueId().toString(),plusLives);
+							String plusLives = Integer.toString((Integer.valueOf(satoshiQuest.REDIS.get("LivesLeft" +Bukkit.getServer().getPlayer(sendWho).getUniqueId().toString())) + livesAmount));
+							satoshiQuest.REDIS.set("LivesLeft" + uuid.toString(),plusLives);
 							}
 						} else {
 							player.sendMessage(ChatColor.RED + "You need 2 or more lives to be able to send to another player");
 						}
-					}
-				}
+					//}
 
-				}//end for
 			}//if send
 		}//end (args.length == 3)
-		}//end is args[0] > 0
-	} //end isStringInt
 	}//end args length >0
 
     return true;
