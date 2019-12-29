@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -95,7 +96,7 @@ public class EntityEvents implements Listener {
             "You are temporarily banned. Please contact satoshiquest@satoshiquest.co");
       }
       if (SatoshiQuest.REDIS.exists("winner")) {
-        System.out.println("kicking player " + event.getPlayer().getDisplayName() + " while world resets");
+        System.out.println("kicking player " + event.getPlayer().getDisplayName() + " while world loads");
         event.disallow(
             PlayerLoginEvent.Result.KICK_OTHER,
             "World is resetting for new game, please try again in a moment.");
@@ -343,5 +344,48 @@ if (isAtSpawn(player.getLocation()) == false) {
         + location.getChunk().getZ()
         + "spawn";
   }
+
+
+  @EventHandler
+    public void onPortal(PlayerPortalEvent event) {
+        Player player = event.getPlayer();
+
+        if (event.getCause() == PlayerTeleportEvent.TeleportCause.NETHER_PORTAL) {
+            event.useTravelAgent(true);
+            event.getPortalTravelAgent().setCanCreatePortal(true);
+            Location location;
+            if (player.getWorld() == Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME)) {
+                 location = new Location(Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME+"_nether"), event.getFrom().getBlockX() / 8, event.getFrom().getBlockY(), event.getFrom().getBlockZ() / 8);
+            } else {
+                location = new Location(Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME), event.getFrom().getBlockX() * 8, event.getFrom().getBlockY(), event.getFrom().getBlockZ() * 8);
+            }
+            event.setTo(event.getPortalTravelAgent().findOrCreate(location));
+        }
+
+        if (event.getCause() == PlayerTeleportEvent.TeleportCause.END_PORTAL) {
+            if (player.getWorld() == Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME)) {
+                Location loc = new Location(Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME+"_the_end"), 100, 50, 0); // This is the vanilla location for obsidian platform.
+                event.setTo(loc);
+                Block block = loc.getBlock();
+                for (int x = block.getX() - 2; x <= block.getX() + 2; x++) {
+                    for (int z = block.getZ() - 2; z <= block.getZ() + 2; z++) {
+                        Block platformBlock = loc.getWorld().getBlockAt(x, block.getY() - 1, z);
+                        if (platformBlock.getType() != Material.OBSIDIAN) {
+                            platformBlock.setType(Material.OBSIDIAN);
+                        }
+                        for (int yMod = 1; yMod <= 3; yMod++) {
+                            Block b = platformBlock.getRelative(BlockFace.UP, yMod);
+                            if (b.getType() != Material.AIR) {
+                                b.setType(Material.AIR);
+                            }
+                        }
+                    }
+                }
+            } else if (player.getWorld() == Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME+"_the_end")) {
+                event.setTo(Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME).getSpawnLocation());
+            }
+        }
+    }
+
 
 }
