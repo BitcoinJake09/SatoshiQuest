@@ -279,12 +279,17 @@ int tempLives = Integer.parseInt(satoshiQuest.REDIS.get("LivesLeft" +player.getU
 //event.getPlayer().sendMessage(ChatColor.WHITE + "Welcome to " + SatoshiQuest.SERVERDISPLAY_NAME);
 	}
 	if (event.getFrom().getBlock() != event.getTo().getBlock()) {
-      if (Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + event.getPlayer().getUniqueId().toString())) <= 0) {
+      if ((Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + event.getPlayer().getUniqueId().toString())) <= 0) || (!satoshiQuest.canLeaveSpawn())) {
 		if (isAtSpawn(event.getPlayer().getLocation()) == false) {
-			event.getPlayer().sendMessage(ChatColor.RED + "you cant leave spawn with 0 lives!");
+			event.getPlayer().sendMessage(ChatColor.RED + "you cant leave spawn with 0 lives! or while the loot balance has 0 confirmed loot.");
 			event.getPlayer().sendMessage(ChatColor.GREEN + "try /wallet for your deposit & life info.");
 			satoshiQuest.teleportToSpawn(event.getPlayer());
 		}
+	}
+	if (isAtSpawn(event.getPlayer().getLocation()) == true) {
+		event.getPlayer().setExhaustion(0);
+		event.getPlayer().setFoodLevel(20);
+		event.getPlayer().setHealth(event.getPlayer().getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 	}
 	satoshiQuest.didFindLoot(event.getPlayer());
 	if (event.getFrom().getChunk() != event.getTo().getChunk()) {
