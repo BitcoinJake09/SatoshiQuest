@@ -40,7 +40,7 @@ public class TipCommand extends CommandAction {
 
                 if (balance >= sat) {
                   // TODO: Pay to user address
-		  String didSend = satoshiQuest.sendToAddress(satoshiQuest.REDIS.get("nodeAddress"+player.getUniqueId().toString()),satoshiQuest.REDIS.get("nodeAddress"+onlinePlayer.getUniqueId().toString()), sat);
+		  String didSend = satoshiQuest.sendToAddress(player.getUniqueId().toString(),satoshiQuest.REDIS.get("nodeAddress"+onlinePlayer.getUniqueId().toString()), sat);
                   if (didSend != "failed") {
                     satoshiQuest.updateScoreboard(onlinePlayer);
                     satoshiQuest.updateScoreboard(player);
