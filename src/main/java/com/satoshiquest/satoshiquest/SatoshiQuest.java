@@ -113,10 +113,10 @@ public class SatoshiQuest extends JavaPlugin {
   public static final Long LOOT_ANNOUNCE_RADIUS =
       System.getenv("LOOT_ANNOUNCE_RADIUS") != null ? Long.parseLong(System.getenv("LOOT_ANNOUNCE_RADIUS")) : 20;
 
-  public static final Long LOOT_RADIUS_MIN =
+  public Long LOOT_RADIUS_MIN =
       System.getenv("LOOT_RADIUS_MIN") != null ? Long.parseLong(System.getenv("LOOT_RADIUS_MIN")) : 1000;
 
-  public static final Long LOOT_RADIUS_MAX =
+  public Long LOOT_RADIUS_MAX =
       System.getenv("LOOT_RADIUS_MAX") != null ? Long.parseLong(System.getenv("LOOT_RADIUS_MAX")) : 10000;
 
   public static int rand(int min, int max) {
@@ -215,6 +215,12 @@ public class SatoshiQuest extends JavaPlugin {
   //listWallets();
 
 	//getWalletInfo(SERVERDISPLAY_NAME);
+	if (!REDIS.exists("ModFlag")) {
+		REDIS.set("ModFlag","false");
+	}
+	if (!REDIS.exists("gameRound")) {
+		REDIS.set("gameRound","1");
+	}
 	if (!REDIS.exists("nodeAddress"+SERVERDISPLAY_NAME)) {
 	if (getWalletInfo(SERVERDISPLAY_NAME)!=false) {
 		try {
@@ -264,6 +270,24 @@ public class SatoshiQuest extends JavaPlugin {
 	System.out.println("[Spawn Created] : " + REDIS.get("spawnCreated"));      
 	}
 
+	if (!REDIS.exists("LOOT_RADIUS_MIN")) {
+		REDIS.set("LOOT_RADIUS_MIN", LOOT_RADIUS_MIN.toString());
+		REDIS.set("LOOT_RADIUS_MAX", LOOT_RADIUS_MAX.toString());
+	} else {
+		REDIS.set("LOOT_RADIUS_MIN", Double.toString(Integer.parseInt(REDIS.get("LOOT_RADIUS_MIN")) + (Integer.parseInt(REDIS.get("LOOT_RADIUS_MIN")) *0.1)));
+		REDIS.set("LOOT_RADIUS_MAX", Double.toString(Integer.parseInt(REDIS.get("LOOT_RADIUS_MAX")) + (Integer.parseInt(REDIS.get("LOOT_RADIUS_MAX")) *0.1)));
+	}
+
+	LOOT_RADIUS_MIN = Long.parseLong(REDIS.get("LOOT_RADIUS_MIN"));
+	LOOT_RADIUS_MAX = Long.parseLong(REDIS.get("LOOT_RADIUS_MAX"));
+	if ((LOOT_RADIUS_MIN >= 2147483647) || (LOOT_RADIUS_MIN <= -2147483647)) {
+		LOOT_RADIUS_MIN = Long.parseLong(System.getenv("LOOT_RADIUS_MIN"));
+	}
+
+	if ((LOOT_RADIUS_MAX >= 2147483647) || (LOOT_RADIUS_MAX <= -2147483647)) {
+		LOOT_RADIUS_MAX = Long.parseLong(System.getenv("LOOT_RADIUS_MAX"));
+	}
+	
   LootSpawnX = new Long(rand(LOOT_RADIUS_MIN.intValue(),LOOT_RADIUS_MAX.intValue()));
   LootSpawnZ = new Long(rand(LOOT_RADIUS_MIN.intValue(),LOOT_RADIUS_MAX.intValue()));
 
@@ -302,7 +326,7 @@ public class SatoshiQuest extends JavaPlugin {
       commands.put("lives", new LivesCommand(this));
       modCommands = new HashMap<String, CommandAction>();
       modCommands.put("crashTest", new CrashtestCommand(this));
-      modCommands.put("mod", new ModCommand());
+      modCommands.put("mod", new ModCommand(this));
       modCommands.put("setlives", new SetLivesCommand(this));
       modCommands.put("ban", new BanCommand());
       modCommands.put("unban", new UnbanCommand());
@@ -1026,17 +1050,22 @@ try {
 		double lootAmount =  (double)(exRate * (lootBalance * 0.00000001));        
 		DecimalFormat df = new DecimalFormat("#.##");
         	System.out.print(df.format(lootAmount));
-		Score score4 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: $" + df.format(lootAmount));
-		score4.setScore(0);
 
-		Score score2 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: " + Long.toString(lootBalance) + "sats");
-		score2.setScore(1);
+                Score score4 = playSBoardObj.getScore(ChatColor.GREEN + "Round " + REDIS.get("gameRound"));
+		score4.setScore(4);
 
-		Score score3 = playSBoardObj.getScore(ChatColor.GREEN + "Balance: " + Long.toString(getBalance(player.getUniqueId().toString(),1)));
-		score3.setScore(2);
+                Score score3 = playSBoardObj.getScore(ChatColor.GREEN + "Lives: " + REDIS.get("LivesLeft" + player.getUniqueId().toString()));
+		score3.setScore(3);
 
-                Score score = playSBoardObj.getScore(ChatColor.GREEN + "Lives: " + REDIS.get("LivesLeft" + player.getUniqueId().toString()));
-		score.setScore(3);
+		Score score2 = playSBoardObj.getScore(ChatColor.GREEN + "Balance: " + Long.toString(getBalance(player.getUniqueId().toString(),1)));
+		score2.setScore(2);
+
+		Score score1 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: " + Long.toString(lootBalance) + "sats");
+		score1.setScore(1);
+
+		Score score0 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: $" + df.format(lootAmount));
+		score0.setScore(0);
+
 
       		  player.setScoreboard(playSBoard);
             
@@ -1239,7 +1268,7 @@ try {
 	DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
 	Date date = new Date();
 	System.out.println(dateFormat.format(date) + " " + player.getName() + " " + sendLoot);
-		
+	REDIS.set("gameRound",Integer.toString(Integer.parseInt(REDIS.get("gameRound"))+1));	
   	leaderBoardList = REDIS.keys("LeaderBoard *");
 
 	int iter=1;
@@ -1350,6 +1379,19 @@ public void teleportToLootSpawn(Player player) {
         }
         return(path.delete());
     }
+
+  public boolean canLeaveSpawn() {
+	try {
+	if(REDIS.get("ModFlag").equals("true")) {
+		return false;
+	} else if((REDIS.get("ModFlag").equals("false"))&&(getBalance(SERVERDISPLAY_NAME,1) > 0)) {
+		return true;
+	}
+	} catch (Exception e) {
+      e.printStackTrace();
+    }
+	return false;
+  }
 
   private void addSpawnBlocks() {
 	Location spawn = Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).getSpawnLocation();
