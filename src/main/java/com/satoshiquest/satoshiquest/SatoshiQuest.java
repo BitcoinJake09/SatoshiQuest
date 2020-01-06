@@ -274,8 +274,14 @@ public class SatoshiQuest extends JavaPlugin {
 		REDIS.set("LOOT_RADIUS_MIN", LOOT_RADIUS_MIN.toString());
 		REDIS.set("LOOT_RADIUS_MAX", LOOT_RADIUS_MAX.toString());
 	} else {
-		REDIS.set("LOOT_RADIUS_MIN", Long.toString(Long.parseLong(REDIS.get("LOOT_RADIUS_MIN")) + Long.parseLong(Double.toString(Double.parseDouble(REDIS.get("LOOT_RADIUS_MIN")) *0.1))));
-		REDIS.set("LOOT_RADIUS_MAX", Long.toString(Long.parseLong(REDIS.get("LOOT_RADIUS_MAX")) + Long.parseLong(Double.toString(Double.parseDouble(REDIS.get("LOOT_RADIUS_MAX")) *0.1))));
+
+
+
+
+	REDIS.set("LOOT_RADIUS_MIN",Long.toString((long)Math.round((Double.valueOf(REDIS.get("LOOT_RADIUS_MIN")) * 0.1) + Double.valueOf(REDIS.get("LOOT_RADIUS_MIN")))));
+
+REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS.get("LOOT_RADIUS_MAX")) * 0.1) + Double.valueOf(REDIS.get("LOOT_RADIUS_MAX")))));
+
 	}
 
 	LOOT_RADIUS_MIN = Long.parseLong(REDIS.get("LOOT_RADIUS_MIN"));
