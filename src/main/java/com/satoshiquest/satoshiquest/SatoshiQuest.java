@@ -274,8 +274,8 @@ public class SatoshiQuest extends JavaPlugin {
 		REDIS.set("LOOT_RADIUS_MIN", LOOT_RADIUS_MIN.toString());
 		REDIS.set("LOOT_RADIUS_MAX", LOOT_RADIUS_MAX.toString());
 	} else {
-		REDIS.set("LOOT_RADIUS_MIN", Double.toString(Integer.parseInt(REDIS.get("LOOT_RADIUS_MIN")) + (Integer.parseInt(REDIS.get("LOOT_RADIUS_MIN")) *0.1)));
-		REDIS.set("LOOT_RADIUS_MAX", Double.toString(Integer.parseInt(REDIS.get("LOOT_RADIUS_MAX")) + (Integer.parseInt(REDIS.get("LOOT_RADIUS_MAX")) *0.1)));
+		REDIS.set("LOOT_RADIUS_MIN", Long.toString(Long.parseLong(REDIS.get("LOOT_RADIUS_MIN")) + Long.parseLong(Double.toString(Double.parseDouble(REDIS.get("LOOT_RADIUS_MIN")) *0.1))));
+		REDIS.set("LOOT_RADIUS_MAX", Long.toString(Long.parseLong(REDIS.get("LOOT_RADIUS_MAX")) + Long.parseLong(Double.toString(Double.parseDouble(REDIS.get("LOOT_RADIUS_MAX")) *0.1))));
 	}
 
 	LOOT_RADIUS_MIN = Long.parseLong(REDIS.get("LOOT_RADIUS_MIN"));
@@ -1704,5 +1704,3 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
 
 
 }
-
-
