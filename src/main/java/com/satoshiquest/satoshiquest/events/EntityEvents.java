@@ -15,6 +15,8 @@ import org.apache.commons.lang.WordUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -300,8 +302,49 @@ int tempLives = Integer.parseInt(satoshiQuest.REDIS.get("LivesLeft" +player.getU
 	}
 	}
   }
+	@EventHandler
+        public void onBlockBreak(BlockBreakEvent event){
+	World getworld = Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME);
+	if(event.getBlock().getWorld()==getworld){
+	Location spawn = Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME).getSpawnLocation();
+	Block spawnBlock = spawn.getBlock();
+	double spawnx = spawn.getX();
+	double spawnz = spawn.getZ();
+	double spawny = spawn.getY();
+	double spawnRadius = satoshiQuest.SPAWN_PROTECT_RADIUS;
+	double posX = spawnx + (spawnRadius);
+	double negX = spawnx - (spawnRadius);
+	double posZ = spawnz + (spawnRadius);
+	double negZ = spawnz - (spawnRadius);
+		for(double x = negX; x <= posX; x++) {
+			for(double z = negZ; z <= posZ; z++) {
+			if(event.getBlock().getX() == x && event.getBlock().getZ() == z) { event.setCancelled(true);}
+			}
+		}
+          }
+            }
 
-
+	@EventHandler
+        public void onPlaceBreak(BlockPlaceEvent event){
+	World getworld = Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME);
+	if(event.getBlock().getWorld()==getworld){
+	Location spawn = Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME).getSpawnLocation();
+	Block spawnBlock = spawn.getBlock();
+	double spawnx = spawn.getX();
+	double spawnz = spawn.getZ();
+	double spawny = spawn.getY();
+	double spawnRadius = satoshiQuest.SPAWN_PROTECT_RADIUS;
+	double posX = spawnx + (spawnRadius);
+	double negX = spawnx - (spawnRadius);
+	double posZ = spawnz + (spawnRadius);
+	double negZ = spawnz - (spawnRadius);
+		for(double x = negX; x <= posX; x++) {
+			for(double z = negZ; z <= posZ; z++) {
+			if(event.getBlock().getX() == x && event.getBlock().getZ() == z) { event.setCancelled(true);}
+			}
+		}
+          }
+            }
 
   @EventHandler
   public void onPlayerInteract(PlayerInteractEvent event)
