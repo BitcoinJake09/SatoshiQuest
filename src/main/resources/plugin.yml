@@ -47,6 +47,9 @@ commands:
   lives:
     description: "Get lives prices and buy or transfer lives to other players"
     usage: "/lives <help|orLives#> <buy>"
+  leaderboard:
+    description: "Lists all round winners"
+    usage: "/leaderboard"
   crashtest:
     description: "Crashes the plugin on purpose, hell breaks loose. Don't try this at home"
     usage: "/crashtest"
