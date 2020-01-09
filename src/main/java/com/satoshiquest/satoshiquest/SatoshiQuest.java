@@ -286,6 +286,8 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
 
 	LOOT_RADIUS_MIN = Long.parseLong(REDIS.get("LOOT_RADIUS_MIN"));
 	LOOT_RADIUS_MAX = Long.parseLong(REDIS.get("LOOT_RADIUS_MAX"));
+	System.out.println("[LOOT_RADIUS_MIN] : " +LOOT_RADIUS_MIN);
+	System.out.println("[LOOT_RADIUS_MAX] : " +LOOT_RADIUS_MAX);
 	if ((LOOT_RADIUS_MIN >= 2147483647) || (LOOT_RADIUS_MIN <= -2147483647)) {
 		LOOT_RADIUS_MIN = Long.parseLong(System.getenv("LOOT_RADIUS_MIN"));
 	}
@@ -330,6 +332,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
       commands.put("tip", new TipCommand(this));
       commands.put("send", new SendCommand(this));
       commands.put("lives", new LivesCommand(this));
+      commands.put("leaderboard", new LeaderBoardCommand(this));
       modCommands = new HashMap<String, CommandAction>();
       modCommands.put("crashTest", new CrashtestCommand(this));
       modCommands.put("mod", new ModCommand(this));
@@ -1057,20 +1060,24 @@ try {
 		DecimalFormat df = new DecimalFormat("#.##");
         	System.out.print(df.format(lootAmount));
 
-                Score score4 = playSBoardObj.getScore(ChatColor.GREEN + "Round " + REDIS.get("gameRound"));
+                Score score5 = playSBoardObj.getScore(ChatColor.GREEN + "Round " + REDIS.get("gameRound"));
+		score5.setScore(5);
+
+                Score score4 = playSBoardObj.getScore(ChatColor.GREEN + "Lives: " + REDIS.get("LivesLeft" + player.getUniqueId().toString()));
 		score4.setScore(4);
 
-                Score score3 = playSBoardObj.getScore(ChatColor.GREEN + "Lives: " + REDIS.get("LivesLeft" + player.getUniqueId().toString()));
+		Score score3 = playSBoardObj.getScore(ChatColor.GREEN + "Balance: " + Long.toString(getBalance(player.getUniqueId().toString(),1)));
 		score3.setScore(3);
 
-		Score score2 = playSBoardObj.getScore(ChatColor.GREEN + "Balance: " + Long.toString(getBalance(player.getUniqueId().toString(),1)));
+		Score score2 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: " + Long.toString(lootBalance) + "sats");
 		score2.setScore(2);
 
-		Score score1 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: " + Long.toString(lootBalance) + "sats");
+		Score score1 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: $" + df.format(lootAmount));
 		score1.setScore(1);
 
-		Score score0 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: $" + df.format(lootAmount));
+		Score score0 = playSBoardObj.getScore(ChatColor.GREEN + "Loot max spawn: " + LOOT_RADIUS_MAX.toString());
 		score0.setScore(0);
+
 
 
       		  player.setScoreboard(playSBoard);
@@ -1205,13 +1212,14 @@ try {
 		double spawnz = spawn.getZ();
 		double playerx=(double)player.getLocation().getX();
                 double playerz=(double)player.getLocation().getZ();
+	World world = Bukkit.getServer().getWorld(SERVERDISPLAY_NAME);
+	if(player.getWorld()==world){
+	if (((playerx<=spawnx+SPAWN_PROTECT_RADIUS+1)&&(playerx>=spawnx-SPAWN_PROTECT_RADIUS-1)) && ((playerz<=spawnz+SPAWN_PROTECT_RADIUS+1)&&(playerz>=spawnz-SPAWN_PROTECT_RADIUS-1)))return false;
+	}
 
-	if (!((playerx<=spawnx+SPAWN_PROTECT_RADIUS+1)&&(playerx>=spawnx-SPAWN_PROTECT_RADIUS-1)))return true;
-	else if(!((playerz<=spawnz+SPAWN_PROTECT_RADIUS+1)&&(playerz>=spawnz-SPAWN_PROTECT_RADIUS-1)))return true;
-	
 		//System.out.println("You may not build at spawn.");  
 		//player.sendMessage(ChatColor.RED + "you cant build at spawn.");
-               return false;//not
+               return true;//not
 
   }
 
@@ -1222,7 +1230,8 @@ try {
 		Double playerx=(double)player.getLocation().getX();
                 Double playerz=(double)player.getLocation().getZ();
 	double announceRadius = (double)LOOT_ANNOUNCE_RADIUS;
-
+	World world = Bukkit.getServer().getWorld(SERVERDISPLAY_NAME);
+	if(player.getWorld()==world){
 	if ((((playerx<lootX+announceRadius)&&(playerx>lootX-announceRadius))) && (((playerz<lootZ+announceRadius)&&(playerz>lootZ-announceRadius)))) {
 		//System.out.println("You are near...");
 		String toAnnounce = (player.getName() + " - X:" + playerx.intValue() + " Z:" + playerz.intValue());
@@ -1230,11 +1239,14 @@ try {
 		//setLootBlocks();
 		return true;
 		}
+	}
                return false;//not
 
   }
 
   public void didFindLoot(Player player) {
+	World getworld = Bukkit.getServer().getWorld(SERVERDISPLAY_NAME);
+	if(player.getWorld()==getworld){
 	Location spawn = Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).getSpawnLocation();
 	double lootX = Double.parseDouble(REDIS.get("lootSpawnX"));
 	double lootZ = Double.parseDouble(REDIS.get("lootSpawnZ"));
@@ -1277,12 +1289,14 @@ try {
 	REDIS.set("gameRound",Integer.toString(Integer.parseInt(REDIS.get("gameRound"))+1));	
   	leaderBoardList = REDIS.keys("LeaderBoard *");
 
+		double amtUSD =  (double)(exRate * sendLoot);  
+
 	int iter=1;
 		for (String templeaderBoardList : leaderBoardList) {
 		announce(iter+") "+ REDIS.get(templeaderBoardList));
 		iter++;
 		}
-REDIS.set("LeaderBoard " + iter,dateFormat.format(date) + " " + player.getName() + " " + sendLoot);
+REDIS.set("LeaderBoard " + iter,dateFormat.format(date) + " " + player.getName() + " " + amtUSD + " " + sendLoot);
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 
     World world = Bukkit.getServer().getWorld(SERVERDISPLAY_NAME);
@@ -1323,6 +1337,7 @@ File BaseFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "players"
 //Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "restart");
 		onEnable();
 	} 
+	}
   }
 
 public void deleteLootWorlds() {
@@ -1656,14 +1671,26 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
         return false;
     }
 }
+	public static boolean isStringDouble(String s)
+{
+    try
+    {
+        Double.parseDouble(s);
+        return true;
+    } catch (NumberFormatException ex)
+    {
+        return false;
+    }
+}
   public void crashtest() {
     this.setEnabled(false);
   }
 
 
-    public static String getExchangeRate(String crypto)
+    public String getExchangeRate(String crypto)
 	{
-	String price="0000.00000000";
+	String price="10000.00000000";
+	String rate = exRate.toString();
 	 try {
             
                 URL url=new URL("https://api.cryptonator.com/api/ticker/"+crypto+"-usd");
@@ -1687,7 +1714,7 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
                 in.close();
 		JSONParser parser = new JSONParser();
             	final JSONObject jsonobj,jsonobj2;
-            try {
+
                 jsonobj = (JSONObject) parser.parse(response.toString());
                 jsonobj2 = (JSONObject) parser.parse(jsonobj.get("ticker").toString());
 		//double val=Double.parseDouble(jsonobj2.get("price").toString());
@@ -1696,17 +1723,19 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
 		price=jsonobj2.get("price").toString();
                 //System.out.println(crypto + "price: "+price);
 
-            } catch (org.json.simple.parser.ParseException e) {
-                e.printStackTrace();
-            }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.println("[PRICE] problem updating price for "+crypto);
-            System.out.println(e);
+                e.printStackTrace();
             // wallet might be new and it's not listed on the blockchain yet
-        } 
-	return price;
+        }
+	if (isStringDouble(price)) {
+		return price;
+	} else {
+		return rate;
+	}
     }
 
 
 }
+
