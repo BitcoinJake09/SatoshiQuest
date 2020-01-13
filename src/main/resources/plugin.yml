@@ -44,6 +44,9 @@ commands:
   send:
     description: "Send is used for External transactions to an address"
     usage: "/send <amount> <address>"
+  reset:
+    description: "used to reset world variable like loot spawn and announce radius"
+    usage: "/reset"
   lives:
     description: "Get lives prices and buy or transfer lives to other players"
     usage: "/lives <help|orLives#> <buy>"
