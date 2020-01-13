@@ -269,6 +269,12 @@ public class SatoshiQuest extends JavaPlugin {
 		REDIS.set("spawnCreated", "true");
 	System.out.println("[Spawn Created] : " + REDIS.get("spawnCreated"));      
 	}
+	
+
+		
+
+	
+	
 
 	if (!REDIS.exists("LOOT_RADIUS_MIN")) {
 		REDIS.set("LOOT_RADIUS_MIN", LOOT_RADIUS_MIN.toString());
@@ -295,7 +301,9 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
 	if ((LOOT_RADIUS_MAX >= 2147483647) || (LOOT_RADIUS_MAX <= -2147483647)) {
 		LOOT_RADIUS_MAX = Long.parseLong(System.getenv("LOOT_RADIUS_MAX"));
 	}
-	
+
+	REDIS.set("LOOT_ANNOUNCE_RADIUS",Long.toString(LOOT_RADIUS_MAX/4));
+
   LootSpawnX = new Long(rand(LOOT_RADIUS_MIN.intValue(),LOOT_RADIUS_MAX.intValue()));
   LootSpawnZ = new Long(rand(LOOT_RADIUS_MIN.intValue(),LOOT_RADIUS_MAX.intValue()));
 
@@ -323,7 +331,10 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
 	REDIS.set("lootSpawnX",LootSpawnX.toString());
 	REDIS.set("lootSpawnZ",LootSpawnZ.toString());
 	}
+  System.out.println("LOOT_ANNOUNCE_RADIUS: " + REDIS.get("LOOT_ANNOUNCE_RADIUS"));
+
   System.out.println("Loot X,Z: " + REDIS.get("lootSpawnX") + " " + REDIS.get("lootSpawnZ"));
+
 	setLootBlocks();
       // creates scheduled timers (update balances, etc)
       createScheduledTimers();
@@ -336,6 +347,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
       modCommands = new HashMap<String, CommandAction>();
       modCommands.put("crashTest", new CrashtestCommand(this));
       modCommands.put("mod", new ModCommand(this));
+      modCommands.put("reset", new ResetCommand(this));
       modCommands.put("setlives", new SetLivesCommand(this));
       modCommands.put("ban", new BanCommand());
       modCommands.put("unban", new UnbanCommand());
@@ -1229,7 +1241,7 @@ try {
 	double lootZ = Double.parseDouble(REDIS.get("lootSpawnZ"));
 		Double playerx=(double)player.getLocation().getX();
                 Double playerz=(double)player.getLocation().getZ();
-	double announceRadius = (double)LOOT_ANNOUNCE_RADIUS;
+	double announceRadius = (double)Long.parseLong(REDIS.get("LOOT_ANNOUNCE_RADIUS"));
 	World world = Bukkit.getServer().getWorld(SERVERDISPLAY_NAME);
 	if(player.getWorld()==world){
 	if ((((playerx<lootX+announceRadius)&&(playerx>lootX-announceRadius))) && (((playerz<lootZ+announceRadius)&&(playerz>lootZ-announceRadius)))) {
@@ -1701,17 +1713,30 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
                 con.setRequestProperty("User-Agent", "Mozilla/1.22 (compatible; MSIE 2.0; Windows 3.1)");
                 con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
 
-                int responseCode = con.getResponseCode();
+	int responseCode = con.getResponseCode();
+	StringBuffer response = new StringBuffer();
+          if(responseCode==200) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            response = new StringBuffer();
 
-                BufferedReader in = new BufferedReader(
-                        new InputStreamReader(con.getInputStream()));
-                String inputLine;
-                StringBuffer response = new StringBuffer();
+            while ((inputLine = in.readLine()) != null) {
+              response.append(inputLine);
+            }
+            in.close();
+            System.out.println(response.toString());
 
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
-                }
-                in.close();
+          } else {
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+            String inputLine;
+            response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+              response.append(inputLine);
+            }
+            in.close();
+            System.out.println(response.toString());
+		}
 		JSONParser parser = new JSONParser();
             	final JSONObject jsonobj,jsonobj2;
 
