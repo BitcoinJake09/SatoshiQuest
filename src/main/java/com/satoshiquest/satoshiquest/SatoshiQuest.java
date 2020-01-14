@@ -174,8 +174,8 @@ public class SatoshiQuest extends JavaPlugin {
 	if (eventsLoaded == false) {
       getServer().getPluginManager().registerEvents(new EntityEvents(this), this);
       getServer().getPluginManager().registerEvents(new ServerEvents(this), this);
-	REDIS.del("spawnCreated");
-	REDIS.del("lootSpawnY");
+	//REDIS.del("spawnCreated");
+	//REDIS.del("lootSpawnY");
 	eventsLoaded = true;	
 	}
 
@@ -281,12 +281,11 @@ public class SatoshiQuest extends JavaPlugin {
 		REDIS.set("LOOT_RADIUS_MAX", LOOT_RADIUS_MAX.toString());
 	} else {
 
-
-
-
-	REDIS.set("LOOT_RADIUS_MIN",Long.toString((long)Math.round((Double.valueOf(REDIS.get("LOOT_RADIUS_MIN")) * 0.1) + Double.valueOf(REDIS.get("LOOT_RADIUS_MIN")))));
+		if (REDIS.exists("pushloot")){	REDIS.set("LOOT_RADIUS_MIN",Long.toString((long)Math.round((Double.valueOf(REDIS.get("LOOT_RADIUS_MIN")) * 0.1) + Double.valueOf(REDIS.get("LOOT_RADIUS_MIN")))));
 
 REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS.get("LOOT_RADIUS_MAX")) * 0.1) + Double.valueOf(REDIS.get("LOOT_RADIUS_MAX")))));
+	REDIS.del("pushloot");
+	}
 
 	}
 
@@ -1148,10 +1147,27 @@ try {
           @Override
           public void run() {
             publish_stats();
+try {
 		long waitTime = 1000 * 60 * 15;
+if((exTime <= ((new Date().getTime()) - waitTime))||(exRate == 0)) {
+		//announce player location in discord if near
+		World world = Bukkit.getServer().getWorld(SERVERDISPLAY_NAME);
+		File BaseFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "players");
+	            for(Player p : world.getPlayers()){
+			if (isNearLoot(p)) {
+				Double px=(double)p.getLocation().getX();
+		                Double pz=(double)p.getLocation().getZ();
+				String toAnnounce = ("@here player " + p.getName() + " is near the loot! their last know location was:  X: " + px.intValue() + "   Z: " + pz.intValue());
+				if(System.getenv("DISCORD_HOOK_URL")!=null) {
+					sendDiscordMessage(toAnnounce);
+				}
+			}
+		}
+
+
 		//announce("Current time is: "+ (new Date().getTime()));
-		if((exTime <= ((new Date().getTime()) - waitTime))||(exRate == 0)) {
-		try {
+		
+		
 		exRate =  Double.parseDouble(getExchangeRate("btc"));
 		livesRate =  (long)((BUYIN_AMOUNT/(exRate*0.00000001))*0.90);
 		adminRate =  (long)((BUYIN_AMOUNT/(exRate*0.00000001))*0.10);
@@ -1160,10 +1176,23 @@ try {
 	        System.out.println("Currently Bitcoin is: $"+ exRate);
 		announce("1 Life is: "+ totalLifeRate + " " +DENOMINATION_NAME);
 	        System.out.println("1 Life is: "+ totalLifeRate + " " +DENOMINATION_NAME);
-		} catch (Exception e) {
-			e.printStackTrace();
+		if(System.getenv("DISCORD_HOOK_URL")!=null) {
+			sendDiscordMessage("1 Life is: "+ totalLifeRate + " sats");
 		}
-		exTime = new Date().getTime();
+		
+		// announce loot in discord
+		long lootBalance = (long)(getBalance(SERVERDISPLAY_NAME,1) * 0.85);
+		double lootAmount =  (double)(exRate * (lootBalance * 0.00000001));        
+		DecimalFormat df = new DecimalFormat("#.##");
+        	System.out.print(df.format(lootAmount));
+		String lootAnnounce = ("Current BTC in loot: " +lootBalance + " sats! worth: $"+df.format(lootAmount)+" USD!");
+		if(System.getenv("DISCORD_HOOK_URL")!=null) {
+			sendDiscordMessage(lootAnnounce);
+		}
+exTime = new Date().getTime();
+		}
+} catch (Exception e) {
+			e.printStackTrace();
 		}
           }
         },
@@ -1272,7 +1301,7 @@ try {
 		System.out.println(player.getDisplayName() + " won!");
 		REDIS.set("winner",player.getDisplayName());
 		announce(player.getName() + " WON!");
-
+		REDIS.set("pushloot","true");
 		//sendloot to winner
 		long sendLoot = 0L;
 		String result = "failed";
@@ -1639,7 +1668,7 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
           OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
           out.write(json);
           out.close();
-          int responseCode = con.getResponseCode();
+	int responseCode = con.getResponseCode();
           if(responseCode==200) {
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
             String inputLine;
@@ -1652,17 +1681,9 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
             System.out.println(response.toString());
             return true;
           } else {
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-
-            while ((inputLine = in.readLine()) != null) {
-              response.append(inputLine);
-            }
-            in.close();
-            System.out.println(response.toString());
             return false;
           }
+          
 
       } catch (Exception e) {
           e.printStackTrace();
