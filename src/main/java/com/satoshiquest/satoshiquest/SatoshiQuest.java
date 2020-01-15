@@ -1157,7 +1157,7 @@ if((exTime <= ((new Date().getTime()) - waitTime))||(exRate == 0)) {
 			if (isNearLoot(p)) {
 				Double px=(double)p.getLocation().getX();
 		                Double pz=(double)p.getLocation().getZ();
-				String toAnnounce = ("@here player " + p.getName() + " is near the loot! their last know location was:  X: " + px.intValue() + "   Z: " + pz.intValue());
+				String toAnnounce = ("@ here: player " + p.getName() + " is near the loot! their last know location was:  X: " + px.intValue() + "   Z: " + pz.intValue());
 				if(System.getenv("DISCORD_HOOK_URL")!=null) {
 					sendDiscordMessage(toAnnounce);
 				}
@@ -1337,14 +1337,23 @@ exTime = new Date().getTime();
 		announce(iter+") "+ REDIS.get(templeaderBoardList));
 		iter++;
 		}
-REDIS.set("LeaderBoard " + iter,dateFormat.format(date) + " " + player.getName() + " " + amtUSD + " " + sendLoot);
+		DecimalFormat df = new DecimalFormat("#.##");
+        	System.out.print(df.format(amtUSD));
+REDIS.set("LeaderBoard " + iter,dateFormat.format(date) + " " + player.getName() + " " + df.format(amtUSD) + " " + sendLoot);
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
+		if(System.getenv("DISCORD_HOOK_URL")!=null) {
+			sendDiscordMessage(dateFormat.format(date) + " " + player.getName() + " WON " + sendLoot + " SATS worth $" + df.format(amtUSD));
+		}
 
     World world = Bukkit.getServer().getWorld(SERVERDISPLAY_NAME);
  if(!world.equals(null)) {
 File BaseFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "players");
-            for(Player p : world.getPlayers()){
+	    for(OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
+		REDIS.set("ClearInv" +offlinePlayer.getUniqueId().toString(), "true");
+		}
+	   for(Player p : Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).getPlayers()) {
                 p.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+		REDIS.del("ClearInv" +p.getUniqueId().toString());
 		PlayerInventory pli1= p.getInventory();
 		pli1.clear(); //delete player world datas
 		pli1.setArmorContents(new ItemStack[4]);
@@ -1364,9 +1373,6 @@ File BaseFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "players"
 		} catch (Exception excep) {
 			System.out.println(excep);
 		}
-            }
-	    for(OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
-		REDIS.set("ClearInv" +offlinePlayer.getUniqueId().toString(), "true");
 		}
             Bukkit.getServer().unloadWorld(world, false);
             System.out.println(world.getName() + " unloaded!");
@@ -1377,6 +1383,7 @@ File BaseFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "players"
 		REDIS.del("spawnCreated");
 //Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "restart");
 		onEnable();
+
 	} 
 	}
   }
