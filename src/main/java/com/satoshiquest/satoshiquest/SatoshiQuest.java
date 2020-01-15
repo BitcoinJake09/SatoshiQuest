@@ -1331,7 +1331,7 @@ exTime = new Date().getTime();
   	leaderBoardList = REDIS.keys("LeaderBoard *");
 
 		double amtUSD =  (double)(exRate * sendLoot);  
-
+if (result != "failed"){
 	int iter=1;
 		for (String templeaderBoardList : leaderBoardList) {
 		announce(iter+") "+ REDIS.get(templeaderBoardList));
@@ -1344,11 +1344,17 @@ REDIS.set("LeaderBoard " + iter,dateFormat.format(date) + " " + player.getName()
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
 			sendDiscordMessage(dateFormat.format(date) + " " + player.getName() + " WON " + sendLoot + " SATS worth $" + df.format(amtUSD));
 		}
-
+	}
     World world = Bukkit.getServer().getWorld(SERVERDISPLAY_NAME);
  if(!world.equals(null)) {
 File BaseFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "players");
 	    for(OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
+		if (result != "failed"){
+		int tempLivesOfflinePlayer = Integer.parseInt(REDIS.get("LivesLeft" +offlinePlayer.getUniqueId().toString()));
+		if (tempLivesOfflinePlayer >= 1) {
+		REDIS.set("LivesLeft" +offlinePlayer.getUniqueId().toString(), Integer.toString(tempLivesOfflinePlayer-1));
+		}
+		}
 		REDIS.set("ClearInv" +offlinePlayer.getUniqueId().toString(), "true");
 		}
 	   for(Player p : Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).getPlayers()) {
@@ -1365,8 +1371,10 @@ File BaseFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "players"
 		p.setFoodLevel(20);
 		p.setHealth(p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 		int tempLives = Integer.parseInt(REDIS.get("LivesLeft" +p.getUniqueId().toString()));
+		if (result != "failed"){
 		if (tempLives >= 1) {
 		REDIS.set("LivesLeft" +p.getUniqueId().toString(), Integer.toString(tempLives-1));
+		}
 		}
 		try {
 		updateScoreboard(p);
