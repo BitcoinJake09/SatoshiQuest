@@ -172,10 +172,7 @@ public class EntityEvents implements Listener {
 		player.setExhaustion(0);
 		player.setFoodLevel(20);
 player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
-int tempLives = Integer.parseInt(satoshiQuest.REDIS.get("LivesLeft" +player.getUniqueId().toString()));
-		if (tempLives >= 1) {
-		satoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(), Integer.toString(tempLives-1));
-		}
+
 		satoshiQuest.REDIS.del("ClearInv" +player.getUniqueId().toString());
 	}
 	try {
