@@ -1052,9 +1052,18 @@ try {
 
     public void updateScoreboard(final Player player) throws ParseException, org.json.simple.parser.ParseException, IOException {
             //User user=new User(player);
- 	
-		
-                ScoreboardManager scoreboardManager;
+ 		boolean isPlayersAroundLoot = false;
+		for(Player p : Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).getPlayers()) {
+		if (isNearLoot(p)) {
+			isPlayersAroundLoot = true;
+			break;
+		}
+		if (isPlayersAroundLoot == true) {
+			break;
+		}
+		}
+
+		ScoreboardManager scoreboardManager;
                 Scoreboard playSBoard;
                 Objective playSBoardObj;
                 scoreboardManager = Bukkit.getScoreboardManager();
@@ -1065,32 +1074,48 @@ try {
 
                 playSBoardObj.setDisplayName(ChatColor.GREEN + ChatColor.BOLD.toString() + "Satoshi" + ChatColor.GOLD + ChatColor.BOLD.toString() + "Quest");
 
-
+		if (isPlayersAroundLoot == false) {
 		long lootBalance = (long)(getBalance(SERVERDISPLAY_NAME,1) * 0.85);
 		double lootAmount =  (double)(exRate * (lootBalance * 0.00000001));        
 		DecimalFormat df = new DecimalFormat("#.##");
         	System.out.print(df.format(lootAmount));
 
-                Score score5 = playSBoardObj.getScore(ChatColor.GREEN + "Round " + REDIS.get("gameRound"));
+                Score score6 = playSBoardObj.getScore(ChatColor.GREEN + "Round " + REDIS.get("gameRound"));
+		score6.setScore(6);
+
+                Score score5 = playSBoardObj.getScore(ChatColor.GREEN + "Lives: " + REDIS.get("LivesLeft" + player.getUniqueId().toString()));
 		score5.setScore(5);
 
-                Score score4 = playSBoardObj.getScore(ChatColor.GREEN + "Lives: " + REDIS.get("LivesLeft" + player.getUniqueId().toString()));
+		Score score4 = playSBoardObj.getScore(ChatColor.GREEN + "Balance: " + Long.toString(getBalance(player.getUniqueId().toString(),1)));
 		score4.setScore(4);
 
-		Score score3 = playSBoardObj.getScore(ChatColor.GREEN + "Balance: " + Long.toString(getBalance(player.getUniqueId().toString(),1)));
+		Score score3 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: " + Long.toString(lootBalance) + "sats");
 		score3.setScore(3);
 
-		Score score2 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: " + Long.toString(lootBalance) + "sats");
+		Score score2 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: $" + df.format(lootAmount));
 		score2.setScore(2);
 
-		Score score1 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: $" + df.format(lootAmount));
+		Score score1 = playSBoardObj.getScore(ChatColor.GREEN + "Loot max spawn: " + LOOT_RADIUS_MAX.toString());
 		score1.setScore(1);
+		} else if (isPlayersAroundLoot == true) {
+		Score[] scores = new Score[15];
+		int iter = 1;
+		for(Player pl : Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).getPlayers()) {
+		if ((isNearLoot(pl)) && (iter <= 8)) {
+		scores[iter] = playSBoardObj.getScore(ChatColor.RED + " " + " X: " + Integer.toString((int)(pl.getLocation().getX())) + " Z: " + Integer.toString((int)(pl.getLocation().getZ())));
+		scores[iter].setScore(iter);
+		iter = iter + 1;
+		scores[iter] = playSBoardObj.getScore(ChatColor.GREEN + " " + pl.getName());
+		scores[iter].setScore(iter);
+		iter = iter + 1;
+		}
 
-		Score score0 = playSBoardObj.getScore(ChatColor.GREEN + "Loot max spawn: " + LOOT_RADIUS_MAX.toString());
-		score0.setScore(0);
-
-
-
+		}
+		}
+		if (isNearLoot(player)){
+		Score scoreIsNear = playSBoardObj.getScore(ChatColor.GREEN + player.getName() + " you are near..");
+		scoreIsNear.setScore(0);
+		}
       		  player.setScoreboard(playSBoard);
             
        
@@ -1275,8 +1300,8 @@ exTime = new Date().getTime();
 	if(player.getWorld()==world){
 	if ((((playerx<lootX+announceRadius)&&(playerx>lootX-announceRadius))) && (((playerz<lootZ+announceRadius)&&(playerz>lootZ-announceRadius)))) {
 		//System.out.println("You are near...");
-		String toAnnounce = (player.getName() + " - X:" + playerx.intValue() + " Z:" + playerz.intValue());
-		announce(toAnnounce);
+		//String toAnnounce = (player.getName() + " - X:" + playerx.intValue() + " Z:" + playerz.intValue());
+		//announce(toAnnounce);
 		//setLootBlocks();
 		return true;
 		}
@@ -1305,14 +1330,15 @@ exTime = new Date().getTime();
 		//sendloot to winner
 		long sendLoot = 0L;
 		String result = "failed";
+		result = "test";
 		try {
 		if (getBalance(SERVERDISPLAY_NAME,1) > 0) {
 			sendLoot = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * 0.85);
 			Long sendback = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * 0.025);
 		if (REDIS.exists("ExternalAddress" +player.getUniqueId().toString())) {
-		result = sendMany(SERVERDISPLAY_NAME, REDIS.get("ExternalAddress" +player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback, 24);
+		//result = sendMany(SERVERDISPLAY_NAME, REDIS.get("ExternalAddress" +player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback, 24);
 		} else {
-		result = sendMany(SERVERDISPLAY_NAME, REDIS.get("nodeAddress"+player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback, 24);
+		//result = sendMany(SERVERDISPLAY_NAME, REDIS.get("nodeAddress"+player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback, 24);
 		}
 			System.out.println("won " + sendLoot + " LOOT! txid: " +result);
 		}
@@ -1330,7 +1356,7 @@ exTime = new Date().getTime();
 	REDIS.set("gameRound",Integer.toString(Integer.parseInt(REDIS.get("gameRound"))+1));	
   	leaderBoardList = REDIS.keys("LeaderBoard *");
 
-		double amtUSD =  (double)(exRate * sendLoot);  
+		double amtUSD = (double)(exRate * (sendLoot * 0.00000001));
 if (result != "failed"){
 	int iter=1;
 		for (String templeaderBoardList : leaderBoardList) {
@@ -1339,7 +1365,7 @@ if (result != "failed"){
 		}
 		DecimalFormat df = new DecimalFormat("#.##");
         	System.out.print(df.format(amtUSD));
-REDIS.set("LeaderBoard " + iter,dateFormat.format(date) + " " + player.getName() + " " + df.format(amtUSD) + " " + sendLoot);
+REDIS.set("LeaderBoard " + iter,dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " Satoshis: " + sendLoot);
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
 			sendDiscordMessage(dateFormat.format(date) + " " + player.getName() + " WON " + sendLoot + " SATS worth $" + df.format(amtUSD));
@@ -1370,12 +1396,8 @@ File BaseFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "players"
 		p.setExhaustion(0);
 		p.setFoodLevel(20);
 		p.setHealth(p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
-		int tempLives = Integer.parseInt(REDIS.get("LivesLeft" +p.getUniqueId().toString()));
-		if (result != "failed"){
-		if (tempLives >= 1) {
-		REDIS.set("LivesLeft" +p.getUniqueId().toString(), Integer.toString(tempLives-1));
-		}
-		}
+		
+
 		try {
 		updateScoreboard(p);
 		} catch (Exception excep) {
