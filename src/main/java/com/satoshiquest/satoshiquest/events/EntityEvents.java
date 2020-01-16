@@ -26,6 +26,7 @@ import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -121,6 +122,15 @@ public class EntityEvents implements Listener {
           "The server is in limited capacity at this moment. Please try again later.");
     }
   }
+  @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        // Called when a player leaves a server
+        Player player = event.getPlayer();
+        String quitMessage = "left the game";
+	if(System.getenv("DISCORD_HOOK_URL")!=null) {
+			satoshiQuest.sendDiscordMessage("Player " + player.getName() + " " + quitMessage);
+	}
+    }
 
   @EventHandler
   public void onPlayerJoin(PlayerJoinEvent event) throws ParseException{
@@ -243,6 +253,11 @@ player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 	} catch(Exception e) {
       e.printStackTrace();
     }
+
+if(System.getenv("DISCORD_HOOK_URL")!=null) {
+			satoshiQuest.sendDiscordMessage("Player " + player.getName() + " joined with " + SatoshiQuest.REDIS.get("LivesLeft" + event.getPlayer().getUniqueId().toString()) + " lives");
+		}
+
   }
 
 	@EventHandler
@@ -293,7 +308,7 @@ player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 	satoshiQuest.didFindLoot(event.getPlayer());
 	if (event.getFrom().getChunk() != event.getTo().getChunk()) {
 		if (satoshiQuest.isNearLoot(event.getPlayer())) {
-			event.getPlayer().sendMessage(ChatColor.GREEN + "You are getting near... stay focused!");
+			//event.getPlayer().sendMessage(ChatColor.GREEN + "You are getting near... stay focused!");
 		}
 		satoshiQuest.updateScoreboard(event.getPlayer());
 	}
@@ -362,6 +377,9 @@ player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 
 		Player p = event.getEntity();
 		Player player = (Player) p;
+		if(System.getenv("DISCORD_HOOK_URL")!=null) {
+			satoshiQuest.sendDiscordMessage("" +event.getDeathMessage());
+		}
 if (isAtSpawn(player.getLocation()) == false) {
 	if (Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())) >= 1)	{
 		int livesLeft = Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())) - 1;
