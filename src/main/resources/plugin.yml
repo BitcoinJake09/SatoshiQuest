@@ -53,6 +53,9 @@ commands:
   leaderboard:
     description: "Lists all round winners"
     usage: "/leaderboard"
+  fixleaderboard:
+    description: "used by admin during testing to correct mistakes"
+    usage: "/fixleaderboard <args>"
   crashtest:
     description: "Crashes the plugin on purpose, hell breaks loose. Don't try this at home"
     usage: "/crashtest"
