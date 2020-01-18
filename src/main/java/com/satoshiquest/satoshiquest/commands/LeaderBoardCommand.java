@@ -13,6 +13,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import java.util.*;
+import java.text.*;
 
 
 public class LeaderBoardCommand extends CommandAction {
@@ -22,15 +23,18 @@ public class LeaderBoardCommand extends CommandAction {
         this.satoshiQuest = plugin;
     }
     public boolean run(CommandSender sender, Command cmd, String label, String[] args, Player player) {
-	Set<String> leaderBoardList = satoshiQuest.REDIS.keys("LeaderBoard *");
-	sender.sendMessage(
-                        ChatColor.BLUE
-                            + "**List of Winners**");
-	int iter=1;
-		for (String templeaderBoardList : leaderBoardList) {
-		sender.sendMessage(ChatColor.GREEN + "" + iter + ") " + satoshiQuest.REDIS.get(templeaderBoardList));
-		iter++;
+	Set<String> ownerList = SatoshiQuest.REDIS.keys("LeaderBoard *");
+			int iter=1;
+				for (String tempOwnerList : ownerList) {
+		if ((SatoshiQuest.REDIS.get("LeaderBoard "+iter)) != null) {					
+			String tempString =  SatoshiQuest.REDIS.get("LeaderBoard "+iter);
+			String lastWord = tempString.substring(tempString.lastIndexOf(" ")+1);
+		double amtUSD = (double)(satoshiQuest.exRate * (Long.parseLong(lastWord) * 0.00000001));
+		DecimalFormat df = new DecimalFormat("#.##");
+					sender.sendMessage(ChatColor.GREEN +" "+iter+") "+ SatoshiQuest.REDIS.get("LeaderBoard "+iter) + " now $" + df.format(amtUSD));
 		}
+					iter++;
+				}
 	return true;	
     }
 }
