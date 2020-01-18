@@ -344,6 +344,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
       commands.put("lives", new LivesCommand(this));
       commands.put("leaderboard", new LeaderBoardCommand(this));
       modCommands = new HashMap<String, CommandAction>();
+      modCommands.put("fixleaderboard", new FixLeaderBoardCommand(this));
       modCommands.put("crashTest", new CrashtestCommand(this));
       modCommands.put("mod", new ModCommand(this));
       modCommands.put("reset", new ResetCommand(this));
@@ -1213,9 +1214,13 @@ if((exTime <= ((new Date().getTime()) - waitTime))||(exRate == 0)) {
 		String lootAnnounce = ("Current BTC in loot: " +lootBalance + " sats! worth: $"+df.format(lootAmount)+" USD!");
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
 			sendDiscordMessage(lootAnnounce);
+			sendDiscordMessage("For more info check out http://AllAboutBTC.com/SatoshiQuest.html");
 		}
 exTime = new Date().getTime();
 		}
+
+		
+
 } catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1365,10 +1370,10 @@ if (result != "failed"){
 		}
 		DecimalFormat df = new DecimalFormat("#.##");
         	System.out.print(df.format(amtUSD));
-REDIS.set("LeaderBoard " + iter,dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " Satoshis: " + sendLoot);
+REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " Sats " + sendLoot);
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage(dateFormat.format(date) + " " + player.getName() + " WON " + sendLoot + " SATS worth $" + df.format(amtUSD));
+			sendDiscordMessage(dateFormat.format(date) + " " + player.getName() + " WON " + "Round " + REDIS.get("gameRound") + " with " + sendLoot + " SATS worth $" + df.format(amtUSD));
 		}
 	}
     World world = Bukkit.getServer().getWorld(SERVERDISPLAY_NAME);
@@ -1770,10 +1775,8 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
                 con.setRequestMethod("GET");
                 con.setRequestProperty("User-Agent", "Mozilla/1.22 (compatible; MSIE 2.0; Windows 3.1)");
                 con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-
-	int responseCode = con.getResponseCode();
 	StringBuffer response = new StringBuffer();
-          if(responseCode==200) {
+    if(con.getResponseCode()==200) {
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
             String inputLine;
             response = new StringBuffer();
