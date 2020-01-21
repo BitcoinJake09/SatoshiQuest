@@ -69,6 +69,21 @@ public class ModCommand extends CommandAction {
 		}
 
 	return true;	
+	} else if(args[0].equalsIgnoreCase("beta")) {
+	try{
+	if (!(SatoshiQuest.REDIS.exists("BetaTest"))){
+		SatoshiQuest.REDIS.set("BetaTest","true");
+		player.sendMessage(ChatColor.RED + "BetaTest is ON");
+	 } else {
+		SatoshiQuest.REDIS.del("BetaTest");
+		player.sendMessage(ChatColor.RED + "BetaTest is OFF");
+           }
+		} catch (NullPointerException nullPointer)
+		{
+                	System.out.println("BetaTest: "+nullPointer);
+		}
+
+	return true;	
 	} else {
             return false;
         }

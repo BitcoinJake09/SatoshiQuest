@@ -27,6 +27,12 @@ public class ResetCommand extends CommandAction {
 		satoshiQuest.REDIS.del("LOOT_RADIUS_MIN");
 		satoshiQuest.REDIS.del("LOOT_RADIUS_MAX");
 		satoshiQuest.REDIS.del("LOOT_ANNOUNCE_RADIUS");
+		satoshiQuest.REDIS.set("gameRound","1");
+	    for(OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
+		if (satoshiQuest.REDIS.exists("LootAnnounced" +offlinePlayer.getUniqueId().toString())) {
+		satoshiQuest.REDIS.del("LootAnnounced" +offlinePlayer.getUniqueId().toString());
+		}
+		}
 		return true;	
 	} else {
         	return false;
