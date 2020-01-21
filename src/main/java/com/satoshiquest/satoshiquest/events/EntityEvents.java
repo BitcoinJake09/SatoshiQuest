@@ -167,9 +167,15 @@ public class EntityEvents implements Listener {
 		    System.out.println(E);
 	}
     }
-        
+    if (satoshiQuest.REDIS.exists("LootAnnounced" +player.getUniqueId().toString())) {
+		satoshiQuest.REDIS.del("LootAnnounced" +player.getUniqueId().toString());
+		}   
     if (!SatoshiQuest.REDIS.exists("LivesLeft" + player.getUniqueId().toString())) {
 		SatoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(),"0");
+		if (SatoshiQuest.REDIS.exists("BetaTest")){
+		SatoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(),"1");
+		player.sendMessage(ChatColor.WHITE + "You get 1 free life during beta test.");
+		}
 	}
     if (satoshiQuest.REDIS.exists("ClearInv" +player.getUniqueId().toString())) {
 		PlayerInventory pli2 = player.getInventory();
