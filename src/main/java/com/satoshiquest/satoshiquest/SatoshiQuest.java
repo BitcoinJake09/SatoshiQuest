@@ -129,7 +129,8 @@ public class SatoshiQuest extends JavaPlugin {
   public Player last_loot_player;
 
   public Long wallet_balance_cache = 0L;
-  public Long exTime = new Date().getTime();
+  public Long exTime15 = new Date().getTime();
+  public int discordWait15 = 3;
   public Double exRate = 0.0;
   public Long livesRate = 0L;
   public Long adminRate = 0L;
@@ -374,12 +375,12 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
     jsonObject.put("method", "createwallet");
     JSONArray params = new JSONArray();
     params.add(account_id);
-    System.out.println("Creating wallet: " + account_id);
-    System.out.println(params);
+    //System.out.println("Creating wallet: " + account_id);
+    //System.out.println(params);
     jsonObject.put("params", params);
-    System.out.println("Checking blockchain info...");
+    //System.out.println("Checking blockchain info...");
     URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT);
-    System.out.println(url.toString());
+    //System.out.println(url.toString());
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
     String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
     String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
@@ -391,7 +392,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
     con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
     con.setDoOutput(true);
     OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
-    System.out.println(jsonObject.toString());
+    //System.out.println(jsonObject.toString());
     out.write(jsonObject.toString());
     out.close();
 
@@ -404,9 +405,9 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
             response.append(inputLine);
         }
         in.close();
-        System.out.println(response.toString());
+        //System.out.println(response.toString());
         JSONObject response_object = (JSONObject) parser.parse(response.toString());
-        System.out.println(response_object);
+        //System.out.println(response_object);
 
         return new NodeWallet(account_id);
     } else {
@@ -418,9 +419,9 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
             response.append(inputLine);
         }
         in.close();
-        System.out.println(response.toString());
+        //System.out.println(response.toString());
         JSONObject response_object = (JSONObject) parser.parse(response.toString());
-        System.out.println(response_object);
+        //System.out.println(response_object);
         return null;
     }
 
@@ -436,10 +437,10 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
         jsonObject.put("id", "satoshiquest");
         jsonObject.put("method", "listwallets");
         JSONArray params = new JSONArray();
-        System.out.println(params);
+        //System.out.println(params);
         jsonObject.put("params", params);
         URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT+ "/wallet/");
-        System.out.println(url.toString());
+        //System.out.println(url.toString());
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
         String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
@@ -451,7 +452,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
         con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
         con.setDoOutput(true);
         OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
-        System.out.println(jsonObject.toString());
+        //System.out.println(jsonObject.toString());
         out.write(jsonObject.toString());
         out.close();
 
@@ -464,9 +465,9 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
                 response.append(inputLine);
             }
             in.close();
-            System.out.println(response.toString());
+            //System.out.println(response.toString());
             JSONObject response_object = (JSONObject) parser.parse(response.toString());
-            System.out.println(response_object);
+            //System.out.println(response_object);
 
         } else {
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
@@ -477,9 +478,9 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
                 response.append(inputLine);
             }
             in.close();
-            System.out.println(response.toString());
+            //System.out.println(response.toString());
             JSONObject response_object = (JSONObject) parser.parse(response.toString());
-            System.out.println(response_object);
+            //System.out.println(response_object);
         }
 
 
@@ -494,10 +495,10 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
         jsonObject.put("id", "satoshiquest");
         jsonObject.put("method", "getwalletinfo");
         JSONArray params = new JSONArray();
-        System.out.println(params);
+        //System.out.println(params);
         jsonObject.put("params", params);
         URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT + "/wallet/" + account_id);
-        System.out.println(url.toString());
+        //System.out.println(url.toString());
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
         String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
@@ -509,7 +510,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
         con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
         con.setDoOutput(true);
         OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
-        System.out.println(jsonObject.toString());
+        //System.out.println(jsonObject.toString());
         out.write(jsonObject.toString());
         out.close();
 
@@ -522,9 +523,9 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
                 response.append(inputLine);
             }
             in.close();
-            System.out.println(response.toString());
+            //System.out.println(response.toString());
             JSONObject response_object = (JSONObject) parser.parse(response.toString());
-            System.out.println(response_object);
+            //System.out.println(response_object);
 		return true;
 
         } else {
@@ -536,9 +537,9 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
                 response.append(inputLine);
             }
             in.close();
-            System.out.println(response.toString());
+            //System.out.println(response.toString());
             JSONObject response_object = (JSONObject) parser.parse(response.toString());
-            System.out.println(response_object);
+            //System.out.println(response_object);
 		return false;
         }
 
@@ -555,13 +556,13 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
     jsonObject.put("method", "loadwallet");
     JSONArray params = new JSONArray();
     params.add(account_id);
-    System.out.println("Loading wallet: " + account_id);
-    System.out.println(params);
+    //System.out.println("Loading wallet: " + account_id);
+    //System.out.println(params);
     jsonObject.put("params", params);
-    System.out.println("Checking blockchain info...");
+    //System.out.println("Checking blockchain info...");
     URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT + "/wallet/");
-    System.out.println(url.toString());
-    System.out.println(jsonObject.toString());
+    //System.out.println(url.toString());
+    //System.out.println(jsonObject.toString());
 
       HttpURLConnection con = (HttpURLConnection) url.openConnection();
     String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
@@ -587,9 +588,9 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
             response.append(inputLine);
         }
         in.close();
-        System.out.println(response.toString());
+        //System.out.println(response.toString());
         JSONObject response_object = (JSONObject) parser.parse(response.toString());
-        System.out.println(response_object);
+        //System.out.println(response_object);
 
         return new NodeWallet(account_id);
     } else {
@@ -601,7 +602,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
             response.append(inputLine);
         }
         in.close();
-        System.out.println(response.toString());
+        //System.out.println(response.toString());
         JSONObject response_object = (JSONObject) parser.parse(response.toString());
 	
         return null;
@@ -618,9 +619,9 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
       jsonObject.put("method", "getblockchaininfo");
       JSONArray params = new JSONArray();
       jsonObject.put("params", params);
-      System.out.println("Checking blockchain info...");
+      //System.out.println("Checking blockchain info...");
       URL url = new URL("http://" + BITCOIN_NODE_HOST + ":" + BITCOIN_NODE_PORT);
-      System.out.println(url.toString());
+      //System.out.println(url.toString());
       HttpURLConnection con = (HttpURLConnection) url.openConnection();
       String userPassword = BITCOIN_NODE_USERNAME + ":" + BITCOIN_NODE_PASSWORD;
       String encoding = java.util.Base64.getEncoder().encodeToString(userPassword.getBytes());
@@ -645,7 +646,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
         response.append(inputLine);
       }
       in.close();
-      System.out.println(response.toString());
+      //System.out.println(response.toString());
       return (JSONObject) parser.parse(response.toString());
     } catch (IOException e) {
       System.out.println("problem connecting with bitcoin node");
@@ -668,10 +669,10 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
         JSONArray params = new JSONArray();
 	params.add(address);
 	params.add(confirmations);
-        System.out.println("Parms: " + params);
+        //System.out.println("Parms: " + params);
         jsonObject.put("params", params);
         URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT + "/wallet/" + account_id);
-        System.out.println(url.toString());
+        //System.out.println(url.toString());
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
         String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
@@ -683,7 +684,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
         con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
         con.setDoOutput(true);
         OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
-        System.out.println(jsonObject.toString());
+        //System.out.println(jsonObject.toString());
         out.write(jsonObject.toString());
         out.close();
 
@@ -696,11 +697,11 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
                 response.append(inputLine);
             }
             in.close();
-            System.out.println(response.toString());
+            //System.out.println(response.toString());
             JSONObject response_object = (JSONObject) parser.parse(response.toString());
 	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * 100000000L;
 	    final Long balance = d.longValue();
-            System.out.println(balance);
+            //System.out.println(balance);
 	    return balance;
 
         } else {
@@ -712,11 +713,11 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
                 response.append(inputLine);
             }
             in.close();
-            System.out.println(response.toString());
+            //System.out.println(response.toString());
             JSONObject response_object = (JSONObject) parser.parse(response.toString());
 	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * 100000000L;
 	    final Long balance = d.longValue();
-            System.out.println(balance);
+            //System.out.println(balance);
 	    return balance;
         }
 	} catch(Exception e) {
@@ -737,10 +738,10 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
         JSONArray params = new JSONArray();
 	params.add("*");
 	params.add(confirmations);
-        System.out.println("Parms: " + params);
+        //System.out.println("Parms: " + params);
         jsonObject.put("params", params);
         URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT + "/wallet/" + account_id);
-        System.out.println(url.toString());
+        //System.out.println(url.toString());
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
         String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
@@ -752,7 +753,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
         con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
         con.setDoOutput(true);
         OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
-        System.out.println(jsonObject.toString());
+        //System.out.println(jsonObject.toString());
         out.write(jsonObject.toString());
         out.close();
 
@@ -765,11 +766,11 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
                 response.append(inputLine);
             }
             in.close();
-            System.out.println(response.toString());
+            //System.out.println(response.toString());
             JSONObject response_object = (JSONObject) parser.parse(response.toString());
 	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * 100000000L;
 	    final Long balance = d.longValue();
-            System.out.println(balance);
+            //System.out.println(balance);
 	    return balance;
 
         } else {
@@ -781,11 +782,11 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
                 response.append(inputLine);
             }
             in.close();
-            System.out.println(response.toString());
+            //System.out.println(response.toString());
             JSONObject response_object = (JSONObject) parser.parse(response.toString());
 	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * 100000000L;
 	    final Long balance = d.longValue();
-            System.out.println(balance);
+            //System.out.println(balance);
 	    return balance;
         }
 	} catch(Exception e) {
@@ -804,7 +805,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
         jsonObject.put("id", "satoshiquest");
         jsonObject.put("method", "getunconfirmedbalance");
         URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT + "/wallet/" + account_id);
-        System.out.println(url.toString());
+        //System.out.println(url.toString());
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         String userPassword = SatoshiQuest.BITCOIN_NODE_USERNAME + ":" + SatoshiQuest.BITCOIN_NODE_PASSWORD;
         String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
@@ -816,7 +817,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
         con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
         con.setDoOutput(true);
         OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
-        System.out.println(jsonObject.toString());
+        //System.out.println(jsonObject.toString());
         out.write(jsonObject.toString());
         out.close();
 
@@ -829,11 +830,11 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
                 response.append(inputLine);
             }
             in.close();
-            System.out.println(response.toString());
+            //System.out.println(response.toString());
             JSONObject response_object = (JSONObject) parser.parse(response.toString());
 	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * 100000000L;
 	    final Long balance = d.longValue();
-            System.out.println(balance);
+            //System.out.println(balance);
 	    return balance;
 
         } else {
@@ -845,11 +846,11 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
                 response.append(inputLine);
             }
             in.close();
-            System.out.println(response.toString());
+            //System.out.println(response.toString());
             JSONObject response_object = (JSONObject) parser.parse(response.toString());
 	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * 100000000L;
 	    final Long balance = d.longValue();
-            System.out.println(balance);
+            //System.out.println(balance);
 	    return balance;
         }
 	} catch(Exception e) {
@@ -868,8 +869,6 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
     jsonObject.put("method", "getaddressesbylabel");
     JSONArray params = new JSONArray();
     params.add(account_id);
-    if (SATOSHIQUEST_ENV == "development")
-      System.out.println("[getaddressesbylabel] " + account_id);
     jsonObject.put("params", params);
     URL url = new URL("http://" + BITCOIN_NODE_HOST + ":" + BITCOIN_NODE_PORT + "/wallet/" + account_id);
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -898,7 +897,6 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
     in.close();
 	try {
     JSONObject response_object = (JSONObject) parser.parse(response.toString());
-    if (SATOSHIQUEST_ENV == "development") System.out.println(response_object);
 
 	String stringToSplit = response_object.get("result").toString();
         String[] tempArray;
@@ -906,7 +904,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
 	int tempAddy = 0;
         for (int i = 0; i < tempArray.length; i++)
 		if (tempArray[i].length() > 16) {
-          	  System.out.println(tempArray[i]);
+          	  //System.out.println(tempArray[i]);
 		  tempAddy = i;
 		}
 
@@ -928,21 +926,21 @@ try {
     jsonObject.put("method", "sendtoaddress");
     JSONArray params = new JSONArray();
     params.add(address);
-    System.out.println(sat);
+    //System.out.println(sat);
     BigDecimal decimalSat = new BigDecimal(sat * 0.00000001);
     decimalSat = decimalSat.setScale(8, BigDecimal.ROUND_DOWN);
-    System.out.println(decimalSat);
+    //System.out.println(decimalSat);
     params.add(decimalSat);
     params.add(SERVERDISPLAY_NAME);
     params.add(SERVERDISPLAY_NAME);
     params.add(false);
     params.add(false);
     params.add(18);
-    System.out.println(params);
+    //System.out.println(params);
     jsonObject.put("params", params);
-    System.out.println("Checking blockchain info...");
+    //System.out.println("Checking blockchain info...");
     URL url = new URL("http://" + BITCOIN_NODE_HOST + ":" + BITCOIN_NODE_PORT + "/wallet/" + account_id);
-    System.out.println(url.toString());
+    //System.out.println(url.toString());
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
     String userPassword = BITCOIN_NODE_USERNAME + ":" + BITCOIN_NODE_PASSWORD;
     String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
@@ -967,9 +965,9 @@ try {
       response.append(inputLine);
     }
     in.close();
-    System.out.println(response.toString());
+    //System.out.println(response.toString());
     JSONObject response_object = (JSONObject) parser.parse(response.toString());
-    System.out.println(response_object);
+    //System.out.println(response_object);
     return (String) response_object.get("result");
 	} catch(Exception e) {
 		e.printStackTrace();
@@ -989,28 +987,28 @@ try {
     params.add("");
     final JSONObject addresses = new JSONObject();
 
-    System.out.println(sat1);
+    //System.out.println(sat1);
     BigDecimal decimalSat1 = new BigDecimal(sat1 * 0.00000001);
     decimalSat1 = decimalSat1.setScale(8, BigDecimal.ROUND_DOWN);
-    System.out.println(decimalSat1);
+    //System.out.println(decimalSat1);
     addresses.put(address1,decimalSat1);
 
 
-    System.out.println(sat2);
+    //System.out.println(sat2);
     BigDecimal decimalSat2 = new BigDecimal(sat2 * 0.00000001);
     decimalSat2 = decimalSat2.setScale(8, BigDecimal.ROUND_DOWN);
-    System.out.println(decimalSat2);
+    //System.out.println(decimalSat2);
     addresses.put(address2,decimalSat2);
     params.add(addresses);
 
     params.add(confirmations);
     params.add("SatoshiQuest");//the comment :p
 
-    System.out.println(params);
+    //System.out.println(params);
     jsonObject.put("params", params);
-    System.out.println("Checking blockchain info...");
+    //System.out.println("Checking blockchain info...");
     URL url = new URL("http://" + BITCOIN_NODE_HOST + ":" + BITCOIN_NODE_PORT + "/wallet/" + account_id);
-    System.out.println(url.toString());
+    //System.out.println(url.toString());
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
     String userPassword = BITCOIN_NODE_USERNAME + ":" + BITCOIN_NODE_PASSWORD;
     String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
@@ -1035,9 +1033,9 @@ try {
       response.append(inputLine);
     }
     in.close();
-    System.out.println(response.toString());
+    //System.out.println(response.toString());
     JSONObject response_object = (JSONObject) parser.parse(response.toString());
-    System.out.println(response_object);
+    //System.out.println(response_object);
     return (String) response_object.get("result");
 	} catch(Exception e) {
 		e.printStackTrace();
@@ -1079,9 +1077,12 @@ try {
 		long lootBalance = (long)(getBalance(SERVERDISPLAY_NAME,1) * 0.85);
 		double lootAmount =  (double)(exRate * (lootBalance * 0.00000001));        
 		DecimalFormat df = new DecimalFormat("#.##");
-        	System.out.print(df.format(lootAmount));
-
-                Score score6 = playSBoardObj.getScore(ChatColor.GREEN + "Round " + REDIS.get("gameRound"));
+        	//System.out.print(df.format(lootAmount));
+		String whatRound = "Round " + REDIS.get("gameRound");
+				if (REDIS.exists("BetaTest")){
+					whatRound = "BetaTest Round " + REDIS.get("gameRound");
+				}
+                Score score6 = playSBoardObj.getScore(ChatColor.GREEN + "" + whatRound);
 		score6.setScore(6);
 
                 Score score5 = playSBoardObj.getScore(ChatColor.GREEN + "Lives: " + REDIS.get("LivesLeft" + player.getUniqueId().toString()));
@@ -1174,8 +1175,8 @@ try {
           public void run() {
             publish_stats();
 try {
-		long waitTime = 1000 * 60 * 15;
-if((exTime <= ((new Date().getTime()) - waitTime))||(exRate == 0)) {
+		long waitTime15 = 1000 * 60 * 15;
+if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
 		//announce player location in discord if near
 		World world = Bukkit.getServer().getWorld(SERVERDISPLAY_NAME);
 		File BaseFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "players");
@@ -1190,36 +1191,34 @@ if((exTime <= ((new Date().getTime()) - waitTime))||(exRate == 0)) {
 			}
 		}
 
+			exRate =  Double.parseDouble(getExchangeRate("btc"));
+			livesRate =  (long)((BUYIN_AMOUNT/(exRate*0.00000001))*0.90);
+			adminRate =  (long)((BUYIN_AMOUNT/(exRate*0.00000001))*0.10);
+			totalLifeRate = livesRate + adminRate;
+			announce("Currently Bitcoin is: $"+ exRate);
+		        //System.out.println("Currently Bitcoin is: $"+ exRate);
+			announce("1 Life is: "+ totalLifeRate + " " +DENOMINATION_NAME);
+		        //System.out.println("1 Life is: "+ totalLifeRate + " " +DENOMINATION_NAME);
+			if ((System.getenv("DISCORD_HOOK_URL")!=null)&&(discordWait15 >= 3)) {
+			// announce loot in discord
+			long lootBalance = (long)(getBalance(SERVERDISPLAY_NAME,1) * 0.85);
+			double lootAmount =  (double)(exRate * (lootBalance * 0.00000001));        
+			DecimalFormat df = new DecimalFormat("#.##");
+        		//System.out.print(df.format(lootAmount));
+			String lootAnnounce = ("Current BTC in loot: " +lootBalance + " sats! worth: $"+df.format(lootAmount)+" USD!");
+				sendDiscordMessage("1 Life is: "+ totalLifeRate + " sats");
+				sendDiscordMessage(lootAnnounce);
+				sendDiscordMessage("For more info check out http://AllAboutBTC.com/SatoshiQuest.html");
+				discordWait15=0;
+			} else {
+				discordWait15++;
+			}
 
 		//announce("Current time is: "+ (new Date().getTime()));
 		
-		
-		exRate =  Double.parseDouble(getExchangeRate("btc"));
-		livesRate =  (long)((BUYIN_AMOUNT/(exRate*0.00000001))*0.90);
-		adminRate =  (long)((BUYIN_AMOUNT/(exRate*0.00000001))*0.10);
-		totalLifeRate = livesRate + adminRate;
-		announce("Currently Bitcoin is: $"+ exRate);
-	        System.out.println("Currently Bitcoin is: $"+ exRate);
-		announce("1 Life is: "+ totalLifeRate + " " +DENOMINATION_NAME);
-	        System.out.println("1 Life is: "+ totalLifeRate + " " +DENOMINATION_NAME);
-		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("1 Life is: "+ totalLifeRate + " sats");
-		}
-		
-		// announce loot in discord
-		long lootBalance = (long)(getBalance(SERVERDISPLAY_NAME,1) * 0.85);
-		double lootAmount =  (double)(exRate * (lootBalance * 0.00000001));        
-		DecimalFormat df = new DecimalFormat("#.##");
-        	System.out.print(df.format(lootAmount));
-		String lootAnnounce = ("Current BTC in loot: " +lootBalance + " sats! worth: $"+df.format(lootAmount)+" USD!");
-		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage(lootAnnounce);
-			sendDiscordMessage("For more info check out http://AllAboutBTC.com/SatoshiQuest.html");
-		}
-exTime = new Date().getTime();
-		}
 
-		
+		exTime15 = new Date().getTime();
+		} //end waitTime15
 
 } catch (Exception e) {
 			e.printStackTrace();
@@ -1242,7 +1241,7 @@ exTime = new Date().getTime();
         jsonObject.put("balance", balance);
         jsonObject.put("time", new Date().getTime());
         URL url = new URL(System.getenv("ELASTICSEARCH_ENDPOINT") + "-stats/_doc");
-        System.out.println(url.toString());
+        //System.out.println(url.toString());
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
         con.setRequestMethod("POST");
@@ -1263,9 +1262,9 @@ exTime = new Date().getTime();
           response.append(inputLine);
         }
         in.close();
-        System.out.println(response.toString());
+        //System.out.println(response.toString());
         JSONObject response_object = (JSONObject) parser.parse(response.toString());
-        System.out.println(response_object);
+        //System.out.println(response_object);
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -1294,7 +1293,8 @@ exTime = new Date().getTime();
 
   }
 
-  public static boolean isNearLoot(Player player) {
+  public boolean isNearLoot(Player player) {
+	String toAnnounce = "";
 	Location spawn = Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).getSpawnLocation();
 	double lootX = Double.parseDouble(REDIS.get("lootSpawnX"));
 	double lootZ = Double.parseDouble(REDIS.get("lootSpawnZ"));
@@ -1304,6 +1304,15 @@ exTime = new Date().getTime();
 	World world = Bukkit.getServer().getWorld(SERVERDISPLAY_NAME);
 	if(player.getWorld()==world){
 	if ((((playerx<lootX+announceRadius)&&(playerx>lootX-announceRadius))) && (((playerz<lootZ+announceRadius)&&(playerz>lootZ-announceRadius)))) {
+		if (!REDIS.exists("LootAnnounced" +player.getUniqueId().toString())) {
+		REDIS.set("LootAnnounced" +player.getUniqueId().toString(), "true");
+
+		toAnnounce = ("@ here: player " + player.getName() + " is near the loot! their last know location was:  X: " + playerx.intValue() + " Z:" + playerz.intValue());
+		announce(toAnnounce);
+if(System.getenv("DISCORD_HOOK_URL")!=null) {
+			sendDiscordMessage(toAnnounce);
+		}
+		}
 		//System.out.println("You are near...");
 		//String toAnnounce = (player.getName() + " - X:" + playerx.intValue() + " Z:" + playerz.intValue());
 		//announce(toAnnounce);
@@ -1370,11 +1379,20 @@ if (result != "failed"){
 		}
 		DecimalFormat df = new DecimalFormat("#.##");
         	System.out.print(df.format(amtUSD));
+		if (REDIS.exists("BetaTest")){
+REDIS.set("LeaderBoard " + iter, "BetaTest Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " Sats " + sendLoot);
+		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
+		if(System.getenv("DISCORD_HOOK_URL")!=null) {
+			sendDiscordMessage(dateFormat.format(date) + " " + player.getName() + " WON " + "BetaTest Round " + REDIS.get("gameRound") + " with " + sendLoot + " SATS worth $" + df.format(amtUSD));
+		}
+		}//betatest
+		if (!REDIS.exists("BetaTest")){
 REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " Sats " + sendLoot);
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
 			sendDiscordMessage(dateFormat.format(date) + " " + player.getName() + " WON " + "Round " + REDIS.get("gameRound") + " with " + sendLoot + " SATS worth $" + df.format(amtUSD));
 		}
+		}//betatest
 	}
     World world = Bukkit.getServer().getWorld(SERVERDISPLAY_NAME);
  if(!world.equals(null)) {
@@ -1384,6 +1402,9 @@ File BaseFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "players"
 		int tempLivesOfflinePlayer = Integer.parseInt(REDIS.get("LivesLeft" +offlinePlayer.getUniqueId().toString()));
 		if (tempLivesOfflinePlayer >= 1) {
 		REDIS.set("LivesLeft" +offlinePlayer.getUniqueId().toString(), Integer.toString(tempLivesOfflinePlayer-1));
+		}
+		if (REDIS.exists("LootAnnounced" +offlinePlayer.getUniqueId().toString())) {
+		REDIS.del("LootAnnounced" +offlinePlayer.getUniqueId().toString());
 		}
 		}
 		REDIS.set("ClearInv" +offlinePlayer.getUniqueId().toString(), "true");
@@ -1410,7 +1431,7 @@ File BaseFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "players"
 		}
 		}
             Bukkit.getServer().unloadWorld(world, false);
-            System.out.println(world.getName() + " unloaded!");
+            //System.out.println(world.getName() + " unloaded!");
         }
 		deleteLootWorlds();
 		REDIS.del("winner");
@@ -1450,11 +1471,11 @@ public void teleportToLootSpawn(Player player) {
             player.sendMessage(ChatColor.GREEN + "Teleporting back now that world is loading...");
             player.setMetadata("teleporting", new FixedMetadataValue(this, true));
             Location location= getServer().createWorld(new WorldCreator(SERVERDISPLAY_NAME)).getSpawnLocation();
-            System.out.println("location: " + location);
+            //System.out.println("location: " + location);
             final Location spawn=location;
 
             Chunk c = spawn.getChunk();
-            System.out.println("Chunk: " + c);
+            //System.out.println("Chunk: " + c);
             if (!c.isLoaded()) {
                 c.load();
             }
@@ -1682,7 +1703,76 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
   public String urlenDecode(String en) throws UnsupportedEncodingException {
     return URLDecoder.decode(en, "UTF-8");
   }
-  public boolean sendDiscordMessage(String content) {
+  public void sendDiscordMessage(String content) {
+    if(System.getenv("DISCORD_HOOK_URL")!=null) {
+      //System.out.println("[discord] "+content);
+      try {
+          String json = "{\"content\":\""+content+"\"}";
+
+          JSONParser parser = new JSONParser();
+
+          final JSONObject jsonObject = new JSONObject();
+          jsonObject.put("content", content);
+          CookieHandler.setDefault(new CookieManager());
+
+          URL url = new URL(System.getenv("DISCORD_HOOK_URL"));
+          HttpsURLConnection con = null;
+
+          System.setProperty("http.agent", "");
+
+          con = (HttpsURLConnection) url.openConnection();
+
+          con.setRequestMethod("POST");
+          con.setRequestProperty("Content-Type", "application/json");
+          con.setRequestProperty("Cookie", "satoshiquest=true");
+          con.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
+
+          con.setDoOutput(true);
+          OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
+          out.write(json);
+          out.close();
+	int responseCode = con.getResponseCode();
+          if(responseCode==200) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+              response.append(inputLine);
+            }
+            in.close();
+            //System.out.println(response.toString());
+            //return true;
+          } else {
+            //return false;
+          }
+          
+
+      } catch (Exception e) {
+          e.printStackTrace();
+          //return false;
+      }
+    }
+    //return false;
+
+  }
+
+/*
+{
+  "last_message_id": "3343820033257021450",
+  "type": 1,
+  "id": "319674150115610528",
+  "recipients": [
+    {
+      "username": "test",
+      "discriminator": "9999",
+      "id": "82198898841029460",
+      "avatar": "33ecab261d4681afa4d85a04691c4a01"
+    }
+  ]
+}
+
+  public void sendDiscordDM(String content) {
     if(System.getenv("DISCORD_HOOK_URL")!=null) {
       System.out.println("[discord] "+content);
       try {
@@ -1721,20 +1811,21 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
             }
             in.close();
             System.out.println(response.toString());
-            return true;
+            //return true;
           } else {
-            return false;
+            //return false;
           }
           
 
       } catch (Exception e) {
           e.printStackTrace();
-          return false;
+          //return false;
       }
     }
-    return false;
+    //return false;
 
   }
+*/
 	public boolean isStringInt(String s)
 {
     try
@@ -1770,7 +1861,7 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
             
                 URL url=new URL("https://api.cryptonator.com/api/ticker/"+crypto+"-usd");
                 
-                System.out.println(url.toString());
+                //System.out.println(url.toString());
                 HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
                 con.setRequestMethod("GET");
                 con.setRequestProperty("User-Agent", "Mozilla/1.22 (compatible; MSIE 2.0; Windows 3.1)");
@@ -1785,7 +1876,7 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
               response.append(inputLine);
             }
             in.close();
-            System.out.println(response.toString());
+            //System.out.println(response.toString());
 
           } else {
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
@@ -1796,7 +1887,7 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
               response.append(inputLine);
             }
             in.close();
-            System.out.println(response.toString());
+            //System.out.println(response.toString());
 		}
 		JSONParser parser = new JSONParser();
             	final JSONObject jsonobj,jsonobj2;
