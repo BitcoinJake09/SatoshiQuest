@@ -24,9 +24,6 @@ public class ResetCommand extends CommandAction {
     public boolean run(CommandSender sender, Command cmd, String label, String[] args, Player player) {
 	if (args.length == 0) {
 		satoshiQuest.REDIS.del("lootSpawnY");
-		satoshiQuest.REDIS.del("LOOT_RADIUS_MIN");
-		satoshiQuest.REDIS.del("LOOT_RADIUS_MAX");
-		satoshiQuest.REDIS.del("LOOT_ANNOUNCE_RADIUS");
 		satoshiQuest.REDIS.set("gameRound","1");
 	    for(OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
 		if (satoshiQuest.REDIS.exists("LootAnnounced" +offlinePlayer.getUniqueId().toString())) {
