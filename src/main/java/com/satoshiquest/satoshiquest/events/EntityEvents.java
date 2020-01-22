@@ -339,11 +339,20 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 			if(event.getBlock().getX() == x && event.getBlock().getZ() == z) { event.setCancelled(true);}
 			}
 		}
-          }
+			for (double lootX = (Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnX"))-1);lootX<=(Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnX"))+1);lootX++) {
+				for (double lootZ = (Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnZ"))-1);lootZ<=(Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnZ"))+1);lootZ++) {
+					for (double lootY = Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnY"));lootY<=(Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnY"))+4);lootY++) {
+	                			if(event.getBlock().getX() == lootX && event.getBlock().getZ() == lootZ && event.getBlock().getY() == lootY) {event.getPlayer().sendMessage(ChatColor.RED + "you are not allow to do that."); event.setCancelled(true);}
+					}//end for lootY
+				}//end for lootZ
+		}//end for lootX
+
+
+          }//end get world
             }
 
 	@EventHandler
-        public void onPlaceBreak(BlockPlaceEvent event){
+        public void onBlockPlace(BlockPlaceEvent event){
 	World getworld = Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME);
 	if(event.getBlock().getWorld()==getworld){
 	Location spawn = Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME).getSpawnLocation();
@@ -361,6 +370,13 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 			if(event.getBlock().getX() == x && event.getBlock().getZ() == z) { event.setCancelled(true);}
 			}
 		}
+			for (double lootX = (Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnX"))-1);lootX<=(Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnX"))+1);lootX++) {
+				for (double lootZ = (Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnZ"))-1);lootZ<=(Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnZ"))+1);lootZ++) {
+					for (double lootY = Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnY"));lootY<=(Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnY"))+4);lootY++) {
+	                			if(event.getBlock().getX() == lootX && event.getBlock().getZ() == lootZ && event.getBlock().getY() == lootY) {event.getPlayer().sendMessage(ChatColor.RED + "you are not allow to do that."); event.setCancelled(true);}
+					}//end for lootY
+				}//end for lootZ
+		}//end for lootX
           }
             }
 
