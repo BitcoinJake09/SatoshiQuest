@@ -1351,7 +1351,9 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 			Long sendback = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * 0.025);
 		if (REDIS.exists("ExternalAddress" +player.getUniqueId().toString())) {
 		result = sendMany(SERVERDISPLAY_NAME, REDIS.get("ExternalAddress" +player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback, 24);
-		} else {
+		} 
+		if (result == "failed") {
+		player.sendMessage(ChatColor.YELLOW + "External OnWin address not set, or failed, trying in-game wallet.");
 		result = sendMany(SERVERDISPLAY_NAME, REDIS.get("nodeAddress"+player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback, 24);
 		}
 			System.out.println("won " + sendLoot + " LOOT! txid: " +result);
