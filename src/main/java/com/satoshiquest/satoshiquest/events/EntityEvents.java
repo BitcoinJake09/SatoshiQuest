@@ -385,7 +385,7 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
       throws ParseException, org.json.simple.parser.ParseException, IOException {
 
       // If player doesn't have permission, disallow the player to interact with it.
-      if (!satoshiQuest.canBuild(event.getPlayer())) {
+	if (isAtSpawn(event.getPlayer().getLocation()) == false) {
         event.setCancelled(true);
         event.getPlayer().sendMessage(ChatColor.DARK_RED + "You don't have permission to do that!");
       }
