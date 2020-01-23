@@ -41,6 +41,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Attachable;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.advancement.*;
 
 // Color Table :
 // GREEN : Worked, YELLOW : Processing, LIGHT_PURPLE : Any money balance, BLUE : Player name,
@@ -1198,6 +1199,7 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
 			announce("Currently Bitcoin is: $"+ exRate);
 		        //System.out.println("Currently Bitcoin is: $"+ exRate);
 			announce("1 Life is: "+ totalLifeRate + " " +DENOMINATION_NAME);
+			announce("Active updates in the discord: https://discordapp.com/invite/S38Ser6");
 		        //System.out.println("1 Life is: "+ totalLifeRate + " " +DENOMINATION_NAME);
 			if ((System.getenv("DISCORD_HOOK_URL")!=null)&&(discordWait15 >= 3)) {
 			// announce loot in discord
@@ -1344,17 +1346,17 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 		//sendloot to winner
 		long sendLoot = 0L;
 		String result = "failed";
-		//result = "test";
+		result = "test";
 		try {
 		if (getBalance(SERVERDISPLAY_NAME,1) > 0) {
 			sendLoot = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * 0.85);
 			Long sendback = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * 0.025);
 		if (REDIS.exists("ExternalAddress" +player.getUniqueId().toString())) {
-		result = sendMany(SERVERDISPLAY_NAME, REDIS.get("ExternalAddress" +player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback, 24);
+		//result = sendMany(SERVERDISPLAY_NAME, REDIS.get("ExternalAddress" +player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback, 24);
 		} 
 		if (result == "failed") {
 		player.sendMessage(ChatColor.YELLOW + "External OnWin address not set, or failed, trying in-game wallet.");
-		result = sendMany(SERVERDISPLAY_NAME, REDIS.get("nodeAddress"+player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback, 24);
+		//result = sendMany(SERVERDISPLAY_NAME, REDIS.get("nodeAddress"+player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback, 24);
 		}
 			System.out.println("won " + sendLoot + " LOOT! txid: " +result);
 		}
@@ -1425,6 +1427,22 @@ File BaseFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "players"
 		p.setFoodLevel(20);
 		p.setHealth(p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 		
+		Iterator<Advancement> it = Bukkit.getServer().advancementIterator();
+		// gets all 'registered' advancements on the server.
+		while (it.hasNext()) {
+		// loops through these.
+		Advancement a = it.next();
+	        AdvancementProgress progress = p.getAdvancementProgress(a);
+		if (progress.isDone() == true) {
+		         for(String c: a.getCriteria()) {
+	 p.getAdvancementProgress(a).revokeCriteria(c);
+			}
+		}
+
+            }
+        
+
+
 
 		try {
 		updateScoreboard(p);
@@ -1433,6 +1451,8 @@ File BaseFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "players"
 		}
 		}
             Bukkit.getServer().unloadWorld(world, false);
+Bukkit.getServer().unloadWorld(Bukkit.getServer().getWorld(SERVERDISPLAY_NAME+"_the_end"), false);
+Bukkit.getServer().unloadWorld(Bukkit.getServer().getWorld(SERVERDISPLAY_NAME+"_nether"), false);
             //System.out.println(world.getName() + " unloaded!");
         }
 		deleteLootWorlds();
@@ -1511,7 +1531,7 @@ public void teleportToLootSpawn(Player player) {
 	try {
 	if(REDIS.get("ModFlag").equals("true")) {
 		return false;
-	} else if((REDIS.get("ModFlag").equals("false"))&&(getBalance(SERVERDISPLAY_NAME,1) > 0)) {
+	} else if(REDIS.get("ModFlag").equals("false")) {
 		return true;
 	}
 	} catch (Exception e) {
