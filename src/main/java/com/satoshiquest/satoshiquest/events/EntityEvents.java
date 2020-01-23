@@ -40,6 +40,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.util.Vector;
+import org.bukkit.advancement.*;
+import java.util.*;
 
 public class EntityEvents implements Listener {
   SatoshiQuest satoshiQuest;
@@ -189,6 +191,20 @@ public class EntityEvents implements Listener {
 		player.setFoodLevel(20);
 player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 
+		Iterator<Advancement> it = Bukkit.getServer().advancementIterator();
+		// gets all 'registered' advancements on the server.
+		while (it.hasNext()) {
+		// loops through these.
+		Advancement a = it.next();
+	        AdvancementProgress progress = player.getAdvancementProgress(a);
+		if (progress.isDone() == true) {
+		         for(String c: a.getCriteria()) {
+	 player.getAdvancementProgress(a).revokeCriteria(c);
+			}
+		}
+
+            }
+
 		satoshiQuest.REDIS.del("ClearInv" +player.getUniqueId().toString());
 	}
 	try {
@@ -301,7 +317,7 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 	if (event.getFrom().getBlock() != event.getTo().getBlock()) {
       if ((Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + event.getPlayer().getUniqueId().toString())) <= 0) || (!satoshiQuest.canLeaveSpawn())) {
 		if (isAtSpawn(event.getPlayer().getLocation()) == false) {
-			event.getPlayer().sendMessage(ChatColor.RED + "you cant leave spawn with 0 lives! or while the loot balance has 0 confirmed loot.");
+			event.getPlayer().sendMessage(ChatColor.RED + "you cant leave spawn with 0 lives! or when a mod locks spawn.");
 			event.getPlayer().sendMessage(ChatColor.GREEN + "try /wallet for your deposit & life info.");
 			satoshiQuest.teleportToSpawn(event.getPlayer());
 		}
@@ -385,7 +401,7 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
       throws ParseException, org.json.simple.parser.ParseException, IOException {
 
       // If player doesn't have permission, disallow the player to interact with it.
-	if (isAtSpawn(event.getPlayer().getLocation()) == false) {
+	if (isAtSpawn(event.getPlayer().getLocation()) == true) {
         event.setCancelled(true);
         event.getPlayer().sendMessage(ChatColor.DARK_RED + "You don't have permission to do that!");
       }
@@ -405,9 +421,11 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 if (isAtSpawn(player.getLocation()) == false) {
 	if (Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())) >= 1)	{
 		int livesLeft = Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())) - 1;
+		if(!SatoshiQuest.REDIS.get("ModFlag").equals("true")) {
 		SatoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(),String.valueOf(livesLeft));
 
             player.sendMessage(ChatColor.RED + "You Lost a life. You have " + SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())  + " lives left.");
+		}
 	}
 	if (Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())) <= 0)	{
 		//tp player to spawn
