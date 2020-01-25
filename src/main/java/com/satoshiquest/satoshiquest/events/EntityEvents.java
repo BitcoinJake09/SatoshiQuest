@@ -115,7 +115,9 @@ public class EntityEvents implements Listener {
 			//player.sendMessage(ChatColor.WHITE + "Welcome to " + SatoshiQuest.SERVERDISPLAY_NAME);
 	}
 	}
-
+	if (SatoshiQuest.REDIS.exists("toldSpawn" + event.getPlayer().getUniqueId().toString())) {
+	SatoshiQuest.REDIS.del("toldSpawn" + event.getPlayer().getUniqueId().toString());
+	}
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -317,8 +319,11 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 	if (event.getFrom().getBlock() != event.getTo().getBlock()) {
       if ((Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + event.getPlayer().getUniqueId().toString())) <= 0) || (!satoshiQuest.canLeaveSpawn())) {
 		if (isAtSpawn(event.getPlayer().getLocation()) == false) {
+			if (!SatoshiQuest.REDIS.exists("toldSpawn" + event.getPlayer().getUniqueId().toString())) {
 			event.getPlayer().sendMessage(ChatColor.RED + "you cant leave spawn with 0 lives! or when a mod locks spawn.");
 			event.getPlayer().sendMessage(ChatColor.GREEN + "try /wallet for your deposit & life info.");
+			SatoshiQuest.REDIS.set("toldSpawn" + event.getPlayer().getUniqueId().toString(),"true");
+			}
 			satoshiQuest.teleportToSpawn(event.getPlayer());
 		}
 	}
