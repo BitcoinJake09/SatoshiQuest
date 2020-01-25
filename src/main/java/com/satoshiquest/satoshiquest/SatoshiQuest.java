@@ -637,18 +637,34 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
       out.write(jsonObject.toString());
       out.close();
 
-      int responseCode = con.getResponseCode();
+    if(con.getResponseCode()==200) {
 
-      BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-      String inputLine;
-      StringBuffer response = new StringBuffer();
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
 
-      while ((inputLine = in.readLine()) != null) {
-        response.append(inputLine);
-      }
-      in.close();
-      //System.out.println(response.toString());
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        //System.out.println(response.toString());
+        JSONObject response_object = (JSONObject) parser.parse(response.toString());
+        //System.out.println(response_object);
       return (JSONObject) parser.parse(response.toString());
+    } else {
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        //System.out.println(response.toString());
+        JSONObject response_object = (JSONObject) parser.parse(response.toString());
+	
+        return new JSONObject();
+    }
     } catch (IOException e) {
       System.out.println("problem connecting with bitcoin node");
       System.out.println(e);
@@ -885,8 +901,8 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
     OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
     out.write(jsonObject.toString());
     out.close();
-
-    int responseCode = con.getResponseCode();
+	try {
+    if(con.getResponseCode()==200) {
 
     BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
     String inputLine;
@@ -896,7 +912,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
       response.append(inputLine);
     }
     in.close();
-	try {
+
     JSONObject response_object = (JSONObject) parser.parse(response.toString());
 
 	String stringToSplit = response_object.get("result").toString();
@@ -911,6 +927,19 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
 
 
     return tempArray[tempAddy];
+    } else {
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        //System.out.println(response.toString());
+        JSONObject response_object = (JSONObject) parser.parse(response.toString());
+	return null;
+	}
 	} catch(Exception e) {
 		e.printStackTrace();
 	}
@@ -936,7 +965,7 @@ try {
     params.add(SERVERDISPLAY_NAME);
     params.add(false);
     params.add(false);
-    params.add(18);
+    params.add(6);
     //System.out.println(params);
     jsonObject.put("params", params);
     //System.out.println("Checking blockchain info...");
@@ -956,20 +985,33 @@ try {
     out.write(jsonObject.toString());
     out.close();
 
-    int responseCode = con.getResponseCode();
+    if(con.getResponseCode()==200) {
 
-    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-    String inputLine;
-    StringBuffer response = new StringBuffer();
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
 
-    while ((inputLine = in.readLine()) != null) {
-      response.append(inputLine);
-    }
-    in.close();
-    //System.out.println(response.toString());
-    JSONObject response_object = (JSONObject) parser.parse(response.toString());
-    //System.out.println(response_object);
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        //System.out.println(response.toString());
+        JSONObject response_object = (JSONObject) parser.parse(response.toString());
+        //System.out.println(response_object);
     return (String) response_object.get("result");
+} else {
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        //System.out.println(response.toString());
+        JSONObject response_object = (JSONObject) parser.parse(response.toString());
+    return "failed";
+	}
 	} catch(Exception e) {
 		e.printStackTrace();
 	}
@@ -1024,20 +1066,34 @@ try {
     out.write(jsonObject.toString());
     out.close();
 
-    int responseCode = con.getResponseCode();
+if(con.getResponseCode()==200) {
 
-    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-    String inputLine;
-    StringBuffer response = new StringBuffer();
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
 
-    while ((inputLine = in.readLine()) != null) {
-      response.append(inputLine);
-    }
-    in.close();
-    //System.out.println(response.toString());
-    JSONObject response_object = (JSONObject) parser.parse(response.toString());
-    //System.out.println(response_object);
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        //System.out.println(response.toString());
+        JSONObject response_object = (JSONObject) parser.parse(response.toString());
+        //System.out.println(response_object);
+
     return (String) response_object.get("result");
+ } else {
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        //System.out.println(response.toString());
+        JSONObject response_object = (JSONObject) parser.parse(response.toString());
+    return "failed";
+	}
 	} catch(Exception e) {
 		e.printStackTrace();
 	}
@@ -1127,7 +1183,7 @@ try {
   public void teleportToSpawn(Player player) {
     SatoshiQuest satoshiQuest = this;
     // TODO: open the tps inventory
-    player.sendMessage(ChatColor.GREEN + "Teleporting to spawn...");
+    //player.sendMessage(ChatColor.GREEN + "Teleporting to spawn...");
     player.setMetadata("teleporting", new FixedMetadataValue(satoshiQuest, true));
     World world = Bukkit.getWorld(SERVERDISPLAY_NAME);
 
@@ -1174,7 +1230,7 @@ try {
         new Runnable() {
           @Override
           public void run() {
-            publish_stats();
+            //publish_stats();
 try {
 		long waitTime15 = 1000 * 60 * 15;
 if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
@@ -1254,19 +1310,20 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
         out.write(jsonObject.toString());
         out.close();
 
-        int responseCode = con.getResponseCode();
+    if(con.getResponseCode()==200) {
 
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
         String inputLine;
         StringBuffer response = new StringBuffer();
 
         while ((inputLine = in.readLine()) != null) {
-          response.append(inputLine);
+            response.append(inputLine);
         }
         in.close();
         //System.out.println(response.toString());
         JSONObject response_object = (JSONObject) parser.parse(response.toString());
         //System.out.println(response_object);
+	}
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -1346,17 +1403,17 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 		//sendloot to winner
 		long sendLoot = 0L;
 		String result = "failed";
-		result = "test";
+		//result = "test";
 		try {
 		if (getBalance(SERVERDISPLAY_NAME,1) > 0) {
 			sendLoot = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * 0.85);
 			Long sendback = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * 0.025);
 		if (REDIS.exists("ExternalAddress" +player.getUniqueId().toString())) {
-		//result = sendMany(SERVERDISPLAY_NAME, REDIS.get("ExternalAddress" +player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback, 24);
+		result = sendMany(SERVERDISPLAY_NAME, REDIS.get("ExternalAddress" +player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback, 6);
 		} 
 		if (result == "failed") {
 		player.sendMessage(ChatColor.YELLOW + "External OnWin address not set, or failed, trying in-game wallet.");
-		//result = sendMany(SERVERDISPLAY_NAME, REDIS.get("nodeAddress"+player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback, 24);
+		result = sendMany(SERVERDISPLAY_NAME, REDIS.get("nodeAddress"+player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback, 6);
 		}
 			System.out.println("won " + sendLoot + " LOOT! txid: " +result);
 		}
@@ -1753,8 +1810,7 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
           OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
           out.write(json);
           out.close();
-	int responseCode = con.getResponseCode();
-          if(responseCode==200) {
+	if(con.getResponseCode()==200) {
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
             String inputLine;
             StringBuffer response = new StringBuffer();
