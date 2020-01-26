@@ -143,7 +143,6 @@ public class EntityEvents implements Listener {
     // On dev environment, admin gets op. In production, nobody gets op.
 
     player.setGameMode(GameMode.SURVIVAL);
-
 	if (!SatoshiQuest.REDIS.exists("winner")) {
 	if (player.getWorld() == Bukkit.getServer().getWorld("world")) {
 	    Location location = Bukkit
@@ -281,7 +280,7 @@ player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 if(System.getenv("DISCORD_HOOK_URL")!=null) {
 			satoshiQuest.sendDiscordMessage("Player " + player.getName() + " joined with " + SatoshiQuest.REDIS.get("LivesLeft" + event.getPlayer().getUniqueId().toString()) + " lives");
 		}
-
+player.sendMessage(ChatColor.WHITE + "More info: " + ChatColor.UNDERLINE + "http://AllAboutBTC.com/SatoshiQuest.html");
   }
 
 	@EventHandler
@@ -293,18 +292,22 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 		event.setCancelled(true);
 	}
 
-    public boolean isAtSpawn(Location location)
+    public boolean isAtSpawn(Player player)
 	{
 		Location spawn = Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME).getSpawnLocation();
+	World getworld = Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME);
+	if(player.getWorld()==getworld){
 		double spawnx = spawn.getX();
 		double spawnz = spawn.getZ();
-		double playerx=(double)location.getX();
-                double playerz=(double)location.getZ();
+		double playerx=(double)player.getLocation().getX();
+                double playerz=(double)player.getLocation().getZ();
 	        //System.out.println("x:"+playerx+" z:"+playerz);  //for testing lol
-	if ((((playerx<spawnx+SatoshiQuest.SPAWN_PROTECT_RADIUS+1)&&(playerx>spawnx-SatoshiQuest.SPAWN_PROTECT_RADIUS-1))) && (((playerz<spawnz+SatoshiQuest.SPAWN_PROTECT_RADIUS+1)&&(playerz>spawnz-SatoshiQuest.SPAWN_PROTECT_RADIUS-1))))return true;
-	else
-               return false;//not
+	if ((((playerx<spawnx+SatoshiQuest.SPAWN_PROTECT_RADIUS+1)&&(playerx>spawnx-SatoshiQuest.SPAWN_PROTECT_RADIUS-1))) && (((playerz<spawnz+SatoshiQuest.SPAWN_PROTECT_RADIUS+1)&&(playerz>spawnz-SatoshiQuest.SPAWN_PROTECT_RADIUS-1)))) {return true;}
+	} 
+        return false;//not
+	
 	}
+
 
   @EventHandler
   public void onPlayerMove(PlayerMoveEvent event)
@@ -318,7 +321,7 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 	}
 	if (event.getFrom().getBlock() != event.getTo().getBlock()) {
       if ((Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + event.getPlayer().getUniqueId().toString())) <= 0) || (!satoshiQuest.canLeaveSpawn())) {
-		if (isAtSpawn(event.getPlayer().getLocation()) == false) {
+		if (isAtSpawn(event.getPlayer()) == false) {
 			if (!SatoshiQuest.REDIS.exists("toldSpawn" + event.getPlayer().getUniqueId().toString())) {
 			event.getPlayer().sendMessage(ChatColor.RED + "you cant leave spawn with 0 lives! or when a mod locks spawn.");
 			event.getPlayer().sendMessage(ChatColor.GREEN + "try /wallet for your deposit & life info.");
@@ -327,7 +330,7 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 			satoshiQuest.teleportToSpawn(event.getPlayer());
 		}
 	}
-	if (isAtSpawn(event.getPlayer().getLocation()) == true) {
+	if (isAtSpawn(event.getPlayer()) == true) {
 		event.getPlayer().setExhaustion(0);
 		event.getPlayer().setFoodLevel(20);
 		event.getPlayer().setHealth(event.getPlayer().getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
@@ -406,7 +409,7 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
       throws ParseException, org.json.simple.parser.ParseException, IOException {
 
       // If player doesn't have permission, disallow the player to interact with it.
-	if (isAtSpawn(event.getPlayer().getLocation()) == true) {
+	if (isAtSpawn(event.getPlayer()) == true) {
         event.setCancelled(true);
         event.getPlayer().sendMessage(ChatColor.DARK_RED + "You don't have permission to do that!");
       }
@@ -423,7 +426,7 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
 			satoshiQuest.sendDiscordMessage("" +event.getDeathMessage());
 		}
-if (isAtSpawn(player.getLocation()) == false) {
+if (isAtSpawn(player) == false) {
 	if (Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())) >= 1)	{
 		int livesLeft = Integer.parseInt(SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())) - 1;
 		if(!SatoshiQuest.REDIS.get("ModFlag").equals("true")) {
