@@ -1343,7 +1343,7 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
                 double playerz=(double)player.getLocation().getZ();
 	World world = Bukkit.getServer().getWorld(SERVERDISPLAY_NAME);
 	if(player.getWorld()==world){
-	if (((playerx<=spawnx+SPAWN_PROTECT_RADIUS+1)&&(playerx>=spawnx-SPAWN_PROTECT_RADIUS-1)) && ((playerz<=spawnz+SPAWN_PROTECT_RADIUS+1)&&(playerz>=spawnz-SPAWN_PROTECT_RADIUS-1)))return false;
+	if (((playerx<=spawnx+SPAWN_PROTECT_RADIUS+1)&&(playerx>=spawnx-SPAWN_PROTECT_RADIUS-1)) && ((playerz<=spawnz+SPAWN_PROTECT_RADIUS+1)&&(playerz>=spawnz-SPAWN_PROTECT_RADIUS-1))) {return false;}
 	}
 
 		//System.out.println("You may not build at spawn.");  
