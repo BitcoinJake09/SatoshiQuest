@@ -1409,7 +1409,7 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 			sendLoot = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * 0.85);
 			Long sendback = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * 0.025);
 		if (REDIS.exists("ExternalAddress" +player.getUniqueId().toString())) {
-		result = sendMany(SERVERDISPLAY_NAME, REDIS.get("ExternalAddress" +player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback, 6);
+		/result = sendMany(SERVERDISPLAY_NAME, REDIS.get("ExternalAddress" +player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback, 6);
 		} 
 		if (result == "failed") {
 		player.sendMessage(ChatColor.YELLOW + "External OnWin address not set, or failed, trying in-game wallet.");
@@ -1428,7 +1428,7 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 	DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
 	Date date = new Date();
 	System.out.println(dateFormat.format(date) + " " + player.getName() + " " + sendLoot);
-	REDIS.set("gameRound",Integer.toString(Integer.parseInt(REDIS.get("gameRound"))+1));	
+
   	leaderBoardList = REDIS.keys("LeaderBoard *");
 
 		double amtUSD = (double)(exRate * (sendLoot * 0.00000001));
@@ -1455,6 +1455,7 @@ REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFo
 		}
 		}//betatest
 	}
+	REDIS.set("gameRound",Integer.toString(Integer.parseInt(REDIS.get("gameRound"))+1));	
     World world = Bukkit.getServer().getWorld(SERVERDISPLAY_NAME);
  if(!world.equals(null)) {
 File BaseFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "players");
@@ -1513,11 +1514,16 @@ Bukkit.getServer().unloadWorld(Bukkit.getServer().getWorld(SERVERDISPLAY_NAME+"_
             //System.out.println(world.getName() + " unloaded!");
         }
 		deleteLootWorlds();
-		REDIS.del("winner");
+
 		REDIS.del("lootSpawnY");
 		REDIS.del("spawnCreated");
-//Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "restart");
 		onEnable();
+		while(Bukkit.getServer().getWorld(SERVERDISPLAY_NAME+"_the_end") == null){
+		
+		}
+		REDIS.del("winner");
+//Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "restart");
+
 
 	} 
 	}
@@ -1546,29 +1552,33 @@ File dir3 = new File(getServer().getWorldContainer().getAbsolutePath() + "/" + S
 
 
 public void teleportToLootSpawn(Player player) {
-        if (!player.hasMetadata("teleporting")) {
-            player.sendMessage(ChatColor.GREEN + "Teleporting back now that world is loading...");
-            player.setMetadata("teleporting", new FixedMetadataValue(this, true));
-            Location location= getServer().createWorld(new WorldCreator(SERVERDISPLAY_NAME)).getSpawnLocation();
-            //System.out.println("location: " + location);
-            final Location spawn=location;
+    SatoshiQuest satoshiQuest = this;
+    // TODO: open the tps inventory
+    //player.sendMessage(ChatColor.GREEN + "Teleporting to spawn...");
+    player.setMetadata("teleporting", new FixedMetadataValue(satoshiQuest, true));
+    World world = Bukkit.getWorld(SERVERDISPLAY_NAME);
 
-            Chunk c = spawn.getChunk();
-            //System.out.println("Chunk: " + c);
-            if (!c.isLoaded()) {
-                c.load();
-            }
-            SatoshiQuest plugin = this;
-            BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
-            scheduler.scheduleSyncDelayedTask(this, new Runnable() {
+    final Location spawn = world.getSpawnLocation();
 
-                public void run() {
-                    player.teleport(spawn);
-                    player.removeMetadata("teleporting", plugin);
-                }
-            }, 60L);
-        }
+    Chunk c = spawn.getChunk();
+    if (!c.isLoaded()) {
+      c.load();
     }
+    satoshiQuest
+        .getServer()
+        .getScheduler()
+        .scheduleSyncDelayedTask(
+            satoshiQuest,
+            new Runnable() {
+
+              public void run() {
+                player.teleport(spawn);
+                player.removeMetadata("teleporting", satoshiQuest);
+              }
+            },
+            60L);
+  }
+
 
   private static boolean deleteWorld(File path) {
         if(path.exists()) {
