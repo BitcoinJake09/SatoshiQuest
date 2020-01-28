@@ -143,6 +143,7 @@ public class EntityEvents implements Listener {
     // On dev environment, admin gets op. In production, nobody gets op.
 
     player.setGameMode(GameMode.SURVIVAL);
+    //player.setGameMode(GameMode.CREATIVE); // test for admin
 	if (!SatoshiQuest.REDIS.exists("winner")) {
 	if (player.getWorld() == Bukkit.getServer().getWorld("world")) {
 	    Location location = Bukkit
@@ -497,6 +498,32 @@ if (isAtSpawn(player) == false) {
             }
         }
     }
+
+    @EventHandler
+	void onExplode(EntityExplodeEvent event) {
+
+	Location spawn = Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME).getSpawnLocation();
+	World getworld = Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME);
+	if(event.getEntity().getWorld()==getworld){
+		double spawnx = spawn.getX();
+		double spawnz = spawn.getZ();
+		double eventx=(double)event.getLocation().getX();
+                double eventz=(double)event.getLocation().getZ();
+		double announceRadius = 10;
+		double lootX = Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnX"));
+		double lootZ = Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnZ"));
+	        //System.out.println("x:"+playerx+" z:"+playerz);  //for testing lol
+	if ((((eventx<spawnx+(announceRadius+SatoshiQuest.SPAWN_PROTECT_RADIUS)+1)&&(eventx>spawnx-(announceRadius+SatoshiQuest.SPAWN_PROTECT_RADIUS)-1))) && (((eventz<spawnz+(announceRadius+SatoshiQuest.SPAWN_PROTECT_RADIUS)+1)&&(eventz>spawnz-(announceRadius+SatoshiQuest.SPAWN_PROTECT_RADIUS)-1)))) {
+		event.setCancelled(true);
+	}
+	if ((((eventx<lootX+announceRadius)&&(eventx>lootX-announceRadius))) && (((eventz<lootZ+announceRadius)&&(eventz>lootZ-announceRadius)))) {
+		event.setCancelled(true);
+	}
+
+	}//end world
+
+
+  }
 
 
 }
