@@ -971,7 +971,7 @@ try {
     params.add(SERVERDISPLAY_NAME);
     params.add(false);
     params.add(false);
-    params.add(6);
+    params.add(FEE_BLOCK_CONF);
     //System.out.println(params);
     jsonObject.put("params", params);
     //System.out.println("Checking blockchain info...");
