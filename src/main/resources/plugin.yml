@@ -20,6 +20,9 @@ commands:
   mod:
     description: "Utility to add/remove/list moderators"
     usage: "/mod <add|remove|list>"
+  setfee:
+    description: "Utility to set the expected block the transaction would confirm at."
+    usage: "/setfee <int>"
   setlives:
     description: "Utility to set/correct lives used by mods only"
     usage: "/setlives set <playername> <amount>"
