@@ -108,6 +108,9 @@ public class SatoshiQuest extends JavaPlugin {
   public static final int LIVES_PERBUYIN =
       System.getenv("LIVES_PERBUYIN") != null ? Integer.parseInt(System.getenv("LIVES_PERBUYIN")) : 1;
 
+  public int FEE_BLOCK_CONF =
+      System.getenv("FEE_BLOCK_CONF") != null ? Integer.parseInt(System.getenv("FEE_BLOCK_CONF")) : 6;
+
   public static final Long SPAWN_PROTECT_RADIUS =
       System.getenv("SPAWN_PROTECT_RADIUS") != null ? Long.parseLong(System.getenv("SPAWN_PROTECT_RADIUS")) : 14;
 
@@ -277,7 +280,9 @@ public class SatoshiQuest extends JavaPlugin {
 
 	
 	
-
+	if (!REDIS.exists("FEE_BLOCK_CONF")) {
+		REDIS.set("FEE_BLOCK_CONF", Integer.toString(FEE_BLOCK_CONF));
+	}
 	if (!REDIS.exists("LOOT_RADIUS_MIN")) {
 		REDIS.set("LOOT_RADIUS_MIN", LOOT_RADIUS_MIN.toString());
 		REDIS.set("LOOT_RADIUS_MAX", LOOT_RADIUS_MAX.toString());
@@ -350,6 +355,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
       modCommands.put("crashTest", new CrashtestCommand(this));
       modCommands.put("mod", new ModCommand(this));
       modCommands.put("reset", new ResetCommand(this));
+      modCommands.put("SetFee", new SetFeeCommand(this));
       modCommands.put("setlives", new SetLivesCommand(this));
       modCommands.put("ban", new BanCommand());
       modCommands.put("unban", new UnbanCommand());
@@ -1018,7 +1024,7 @@ try {
     return "failed";
   }
 
-  public String sendMany(String account_id, String address1, String address2, Long sat1, Long sat2, int confirmations) throws IOException, ParseException {
+  public String sendMany(String account_id, String address1, String address2, Long sat1, Long sat2) throws IOException, ParseException {
 try {
     JSONParser parser = new JSONParser();
 
@@ -1044,7 +1050,7 @@ try {
     addresses.put(address2,decimalSat2);
     params.add(addresses);
 
-    params.add(confirmations);
+    params.add(FEE_BLOCK_CONF);
     params.add("SatoshiQuest");//the comment :p
 
     //System.out.println(params);
@@ -1139,22 +1145,25 @@ if(con.getResponseCode()==200) {
 				if (REDIS.exists("BetaTest")){
 					whatRound = "BetaTest Round " + REDIS.get("gameRound");
 				}
-                Score score6 = playSBoardObj.getScore(ChatColor.GREEN + "" + whatRound);
+                Score score7 = playSBoardObj.getScore(ChatColor.GREEN + "" + whatRound);
+		score7.setScore(7);
+
+                Score score6 = playSBoardObj.getScore(ChatColor.GREEN + "Lives: " + REDIS.get("LivesLeft" + player.getUniqueId().toString()));
 		score6.setScore(6);
 
-                Score score5 = playSBoardObj.getScore(ChatColor.GREEN + "Lives: " + REDIS.get("LivesLeft" + player.getUniqueId().toString()));
+		Score score5 = playSBoardObj.getScore(ChatColor.GREEN + "Balance: " + Long.toString(getBalance(player.getUniqueId().toString(),1)));
 		score5.setScore(5);
 
-		Score score4 = playSBoardObj.getScore(ChatColor.GREEN + "Balance: " + Long.toString(getBalance(player.getUniqueId().toString(),1)));
+		Score score4 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: " + Long.toString(lootBalance) + "sats");
 		score4.setScore(4);
 
-		Score score3 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: " + Long.toString(lootBalance) + "sats");
+		Score score3 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: $" + df.format(lootAmount));
 		score3.setScore(3);
 
-		Score score2 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: $" + df.format(lootAmount));
+		Score score2 = playSBoardObj.getScore(ChatColor.GREEN + "Loot max spawn: " + LOOT_RADIUS_MAX.toString());
 		score2.setScore(2);
 
-		Score score1 = playSBoardObj.getScore(ChatColor.GREEN + "Loot max spawn: " + LOOT_RADIUS_MAX.toString());
+		Score score1 = playSBoardObj.getScore(ChatColor.GREEN + "Loot min spawn: " + LOOT_RADIUS_MIN.toString());
 		score1.setScore(1);
 		} else if (isPlayersAroundLoot == true) {
 		Score[] scores = new Score[15];
@@ -1409,11 +1418,11 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 			sendLoot = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * 0.85);
 			Long sendback = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * 0.025);
 		if (REDIS.exists("ExternalAddress" +player.getUniqueId().toString())) {
-		/result = sendMany(SERVERDISPLAY_NAME, REDIS.get("ExternalAddress" +player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback, 6);
+		result = sendMany(SERVERDISPLAY_NAME, REDIS.get("ExternalAddress" +player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback);
 		} 
 		if (result == "failed") {
 		player.sendMessage(ChatColor.YELLOW + "External OnWin address not set, or failed, trying in-game wallet.");
-		result = sendMany(SERVERDISPLAY_NAME, REDIS.get("nodeAddress"+player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback, 6);
+		result = sendMany(SERVERDISPLAY_NAME, REDIS.get("nodeAddress"+player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback);
 		}
 			System.out.println("won " + sendLoot + " LOOT! txid: " +result);
 		}
