@@ -59,7 +59,7 @@ public class LivesCommand extends CommandAction {
 			if (args.length == 2) {
 				if (args[1].equalsIgnoreCase("buy")) {
 				try {
-					String result = satoshiQuest.sendMany(player.getUniqueId().toString(), satoshiQuest.REDIS.get("nodeAddress"+satoshiQuest.SERVERDISPLAY_NAME), satoshiQuest.ADMIN_ADDRESS, sendLoot, sendAdmin, 6);
+					String result = satoshiQuest.sendMany(player.getUniqueId().toString(), satoshiQuest.REDIS.get("nodeAddress"+satoshiQuest.SERVERDISPLAY_NAME), satoshiQuest.ADMIN_ADDRESS, sendLoot, sendAdmin);
       			//Long newBalance = satoshiQuest.getBalance(player.getUniqueId().toString(),1);
 				if (result != "failed") {
 					String setLives = Integer.toString(((Integer.valueOf(satoshiQuest.REDIS.get("LivesLeft" +player.getUniqueId().toString()))) + (satoshiQuest.LIVES_PERBUYIN * livesAmount)));

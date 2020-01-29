@@ -23,9 +23,9 @@ public class WalletCommand extends CommandAction {
 player.sendMessage(ChatColor.GREEN + "Your Deposit address on this server: " + satoshiQuest.getAccountAddress(player.getUniqueId().toString()));
 String url = satoshiQuest.ADDRESS_URL + satoshiQuest.REDIS.get("nodeAddress"+ player.getUniqueId().toString());
       player.sendMessage(ChatColor.WHITE + "" + ChatColor.UNDERLINE + url);
-      Long balance1 = satoshiQuest.getBalance(player.getUniqueId().toString(),1);
+      Long balance6 = satoshiQuest.getBalance(player.getUniqueId().toString(),6);
       Long unconfirmedBalance = satoshiQuest.getUnconfirmedBalance(player.getUniqueId().toString());
-      player.sendMessage(ChatColor.GREEN + "wallet balance with 1-conf+: " + balance1);
+      player.sendMessage(ChatColor.GREEN + "wallet balance with 6-conf+: " + balance6);
       player.sendMessage(ChatColor.DARK_GREEN + "wallet unconfirmed: " + unconfirmedBalance);
 	player.sendMessage(ChatColor.GREEN + "1 btc = $" + satoshiQuest.exRate);
 	if (satoshiQuest.REDIS.exists("ExternalAddress" +player.getUniqueId().toString())) {
