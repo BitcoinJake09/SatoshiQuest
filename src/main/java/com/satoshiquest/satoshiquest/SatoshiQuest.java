@@ -1269,7 +1269,9 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
 			livesRate =  (long)((BUYIN_AMOUNT/(exRate*0.00000001))*0.90);
 			adminRate =  (long)((BUYIN_AMOUNT/(exRate*0.00000001))*0.10);
 			totalLifeRate = livesRate + adminRate;
-			announce("Currently Bitcoin is: $"+ exRate);
+			DecimalFormat df = new DecimalFormat("#.##");
+	        	//System.out.print(df.format(exRate));
+			announce("Currently Bitcoin is: $"+ df.format(exRate));
 		        //System.out.println("Currently Bitcoin is: $"+ exRate);
 			announce("1 Life is: "+ totalLifeRate + " " +DENOMINATION_NAME);
 			announce("Active updates in the discord: https://discordapp.com/invite/S38Ser6");
@@ -1278,7 +1280,6 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
 			// announce loot in discord
 			long lootBalance = (long)(getBalance(SERVERDISPLAY_NAME,1) * 0.85);
 			double lootAmount =  (double)(exRate * (lootBalance * 0.00000001));        
-			DecimalFormat df = new DecimalFormat("#.##");
         		//System.out.print(df.format(lootAmount));
 			String lootAnnounce = ("Current BTC in loot: " +lootBalance + " sats! worth: $"+df.format(lootAmount)+" USD!");
 				sendDiscordMessage("1 Life is: "+ totalLifeRate + " sats");
@@ -1440,7 +1441,7 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 		//reset? DONE :D
 	if (result == "failed") {
 		sendLoot = 0L;
-		announce("Loot failed transfer possibly due to high fee");
+		announce("Loot failed transfer possibly due to high fee, or too many UTXOs to combined at this time.");
 	}
 	DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
 	Date date = new Date();
@@ -1469,6 +1470,33 @@ REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFo
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
 			sendDiscordMessage(dateFormat.format(date) + " " + player.getName() + " WON " + "Round " + REDIS.get("gameRound") + " with " + sendLoot + " SATS worth $" + df.format(amtUSD));
+		}
+		}//betatest
+	}
+//if failed tx give somesort of reward still, 1 life?
+if (result == "failed"){
+	int iter=1;
+	int tempLivesWinningPlayer = Integer.parseInt(REDIS.get("LivesLeft" + player.getUniqueId().toString()));
+		for (String templeaderBoardList : leaderBoardList) {
+		announce(iter+") "+ REDIS.get(templeaderBoardList));
+		iter++;
+		}
+		DecimalFormat df = new DecimalFormat("#.##");
+        	System.out.print(df.format(amtUSD));
+		if (REDIS.exists("BetaTest")){
+REDIS.set("LeaderBoard " + iter, "BetaTest Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " Sats " + totalLifeRate);
+		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
+		REDIS.set("LivesLeft" +player.getUniqueId().toString(), Integer.toString(tempLivesWinningPlayer+1));
+		if(System.getenv("DISCORD_HOOK_URL")!=null) {
+			sendDiscordMessage("WINNER - Beta Test Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " Sats " + totalLifeRate);
+		}
+		}//betatest
+		if (!REDIS.exists("BetaTest")){
+REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " Sats " + totalLifeRate);
+		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
+		REDIS.set("LivesLeft" +player.getUniqueId().toString(), Integer.toString(tempLivesWinningPlayer+1));
+		if(System.getenv("DISCORD_HOOK_URL")!=null) {
+			sendDiscordMessage("WINNER - Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " Sats " + totalLifeRate);
 		}
 		}//betatest
 	}
