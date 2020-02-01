@@ -283,6 +283,7 @@ public class SatoshiQuest extends JavaPlugin {
 	if (!REDIS.exists("FEE_BLOCK_CONF")) {
 		REDIS.set("FEE_BLOCK_CONF", Integer.toString(FEE_BLOCK_CONF));
 	}
+	//REDIS.del("LOOT_RADIUS_MIN"); //use for testing :p
 	if (!REDIS.exists("LOOT_RADIUS_MIN")) {
 		REDIS.set("LOOT_RADIUS_MIN", LOOT_RADIUS_MIN.toString());
 		REDIS.set("LOOT_RADIUS_MAX", LOOT_RADIUS_MAX.toString());
@@ -313,14 +314,21 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
   LootSpawnX = new Long(rand(LOOT_RADIUS_MIN.intValue(),LOOT_RADIUS_MAX.intValue()));
   LootSpawnZ = new Long(rand(LOOT_RADIUS_MIN.intValue(),LOOT_RADIUS_MAX.intValue()));
 
-	int posNeg = rand(1,2);
-	if (posNeg == 1) {
+	int can0 = rand(0,10);
+	if (can0 < 5) {
+  LootSpawnX = new Long(rand(1,LOOT_RADIUS_MAX.intValue()));
+	} else {
+  LootSpawnZ = new Long(rand(1,LOOT_RADIUS_MAX.intValue()));
+	}
+
+	int posNeg = rand(0,10);
+	if (posNeg < 5) {
 		LootSpawnX = LootSpawnX * -1;
 	} else if (posNeg == 2) {
 		LootSpawnX = LootSpawnX * 1;
 	}
-	posNeg = rand(1,2);
-	if (posNeg == 1) {
+	posNeg = rand(0,10);
+	if (posNeg < 5) {
 		LootSpawnZ = LootSpawnZ * -1;
 	} else if (posNeg == 2) {
 		LootSpawnZ = LootSpawnZ * 1;
@@ -332,7 +340,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
 	LootSpawnZ = sZ + LootSpawnZ;
 
 
-
+	//REDIS.del("lootSpawnY"); //use for testing :p
 	if (!REDIS.exists("lootSpawnY")) {
 	REDIS.set("lootSpawnX",LootSpawnX.toString());
 	REDIS.set("lootSpawnZ",LootSpawnZ.toString());
