@@ -105,8 +105,17 @@ public class SatoshiQuest extends JavaPlugin {
   public static final Double BUYIN_AMOUNT =
       System.getenv("BUYIN_AMOUNT") != null ? Double.parseDouble(System.getenv("BUYIN_AMOUNT")) : 1.00;
 
+  public static final Double MAX_WIN_AMOUNT =
+      System.getenv("MAX_WIN_AMOUNT") != null ? Double.parseDouble(System.getenv("BUYIN_AMOUNT")) : 200.00;
+
   public static final int LIVES_PERBUYIN =
       System.getenv("LIVES_PERBUYIN") != null ? Integer.parseInt(System.getenv("LIVES_PERBUYIN")) : 1;
+
+  public double THIS_ROUND_WIN_PERC =
+      System.getenv("THIS_ROUND_WIN_PERC") != null ? Double.parseDouble(System.getenv("THIS_ROUND_WIN_PERC")) : 0.45;
+
+  public double NEXT_ROUND_WIN_PERC =
+      System.getenv("NEXT_ROUND_WIN_PERC") != null ? Double.parseDouble(System.getenv("NEXT_ROUND_WIN_PERC")) : 0.45;
 
   public int FEE_BLOCK_CONF =
       System.getenv("FEE_BLOCK_CONF") != null ? Integer.parseInt(System.getenv("FEE_BLOCK_CONF")) : 6;
@@ -179,8 +188,8 @@ public class SatoshiQuest extends JavaPlugin {
 	if (eventsLoaded == false) {
       getServer().getPluginManager().registerEvents(new EntityEvents(this), this);
       getServer().getPluginManager().registerEvents(new ServerEvents(this), this);
-	//REDIS.del("spawnCreated");
-	//REDIS.del("lootSpawnY");
+	//REDIS.del("spawnCreated");// for testing
+	//REDIS.del("lootSpawnY");// for testing
 	eventsLoaded = true;	
 	}
 
@@ -1145,8 +1154,13 @@ if(con.getResponseCode()==200) {
                 playSBoardObj.setDisplayName(ChatColor.GREEN + ChatColor.BOLD.toString() + "Satoshi" + ChatColor.GOLD + ChatColor.BOLD.toString() + "Quest");
 
 		if (isPlayersAroundLoot == false) {
-		long lootBalance = (long)(getBalance(SERVERDISPLAY_NAME,1) * 0.85);
-		double lootAmount =  (double)(exRate * (lootBalance * 0.00000001));        
+		long lootBalance = (long)(getBalance(SERVERDISPLAY_NAME,1) * THIS_ROUND_WIN_PERC);
+		double lootAmount =  (double)(exRate * (lootBalance * 0.00000001));
+		//lootAmount = 211.37;  // for testing
+		if (lootAmount > MAX_WIN_AMOUNT) {
+			lootBalance = (long)((1 / (exRate/MAX_WIN_AMOUNT)) * 100000000);
+			lootAmount = (double)(exRate * (lootBalance * 0.00000001));
+		}       
 		DecimalFormat df = new DecimalFormat("#.##");
         	//System.out.print(df.format(lootAmount));
 		String whatRound = "Round " + REDIS.get("gameRound");
@@ -1159,7 +1173,7 @@ if(con.getResponseCode()==200) {
                 Score score6 = playSBoardObj.getScore(ChatColor.GREEN + "Lives: " + REDIS.get("LivesLeft" + player.getUniqueId().toString()));
 		score6.setScore(6);
 
-		Score score5 = playSBoardObj.getScore(ChatColor.GREEN + "Balance: " + Long.toString(getBalance(player.getUniqueId().toString(),1)));
+		Score score5 = playSBoardObj.getScore(ChatColor.GREEN + "Balance: " + Long.toString(getBalance(player.getUniqueId().toString(),6)));
 		score5.setScore(5);
 
 		Score score4 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: " + Long.toString(lootBalance) + "sats");
@@ -1190,6 +1204,10 @@ if(con.getResponseCode()==200) {
 		}
 		if (isNearLoot(player)){
 		Score scoreIsNear = playSBoardObj.getScore(ChatColor.GREEN + player.getName() + " you are near..");
+		scoreIsNear.setScore(0);
+		} else {
+		long ann = LOOT_RADIUS_MAX/4;
+		Score scoreIsNear = playSBoardObj.getScore(ChatColor.GREEN + "Announce: " + Long.toString(ann));
 		scoreIsNear.setScore(0);
 		}
       		  player.setScoreboard(playSBoard);
@@ -1258,7 +1276,7 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
 			if (isNearLoot(p)) {
 				Double px=(double)p.getLocation().getX();
 		                Double pz=(double)p.getLocation().getZ();
-				String toAnnounce = ("@ here: player " + p.getName() + " is near the loot! their last know location was:  X: " + px.intValue() + "   Z: " + pz.intValue());
+				String toAnnounce = ("player " + p.getName() + " is near the loot! their last know location was:  X: " + px.intValue() + "   Z: " + pz.intValue());
 				if(System.getenv("DISCORD_HOOK_URL")!=null) {
 					sendDiscordMessage(toAnnounce);
 				}
@@ -1278,8 +1296,13 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
 		        //System.out.println("1 Life is: "+ totalLifeRate + " " +DENOMINATION_NAME);
 			if ((System.getenv("DISCORD_HOOK_URL")!=null)&&(discordWait15 >= 3)) {
 			// announce loot in discord
-			long lootBalance = (long)(getBalance(SERVERDISPLAY_NAME,1) * 0.85);
-			double lootAmount =  (double)(exRate * (lootBalance * 0.00000001));        
+			long lootBalance = (long)(getBalance(SERVERDISPLAY_NAME,1) * THIS_ROUND_WIN_PERC);
+			double lootAmount =  (double)(exRate * (lootBalance * 0.00000001));
+			//lootAmount = 211.37; // for testing
+			if (lootAmount > MAX_WIN_AMOUNT) {
+			lootBalance = (long)((1 / (exRate/MAX_WIN_AMOUNT)) * 100000000);
+			lootAmount = (double)(exRate * (lootBalance * 0.00000001));
+		}               
         		//System.out.print(df.format(lootAmount));
 			String lootAnnounce = ("Current BTC in loot: " +lootBalance + " sats! worth: $"+df.format(lootAmount)+" USD!");
 				sendDiscordMessage("1 Life is: "+ totalLifeRate + " sats");
@@ -1384,7 +1407,7 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
 		if (!REDIS.exists("LootAnnounced" +player.getUniqueId().toString())) {
 		REDIS.set("LootAnnounced" +player.getUniqueId().toString(), "true");
 
-		toAnnounce = ("@ here: player " + player.getName() + " is near the loot! their last know location was:  X: " + playerx.intValue() + " Z:" + playerz.intValue());
+		toAnnounce = ("player " + player.getName() + " is near the loot! their last know location was:  X: " + playerx.intValue() + " Z:" + playerz.intValue());
 		announce(toAnnounce);
 if(System.getenv("DISCORD_HOOK_URL")!=null) {
 			sendDiscordMessage(toAnnounce);
@@ -1424,8 +1447,8 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 		//result = "test";
 		try {
 		if (getBalance(SERVERDISPLAY_NAME,1) > 0) {
-			sendLoot = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * 0.85);
-			Long sendback = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * 0.025);
+			sendLoot = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * THIS_ROUND_WIN_PERC);
+			Long sendback = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * NEXT_ROUND_WIN_PERC);
 		if (REDIS.exists("ExternalAddress" +player.getUniqueId().toString())) {
 		result = sendMany(SERVERDISPLAY_NAME, REDIS.get("ExternalAddress" +player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback);
 		} 
@@ -1696,7 +1719,32 @@ public void teleportToLootSpawn(Player player) {
 			tempblock.setType(Material.WATER);
 	                tempblock = spawnBlock.getWorld().getBlockAt((int)posX,(int)y, (int)negZ);
 			tempblock.setType(Material.WATER);
-				}
+		}
+		for(double z = negZ; z <= posZ-1; z++) {
+				for(double y = lowPoint; y <= highPoint-1; y++) {
+	                Block tempblock = spawnBlock.getWorld().getBlockAt((int)negX,(int)y, (int)z);
+			tempblock.setType(Material.WATER);
+	                tempblock = spawnBlock.getWorld().getBlockAt((int)posX,(int)y, (int)z);
+			tempblock.setType(Material.WATER);
+	                tempblock = spawnBlock.getWorld().getBlockAt((int)negX,(int)y, (int)z);
+			tempblock.setType(Material.WATER);
+	                tempblock = spawnBlock.getWorld().getBlockAt((int)posX,(int)y, (int)z);
+			tempblock.setType(Material.WATER);
+		}
+		}
+		for(double x = negX; x <= posX-1; x++) {
+			for(double y = lowPoint; y <= highPoint-1; y++) {
+	                Block tempblock = spawnBlock.getWorld().getBlockAt((int)x,(int)y, (int)negZ);
+			tempblock.setType(Material.WATER);
+	                tempblock = spawnBlock.getWorld().getBlockAt((int)x,(int)y, (int)posZ);
+			tempblock.setType(Material.WATER);
+	                tempblock = spawnBlock.getWorld().getBlockAt((int)x,(int)y, (int)posZ);
+			tempblock.setType(Material.WATER);
+	                tempblock = spawnBlock.getWorld().getBlockAt((int)x,(int)y, (int)negZ);
+			tempblock.setType(Material.WATER);
+		}
+		}
+				
 
 
 	Block tempSetSpawnBlock = spawnBlock.getWorld().getBlockAt((int)spawnx,((int)spawnBlock.getWorld().getHighestBlockAt((int)spawnx, (int)spawnz).getY()-1), (int)spawnz);
