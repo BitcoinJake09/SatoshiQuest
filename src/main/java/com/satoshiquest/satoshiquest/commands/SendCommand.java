@@ -16,6 +16,10 @@ public class SendCommand extends CommandAction {
 
   public boolean run(
       CommandSender sender, Command cmd, String label, String[] args, final Player player) {
+if (args[0].equalsIgnoreCase("help")) {
+	      player.sendMessage(ChatColor.GREEN + "/send <amount> <address> - Send is used for External transactions to an address. ");
+	return true;
+	}
     if (args.length == 2) {
       for (char c : args[0].toCharArray()) {
         if (!Character.isDigit(c)) return false;
@@ -70,6 +74,11 @@ public class SendCommand extends CommandAction {
     } else {
       return false;
     }
+	try {
+	      satoshiQuest.updateScoreboard(player);
+	} catch(Exception e) {
+					e.printStackTrace();
+				}
     return true;
   }
 }

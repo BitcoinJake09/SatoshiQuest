@@ -16,6 +16,11 @@ public class TipCommand extends CommandAction {
 
   public boolean run(
       CommandSender sender, Command cmd, String label, String[] args, final Player player) {
+if (args[0].equalsIgnoreCase("help")) {
+	      player.sendMessage(ChatColor.GREEN + "/tip <amount> <playername> - Tip is used for player to player transactions.");
+	return true;
+	}
+
     //int MAX_SEND = 10000; // to be multiplied by DENOMINATION_FACTOR
     if (args.length == 2) {
       for (char c : args[0].toCharArray()) {
@@ -86,6 +91,11 @@ public class TipCommand extends CommandAction {
     } else {
       return false;
     }
+	try {
+	      satoshiQuest.updateScoreboard(player);
+	} catch(Exception e) {
+					e.printStackTrace();
+				}
     return true;
   }
 }
