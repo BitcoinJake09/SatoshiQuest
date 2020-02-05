@@ -16,7 +16,7 @@ public class SendCommand extends CommandAction {
 
   public boolean run(
       CommandSender sender, Command cmd, String label, String[] args, final Player player) {
-if (args[0].equalsIgnoreCase("help")) {
+if (args[0].equalsIgnoreCase("help") || args.length == 0) {
 	      player.sendMessage(ChatColor.GREEN + "/send <amount> <address> - Send is used for External transactions to an address. ");
 	return true;
 	}

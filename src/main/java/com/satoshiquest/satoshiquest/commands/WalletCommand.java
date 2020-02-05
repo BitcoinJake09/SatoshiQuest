@@ -17,7 +17,7 @@ public class WalletCommand extends CommandAction {
 
   public boolean run(
       CommandSender sender, Command cmd, String label, String[] args, Player player) {
-if (args[0].equalsIgnoreCase("help")) {
+if (args[0].equalsIgnoreCase("help") || args.length == 0) {
 	      player.sendMessage(ChatColor.GREEN + "/wallet - Displays your SatoshiQuest wallet info.");
               player.sendMessage(ChatColor.GREEN + "/wallet <set> <address> - will set your own win address to an address of your choosing instead of the ingame wallet. ");
 	      player.sendMessage(ChatColor.GREEN + "/tip <amount> <playername> - Tip is used for player to player transactions.");
@@ -30,7 +30,6 @@ String url = satoshiQuest.ADDRESS_URL + satoshiQuest.REDIS.get("nodeAddress"+ pl
       e.printStackTrace();
       player.sendMessage(ChatColor.RED + "There was a problem reading your wallet. try again soon.");
     }
-	return true;
 	}
 
     try {

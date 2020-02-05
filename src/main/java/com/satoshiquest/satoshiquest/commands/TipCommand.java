@@ -16,7 +16,7 @@ public class TipCommand extends CommandAction {
 
   public boolean run(
       CommandSender sender, Command cmd, String label, String[] args, final Player player) {
-if (args[0].equalsIgnoreCase("help")) {
+if (args[0].equalsIgnoreCase("help") || args.length == 0) {
 	      player.sendMessage(ChatColor.GREEN + "/tip <amount> <playername> - Tip is used for player to player transactions.");
 	return true;
 	}
