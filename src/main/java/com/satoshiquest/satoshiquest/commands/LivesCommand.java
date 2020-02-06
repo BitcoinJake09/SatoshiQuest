@@ -19,7 +19,7 @@ public class LivesCommand extends CommandAction {
       CommandSender sender, Command cmd, String label, String[] args, Player player) {
 	//satoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())
 	Long balance = 0L;
-
+       if (args[0].equalsIgnoreCase("help") || !(args.length >= 5)) { 
 
     try {
       satoshiQuest.getWalletInfo(player.getUniqueId().toString());
@@ -40,7 +40,7 @@ try {
 	if ((satoshiQuest.isStringInt(args[0])) && (args.length <= 2)) {  //end help
 		if (Integer.parseInt(args[0]) > 0) {
 			try {
-     				balance = satoshiQuest.getBalance(player.getUniqueId().toString(),1);
+     				balance = satoshiQuest.getBalance(player.getUniqueId().toString(),6);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -48,11 +48,8 @@ try {
 			Long sendLoot = satoshiQuest.livesRate * livesAmount;
 			Long sendAdmin = satoshiQuest.adminRate * livesAmount;
 			Long totalBuyingBTC = satoshiQuest.totalLifeRate * livesAmount;
-			if (args.length == 3) {
-				player.sendMessage(ChatColor.YELLOW + "Bought " + livesAmount + " Lives for " + totalBuyingBTC + " with " + sendLoot + " going into the loot treasure and " + sendAdmin + " going to the admin");
-			} else {
-				player.sendMessage(ChatColor.YELLOW + "Buy " + livesAmount + " Lives for " + totalBuyingBTC + " with " + sendLoot + " going into the loot treasure and " + sendAdmin + " going to the admin");
-			}
+			player.sendMessage(ChatColor.YELLOW + "Buy " + livesAmount + " Lives for " + totalBuyingBTC + " with " + sendLoot + " going into the loot treasure and " + sendAdmin + " going to the admin");
+			
 			if (args.length == 2) {
 				if (args[1].equalsIgnoreCase("buy")) {
 				try {
@@ -106,6 +103,7 @@ try {
 	} catch(Exception e) {
 					e.printStackTrace();
 				}
+	}
     return true;
   }
 
