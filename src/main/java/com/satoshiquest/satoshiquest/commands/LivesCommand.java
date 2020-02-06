@@ -19,17 +19,15 @@ public class LivesCommand extends CommandAction {
       CommandSender sender, Command cmd, String label, String[] args, Player player) {
 	//satoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString())
 	Long balance = 0L;
-   if (args.length > 0) {
 
-      if (args[0].equalsIgnoreCase("help")) {
 
     try {
       satoshiQuest.getWalletInfo(player.getUniqueId().toString());
       balance = satoshiQuest.getBalance(player.getUniqueId().toString(),6);
       player.sendMessage(ChatColor.GREEN + "wallet balance: " + balance);
     } catch (Exception e) {
-      e.printStackTrace();
-      player.sendMessage(ChatColor.RED + "There was a problem reading your wallet.");
+      //e.printStackTrace();
+      //player.sendMessage(ChatColor.RED + "There was a problem reading your wallet.");
     }
 	player.sendMessage(ChatColor.GREEN + "Lives are $" + satoshiQuest.BUYIN_AMOUNT + " USD each in BTC. Most goes into Loot wallet which everyone searches for the treasure, once found that player will recive funds to their player wallet if no external wallet set and the world will reset for a new hunt. A little bit is set aside for further developent and hosting.");
 	player.sendMessage(ChatColor.YELLOW + "You can use the command (/Lives [Number]) like (/Lives 1) or (/Lives 2)");
@@ -37,9 +35,9 @@ public class LivesCommand extends CommandAction {
 	player.sendMessage(ChatColor.GREEN + "Lives are transferable between players with (/Lives [Number] send [playername])");
 	if (balance == 0) {
 	player.sendMessage(ChatColor.RED + "Looks like you dont have enough funds, try the (/wallet) command to check your balance and deposit address.");
-	}
-
-	} else if ((satoshiQuest.isStringInt(args[0])) && (args.length <= 2)) {  //end help
+	
+try {
+	if ((satoshiQuest.isStringInt(args[0])) && (args.length <= 2)) {  //end help
 		if (Integer.parseInt(args[0]) > 0) {
 			try {
      				balance = satoshiQuest.getBalance(player.getUniqueId().toString(),1);
@@ -77,7 +75,10 @@ public class LivesCommand extends CommandAction {
 			
 		}//end is args[0] > 0
 	} //end isStringInt
-
+    } catch (Exception e) {
+      //e.printStackTrace();
+      //player.sendMessage(ChatColor.RED + "There was a problem reading your wallet.");
+    }
 		if (args.length == 3) {
 			if (args[1].equalsIgnoreCase("send")) {
 				String sendWho = args[2];

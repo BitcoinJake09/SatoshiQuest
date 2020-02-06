@@ -16,10 +16,14 @@ public class SendCommand extends CommandAction {
 
   public boolean run(
       CommandSender sender, Command cmd, String label, String[] args, final Player player) {
-if (args[0].equalsIgnoreCase("help") || args.length == 0) {
-	      player.sendMessage(ChatColor.GREEN + "/send <amount> <address> - Send is used for External transactions to an address. ");
-	return true;
+try {
+if (args[0].equalsIgnoreCase("help") || !(args.length >= 1)) {
+	      player.sendMessage(ChatColor.GREEN + "/send <amount> <address> - Send is used for External transactions to an address.");
 	}
+} catch (Exception e) {
+      //e.printStackTrace();
+      player.sendMessage(ChatColor.GREEN + "/send <amount> <address> - Send is used for External transactions to an address.");
+    }
     if (args.length == 2) {
       for (char c : args[0].toCharArray()) {
         if (!Character.isDigit(c)) return false;

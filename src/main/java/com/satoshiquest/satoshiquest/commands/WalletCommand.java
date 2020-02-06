@@ -17,20 +17,24 @@ public class WalletCommand extends CommandAction {
 
   public boolean run(
       CommandSender sender, Command cmd, String label, String[] args, Player player) {
-if (args[0].equalsIgnoreCase("help") || args.length == 0) {
+try {
+if (args[0].equalsIgnoreCase("help") || !(args.length >= 1)) {
 	      player.sendMessage(ChatColor.GREEN + "/wallet - Displays your SatoshiQuest wallet info.");
               player.sendMessage(ChatColor.GREEN + "/wallet <set> <address> - will set your own win address to an address of your choosing instead of the ingame wallet. ");
 	      player.sendMessage(ChatColor.GREEN + "/tip <amount> <playername> - Tip is used for player to player transactions.");
 	      player.sendMessage(ChatColor.GREEN + "/send <amount> <address> - Send is used for External transactions to an address.");
-try {
+
 	      player.sendMessage(ChatColor.GREEN + "Your Deposit address on this server: " + satoshiQuest.getAccountAddress(player.getUniqueId().toString()));
 String url = satoshiQuest.ADDRESS_URL + satoshiQuest.REDIS.get("nodeAddress"+ player.getUniqueId().toString());
       	      player.sendMessage(ChatColor.WHITE + "" + ChatColor.UNDERLINE + url);
-    } catch (Exception e) {
-      e.printStackTrace();
-      player.sendMessage(ChatColor.RED + "There was a problem reading your wallet. try again soon.");
-    }
 	}
+} catch (Exception e) {
+      //e.printStackTrace();
+      player.sendMessage(ChatColor.GREEN + "/wallet - Displays your SatoshiQuest wallet info.");
+              player.sendMessage(ChatColor.GREEN + "/wallet <set> <address> - will set your own win address to an address of your choosing instead of the ingame wallet. ");
+	      player.sendMessage(ChatColor.GREEN + "/tip <amount> <playername> - Tip is used for player to player transactions.");
+	      player.sendMessage(ChatColor.GREEN + "/send <amount> <address> - Send is used for External transactions to an address.");
+    }
 
     try {
       //User user = new User(player);

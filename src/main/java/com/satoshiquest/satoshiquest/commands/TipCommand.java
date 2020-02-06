@@ -16,10 +16,14 @@ public class TipCommand extends CommandAction {
 
   public boolean run(
       CommandSender sender, Command cmd, String label, String[] args, final Player player) {
-if (args[0].equalsIgnoreCase("help") || args.length == 0) {
+	try {
+if (args[0].equalsIgnoreCase("help") || !(args.length >= 1)) {
 	      player.sendMessage(ChatColor.GREEN + "/tip <amount> <playername> - Tip is used for player to player transactions.");
-	return true;
 	}
+	} catch (Exception e) {
+      //e.printStackTrace();
+      player.sendMessage(ChatColor.GREEN + "/tip <amount> <playername> - Tip is used for player to player transactions.");
+    }
 
     //int MAX_SEND = 10000; // to be multiplied by DENOMINATION_FACTOR
     if (args.length == 2) {
