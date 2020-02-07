@@ -258,12 +258,12 @@ player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
     try {
       player.sendMessage(
               "The loot pool is: "
-                      + Long.toString((long)(satoshiQuest.getBalance(satoshiQuest.SERVERDISPLAY_NAME,1) * 0.85))
+                      + Long.toString((long)(satoshiQuest.getBalance(satoshiQuest.SERVERDISPLAY_NAME,1) * satoshiQuest.THIS_ROUND_WIN_PERC))
                       + " "
                       + satoshiQuest.DENOMINATION_NAME);
 	player.sendMessage(
               "The loot pool unconfirmed is: "
-                      + Long.toString((long)(satoshiQuest.getBalance(satoshiQuest.SERVERDISPLAY_NAME,0) * 0.85))
+                      + Long.toString((long)(satoshiQuest.getBalance(satoshiQuest.SERVERDISPLAY_NAME,0) * satoshiQuest.THIS_ROUND_WIN_PERC))
                       + " "
                       + satoshiQuest.DENOMINATION_NAME);
     } catch(Exception e) {
@@ -341,7 +341,11 @@ player.sendMessage(ChatColor.WHITE + "More info: " + ChatColor.UNDERLINE + "http
 		if (satoshiQuest.isNearLoot(event.getPlayer())) {
 			//event.getPlayer().sendMessage(ChatColor.GREEN + "You are getting near... stay focused!");
 		}
+		try {
 		satoshiQuest.updateScoreboard(event.getPlayer());
+		} catch (Exception e){
+		//e.printStackTrace();
+		}
 	}
 	}
   }
