@@ -83,7 +83,7 @@ public class LivesCommand extends CommandAction {
 
 							if (Integer.valueOf(args[0]) <= Integer.valueOf(satoshiQuest.REDIS.get("LivesLeft" +player.getUniqueId().toString()))) {
 						       
-														player.sendMessage(ChatColor.GREEN + "Sending " + args[1] + " lives to " + sendWho);
+														player.sendMessage(ChatColor.GREEN + "Sending " + args[0] + " lives to " + sendWho);
 							String minusLives = Integer.toString((Integer.valueOf(satoshiQuest.REDIS.get("LivesLeft" +player.getUniqueId().toString())) - livesAmount));
 							String plusLives = Integer.toString((Integer.valueOf(satoshiQuest.REDIS.get("LivesLeft" +Bukkit.getServer().getPlayer(sendWho).getUniqueId())) + livesAmount));
 							satoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(), minusLives);

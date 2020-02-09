@@ -45,9 +45,12 @@ String url = satoshiQuest.ADDRESS_URL + satoshiQuest.REDIS.get("nodeAddress"+ pl
       Long balance1 = satoshiQuest.getBalance(player.getUniqueId().toString(),1);
       Long balance6 = satoshiQuest.getBalance(player.getUniqueId().toString(),6);
       Long unconfirmedBalance = satoshiQuest.getUnconfirmedBalance(player.getUniqueId().toString());
-      player.sendMessage(ChatColor.GREEN + "wallet balance with 1-conf+: " + balance1);
       player.sendMessage(ChatColor.GREEN + "wallet balance with 6-conf+: " + balance6);
+      player.sendMessage(ChatColor.GREEN + "wallet balance with 1-conf+: " + balance1);
       player.sendMessage(ChatColor.DARK_GREEN + "wallet unconfirmed: " + unconfirmedBalance);
+	if (SatoshiQuest.REDIS.exists("txFee" + player.getUniqueId().toString())) {
+		player.sendMessage(ChatColor.GREEN + "player fee is set to " + SatoshiQuest.REDIS.get("txFee" + player.getUniqueId().toString()) + "sats/byte.");
+	}
 			DecimalFormat df = new DecimalFormat("#.##");
 	        	//System.out.print(df.format(exRate));
 	player.sendMessage(ChatColor.GREEN + "1 btc = $" + df.format(satoshiQuest.exRate));
