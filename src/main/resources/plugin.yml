@@ -21,8 +21,8 @@ commands:
     description: "Utility to add/remove/list moderators"
     usage: "/mod <add|remove|list>"
   setfee:
-    description: "Utility to set the expected block the transaction would confirm at."
-    usage: "/setfee <int>"
+    description: "Used for players to set their own Sat/Byte between 1.2 - 15 sats/byte."
+    usage: "/setfee <1.2 - 15>"
   setlives:
     description: "Utility to set/correct lives used by mods only"
     usage: "/setlives set <playername> <amount>"
