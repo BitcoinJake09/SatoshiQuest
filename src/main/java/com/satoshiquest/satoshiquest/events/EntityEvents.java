@@ -118,6 +118,14 @@ public class EntityEvents implements Listener {
 	if (SatoshiQuest.REDIS.exists("toldSpawn" + event.getPlayer().getUniqueId().toString())) {
 	SatoshiQuest.REDIS.del("toldSpawn" + event.getPlayer().getUniqueId().toString());
 	}
+	if (!SatoshiQuest.REDIS.exists("txFee" + event.getPlayer().getUniqueId().toString())){
+		boolean setFee = satoshiQuest.setSatByte(event.getPlayer().getUniqueId().toString(), 1.2);
+		//System.out.println("no fee set, set to 1.2sats/byte. "+setFee);
+		SatoshiQuest.REDIS.set("txFee" + event.getPlayer().getUniqueId().toString(),"1.2");
+	} else 	if (SatoshiQuest.REDIS.exists("txFee" + event.getPlayer().getUniqueId().toString())) {
+		boolean setFee = satoshiQuest.setSatByte(event.getPlayer().getUniqueId().toString(), Double.parseDouble(SatoshiQuest.REDIS.get("txFee" + event.getPlayer().getUniqueId().toString())));
+		//System.out.println("player fee is set to " + SatoshiQuest.REDIS.get("txFee" + event.getPlayer().getUniqueId().toString()) + "sats/byte.");
+	}
 
     } catch (Exception e) {
       e.printStackTrace();
