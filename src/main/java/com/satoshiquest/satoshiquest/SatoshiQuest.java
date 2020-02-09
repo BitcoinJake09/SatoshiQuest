@@ -117,9 +117,6 @@ public class SatoshiQuest extends JavaPlugin {
   public double NEXT_ROUND_WIN_PERC =
       System.getenv("NEXT_ROUND_WIN_PERC") != null ? Double.parseDouble(System.getenv("NEXT_ROUND_WIN_PERC")) : 0.45;
 
-  public int FEE_BLOCK_CONF =
-      System.getenv("FEE_BLOCK_CONF") != null ? Integer.parseInt(System.getenv("FEE_BLOCK_CONF")) : 6;
-
   public static final Long SPAWN_PROTECT_RADIUS =
       System.getenv("SPAWN_PROTECT_RADIUS") != null ? Long.parseLong(System.getenv("SPAWN_PROTECT_RADIUS")) : 14;
 
@@ -269,6 +266,8 @@ public class SatoshiQuest extends JavaPlugin {
 
 	System.out.println("[Admin address] address: " + ADMIN_ADDRESS);      
         System.out.println("[world wallet] address: " + REDIS.get("nodeAddress"+SERVERDISPLAY_NAME));
+	boolean setFee = setSatByte(SERVERDISPLAY_NAME, 2.4);
+				System.out.println("set fee to 2.4sats/byte: "+setFee);
 	//System.out.println("[world address] address: " + REDIS.get("nodeAddress"));
         //System.out.println("The loot pool is: " + (int)(wallet.getBalance(0)/DENOMINATION_FACTOR));
 
@@ -289,9 +288,6 @@ public class SatoshiQuest extends JavaPlugin {
 
 	
 	
-	if (!REDIS.exists("FEE_BLOCK_CONF")) {
-		REDIS.set("FEE_BLOCK_CONF", Integer.toString(FEE_BLOCK_CONF));
-	}
 	//REDIS.del("LOOT_RADIUS_MIN"); //use for testing :p
 	if (!REDIS.exists("LOOT_RADIUS_MIN")) {
 		REDIS.set("LOOT_RADIUS_MIN", LOOT_RADIUS_MIN.toString());
@@ -363,6 +359,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
       createScheduledTimers();
       commands = new HashMap<String, CommandAction>();
       commands.put("wallet", new WalletCommand(this));
+      commands.put("SetFee", new SetFeeCommand(this));
       commands.put("tip", new TipCommand(this));
       commands.put("send", new SendCommand(this));
       commands.put("lives", new LivesCommand(this));
@@ -372,7 +369,6 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
       modCommands.put("crashTest", new CrashtestCommand(this));
       modCommands.put("mod", new ModCommand(this));
       modCommands.put("reset", new ResetCommand(this));
-      modCommands.put("SetFee", new SetFeeCommand(this));
       modCommands.put("setlives", new SetLivesCommand(this));
       modCommands.put("ban", new BanCommand());
       modCommands.put("unban", new UnbanCommand());
@@ -988,7 +984,7 @@ try {
     params.add(SERVERDISPLAY_NAME);
     params.add(false);
     params.add(false);
-    params.add(FEE_BLOCK_CONF);
+    params.add(6);
     //System.out.println(params);
     jsonObject.put("params", params);
     //System.out.println("Checking blockchain info...");
@@ -1067,7 +1063,7 @@ try {
     addresses.put(address2,decimalSat2);
     params.add(addresses);
 
-    params.add(FEE_BLOCK_CONF);
+    params.add(6);
     params.add("SatoshiQuest");//the comment :p
 
     //System.out.println(params);
@@ -1121,6 +1117,72 @@ if(con.getResponseCode()==200) {
 		e.printStackTrace();
 	}
     return "failed";
+  }
+
+  public boolean setSatByte(String account_id, double sats) throws IOException, ParseException {
+try {
+    JSONParser parser = new JSONParser();
+    final JSONObject jsonObject = new JSONObject();
+    jsonObject.put("jsonrpc", "1.0");
+    jsonObject.put("id", "satoshiquest");
+    jsonObject.put("method", "settxfee");
+    JSONArray params = new JSONArray();
+    //System.out.println(sat);
+    BigDecimal decimalSat = new BigDecimal(sats * 0.00001);
+    decimalSat = decimalSat.setScale(8, BigDecimal.ROUND_DOWN);
+    //System.out.println(decimalSat);
+    params.add(decimalSat);
+    System.out.println(account_id + " set fee to: " + decimalSat);
+    //System.out.println(params);
+    jsonObject.put("params", params);
+    //System.out.println("Checking blockchain info...");
+    URL url = new URL("http://" + BITCOIN_NODE_HOST + ":" + BITCOIN_NODE_PORT + "/wallet/" + account_id);
+    //System.out.println(url.toString());
+    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+    String userPassword = BITCOIN_NODE_USERNAME + ":" + BITCOIN_NODE_PASSWORD;
+    String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
+    con.setRequestProperty("Authorization", "Basic " + encoding);
+
+    con.setRequestMethod("POST");
+    con.setRequestProperty("User-Agent", "Mozilla/1.22 (compatible; MSIE 2.0; Windows 3.1)");
+    con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+    con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    con.setDoOutput(true);
+    OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
+    out.write(jsonObject.toString());
+    out.close();
+
+    if(con.getResponseCode()==200) {
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        //System.out.println(response.toString());
+        JSONObject response_object = (JSONObject) parser.parse(response.toString());
+        //System.out.println(response_object);
+    return (boolean) response_object.get("result");
+} else {
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        //System.out.println(response.toString());
+        JSONObject response_object = (JSONObject) parser.parse(response.toString());
+    return false;
+	}
+	} catch(Exception e) {
+		e.printStackTrace();
+	}
+    return false;
   }
 
   public static void announce(final String message) {
@@ -1276,7 +1338,7 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
 			if (isNearLoot(p)) {
 				Double px=(double)p.getLocation().getX();
 		                Double pz=(double)p.getLocation().getZ();
-				String toAnnounce = ("player " + p.getName() + " is near the loot! their last know location was:  X: " + px.intValue() + "   Z: " + pz.intValue());
+				String toAnnounce = ("@SatQ-Alerts player " + p.getName() + " is near the loot! their last know location was:  X: " + px.intValue() + "   Z: " + pz.intValue());
 				if(System.getenv("DISCORD_HOOK_URL")!=null) {
 					sendDiscordMessage(toAnnounce);
 				}
@@ -1410,7 +1472,7 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
 		toAnnounce = ("player " + player.getName() + " is near the loot! their last know location was:  X: " + playerx.intValue() + " Z:" + playerz.intValue());
 		announce(toAnnounce);
 if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage(toAnnounce);
+			sendDiscordMessage(("@SatQ-Alerts " + toAnnounce));
 		}
 		}
 		//System.out.println("You are near...");
@@ -1485,14 +1547,14 @@ if (result != "failed"){
 REDIS.set("LeaderBoard " + iter, "BetaTest Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " Sats " + sendLoot);
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage(dateFormat.format(date) + " " + player.getName() + " WON " + "BetaTest Round " + REDIS.get("gameRound") + " with " + sendLoot + " SATS worth $" + df.format(amtUSD));
+			sendDiscordMessage("@SatQ-Alerts " + dateFormat.format(date) + " " + player.getName() + " WON " + "BetaTest Round " + REDIS.get("gameRound") + " with " + sendLoot + " SATS worth $" + df.format(amtUSD));
 		}
 		}//betatest
 		if (!REDIS.exists("BetaTest")){
 REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " Sats " + sendLoot);
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage(dateFormat.format(date) + " " + player.getName() + " WON " + "Round " + REDIS.get("gameRound") + " with " + sendLoot + " SATS worth $" + df.format(amtUSD));
+			sendDiscordMessage("@SatQ-Alerts " + dateFormat.format(date) + " " + player.getName() + " WON " + "Round " + REDIS.get("gameRound") + " with " + sendLoot + " SATS worth $" + df.format(amtUSD));
 		}
 		}//betatest
 	}
@@ -1511,7 +1573,7 @@ REDIS.set("LeaderBoard " + iter, "BetaTest Round " + REDIS.get("gameRound") + " 
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		REDIS.set("LivesLeft" +player.getUniqueId().toString(), Integer.toString(tempLivesWinningPlayer+1));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("WINNER - Beta Test Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " Sats " + totalLifeRate);
+			sendDiscordMessage("@SatQ-Alerts " +  "WINNER - Beta Test Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " Sats " + totalLifeRate);
 		}
 		}//betatest
 		if (!REDIS.exists("BetaTest")){
@@ -1519,7 +1581,7 @@ REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFo
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		REDIS.set("LivesLeft" +player.getUniqueId().toString(), Integer.toString(tempLivesWinningPlayer+1));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("WINNER - Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " Sats " + totalLifeRate);
+			sendDiscordMessage("@SatQ-Alerts " + "WINNER - Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " Sats " + totalLifeRate);
 		}
 		}//betatest
 	}
