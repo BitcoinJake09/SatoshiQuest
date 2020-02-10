@@ -282,6 +282,7 @@ public class SatoshiQuest extends JavaPlugin {
 		REDIS.set("spawnCreated", "true");
 	System.out.println("[Spawn Created] : " + REDIS.get("spawnCreated"));      
 	}
+	//sendDiscordMessage("<@675867882147676210> Server is online - test");
 	
 
 		
@@ -1340,7 +1341,7 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
 		                Double pz=(double)p.getLocation().getZ();
 				String toAnnounce = ("@SatQ-Alerts player " + p.getName() + " is near the loot! their last know location was:  X: " + px.intValue() + "   Z: " + pz.intValue());
 				if(System.getenv("DISCORD_HOOK_URL")!=null) {
-					sendDiscordMessage(toAnnounce);
+					sendDiscordMessage("<@675867882147676210> " + toAnnounce);
 				}
 			}
 		}
@@ -1472,7 +1473,7 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
 		toAnnounce = ("player " + player.getName() + " is near the loot! their last know location was:  X: " + playerx.intValue() + " Z:" + playerz.intValue());
 		announce(toAnnounce);
 if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage(("@SatQ-Alerts " + toAnnounce));
+			sendDiscordMessage(("<@675867882147676210> " +  toAnnounce));
 		}
 		}
 		//System.out.println("You are near...");
@@ -1547,14 +1548,14 @@ if (result != "failed"){
 REDIS.set("LeaderBoard " + iter, "BetaTest Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " Sats " + sendLoot);
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("@SatQ-Alerts " + dateFormat.format(date) + " " + player.getName() + " WON " + "BetaTest Round " + REDIS.get("gameRound") + " with " + sendLoot + " SATS worth $" + df.format(amtUSD));
+			sendDiscordMessage("<@675867882147676210> " +  dateFormat.format(date) + " " + player.getName() + " WON " + "BetaTest Round " + REDIS.get("gameRound") + " with " + sendLoot + " SATS worth $" + df.format(amtUSD));
 		}
 		}//betatest
 		if (!REDIS.exists("BetaTest")){
 REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " Sats " + sendLoot);
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("@SatQ-Alerts " + dateFormat.format(date) + " " + player.getName() + " WON " + "Round " + REDIS.get("gameRound") + " with " + sendLoot + " SATS worth $" + df.format(amtUSD));
+			sendDiscordMessage("<@675867882147676210> " +  dateFormat.format(date) + " " + player.getName() + " WON " + "Round " + REDIS.get("gameRound") + " with " + sendLoot + " SATS worth $" + df.format(amtUSD));
 		}
 		}//betatest
 	}
@@ -1581,7 +1582,7 @@ REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFo
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		REDIS.set("LivesLeft" +player.getUniqueId().toString(), Integer.toString(tempLivesWinningPlayer+1));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("@SatQ-Alerts " + "WINNER - Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " Sats " + totalLifeRate);
+			sendDiscordMessage("<@675867882147676210> " +  "WINNER - Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " Sats " + totalLifeRate);
 		}
 		}//betatest
 	}
