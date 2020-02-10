@@ -118,6 +118,18 @@ public class EntityEvents implements Listener {
 	if (SatoshiQuest.REDIS.exists("toldSpawn" + event.getPlayer().getUniqueId().toString())) {
 	SatoshiQuest.REDIS.del("toldSpawn" + event.getPlayer().getUniqueId().toString());
 	}
+	if (SatoshiQuest.REDIS.exists("toldSpawn2" + event.getPlayer().getUniqueId().toString())) {
+	SatoshiQuest.REDIS.del("toldSpawn2" + event.getPlayer().getUniqueId().toString());
+	}
+	if (SatoshiQuest.REDIS.exists("toldNether" + event.getPlayer().getUniqueId().toString())) {
+	SatoshiQuest.REDIS.del("toldNether" + event.getPlayer().getUniqueId().toString());
+	}
+	if (SatoshiQuest.REDIS.exists("toldNether2" + event.getPlayer().getUniqueId().toString())) {
+	SatoshiQuest.REDIS.del("toldNether2" + event.getPlayer().getUniqueId().toString());
+	}
+	if (SatoshiQuest.REDIS.exists("toldNether3" + event.getPlayer().getUniqueId().toString())) {
+	SatoshiQuest.REDIS.del("toldNether3" + event.getPlayer().getUniqueId().toString());
+	}
 	if (!SatoshiQuest.REDIS.exists("txFee" + event.getPlayer().getUniqueId().toString())){
 		boolean setFee = satoshiQuest.setSatByte(event.getPlayer().getUniqueId().toString(), 1.2);
 		//System.out.println("no fee set, set to 1.2sats/byte. "+setFee);
@@ -151,7 +163,7 @@ public class EntityEvents implements Listener {
     // On dev environment, admin gets op. In production, nobody gets op.
 
     player.setGameMode(GameMode.SURVIVAL);
-    //player.setGameMode(GameMode.CREATIVE); // test for admin
+    player.setGameMode(GameMode.CREATIVE); // test for admin
 	if (!SatoshiQuest.REDIS.exists("winner")) {
 	if (player.getWorld() == Bukkit.getServer().getWorld("world")) {
 	    Location location = Bukkit
@@ -356,6 +368,30 @@ player.sendMessage(ChatColor.WHITE + "More info: " + ChatColor.UNDERLINE + "http
 		}
 	}
 	}
+	World wNether = Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME+"_nether");
+	if(event.getPlayer().getWorld()==wNether){
+		if (event.getPlayer().getLocation().getY() >= 120) {
+			if (!SatoshiQuest.REDIS.exists("toldNether" + event.getPlayer().getUniqueId().toString())) {
+				event.getPlayer().sendMessage(ChatColor.RED + "you cant go on the roof!");
+				SatoshiQuest.REDIS.set("toldNether" + event.getPlayer().getUniqueId().toString(), "True");
+			}
+		} 
+		if (event.getPlayer().getLocation().getY() >= 125) {
+			if (!SatoshiQuest.REDIS.exists("toldNether2" + event.getPlayer().getUniqueId().toString())) {
+			event.getPlayer().sendMessage(ChatColor.RED + "Please DONT DO IT!");
+				SatoshiQuest.REDIS.set("toldNether2" + event.getPlayer().getUniqueId().toString(), "True");
+			}
+		}
+		if (event.getPlayer().getLocation().getY() >= 127) {
+			if (!SatoshiQuest.REDIS.exists("toldNether3" + event.getPlayer().getUniqueId().toString())) {
+			event.getPlayer().sendMessage(ChatColor.RED + "My disappointment is immeasurable and my day is ruined!");
+			SatoshiQuest.REDIS.set("toldNethe3" + event.getPlayer().getUniqueId().toString(), "True");
+			}
+			satoshiQuest.teleportToLootSpawn(event.getPlayer());
+		}
+	} //wNether
+
+
   }
 	@EventHandler
         public void onBlockBreak(BlockBreakEvent event){
@@ -379,7 +415,13 @@ player.sendMessage(ChatColor.WHITE + "More info: " + ChatColor.UNDERLINE + "http
 			for (double lootX = (Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnX"))-1);lootX<=(Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnX"))+1);lootX++) {
 				for (double lootZ = (Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnZ"))-1);lootZ<=(Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnZ"))+1);lootZ++) {
 					for (double lootY = Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnY"));lootY<=(Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnY"))+4);lootY++) {
-	                			if(event.getBlock().getX() == lootX && event.getBlock().getZ() == lootZ && event.getBlock().getY() == lootY) {event.getPlayer().sendMessage(ChatColor.RED + "you are not allow to do that."); event.setCancelled(true);}
+	                			if(event.getBlock().getX() == lootX && event.getBlock().getZ() == lootZ && event.getBlock().getY() == lootY) {
+							if (!SatoshiQuest.REDIS.exists("toldSpawn2" + event.getPlayer().getUniqueId().toString())) {
+							event.getPlayer().sendMessage(ChatColor.RED + "you are not allow to do that.");
+							SatoshiQuest.REDIS.set("toldSpawn2" + event.getPlayer().getUniqueId().toString(), "True");
+							}
+							event.setCancelled(true);
+						}
 					}//end for lootY
 				}//end for lootZ
 		}//end for lootX
@@ -410,7 +452,14 @@ player.sendMessage(ChatColor.WHITE + "More info: " + ChatColor.UNDERLINE + "http
 			for (double lootX = (Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnX"))-1);lootX<=(Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnX"))+1);lootX++) {
 				for (double lootZ = (Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnZ"))-1);lootZ<=(Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnZ"))+1);lootZ++) {
 					for (double lootY = Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnY"));lootY<=(Double.parseDouble(satoshiQuest.REDIS.get("lootSpawnY"))+4);lootY++) {
-	                			if(event.getBlock().getX() == lootX && event.getBlock().getZ() == lootZ && event.getBlock().getY() == lootY) {event.getPlayer().sendMessage(ChatColor.RED + "you are not allow to do that."); event.setCancelled(true);}
+	                			if(event.getBlock().getX() == lootX && event.getBlock().getZ() == lootZ && event.getBlock().getY() == lootY) {
+						
+						if (!SatoshiQuest.REDIS.exists("toldSpawn2" + event.getPlayer().getUniqueId().toString())) {
+							event.getPlayer().sendMessage(ChatColor.RED + "you are not allow to do that.");
+							SatoshiQuest.REDIS.set("toldSpawn2" + event.getPlayer().getUniqueId().toString(), "True");
+						}
+						event.setCancelled(true);
+		}
 					}//end for lootY
 				}//end for lootZ
 		}//end for lootX
@@ -424,7 +473,10 @@ player.sendMessage(ChatColor.WHITE + "More info: " + ChatColor.UNDERLINE + "http
       // If player doesn't have permission, disallow the player to interact with it.
 	if (isAtSpawn(event.getPlayer()) == true) {
         event.setCancelled(true);
-        event.getPlayer().sendMessage(ChatColor.DARK_RED + "You don't have permission to do that!");
+	if (!SatoshiQuest.REDIS.exists("toldSpawn2" + event.getPlayer().getUniqueId().toString())) {
+		event.getPlayer().sendMessage(ChatColor.RED + "you are not allow to do that.");
+		SatoshiQuest.REDIS.set("toldSpawn2" + event.getPlayer().getUniqueId().toString(), "True");
+	}
       }
 
     
