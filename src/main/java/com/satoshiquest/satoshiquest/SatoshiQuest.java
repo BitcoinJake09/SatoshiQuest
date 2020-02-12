@@ -141,7 +141,7 @@ public class SatoshiQuest extends JavaPlugin {
   public Long wallet_balance_cache = 0L;
   public Long exTime15 = new Date().getTime();
   public int discordWait15 = 3;
-  public Double exRate = 0.0;
+  public Double exRate = 10500.00;
   public Long livesRate = 0L;
   public Long adminRate = 0L;
   public Long totalLifeRate = 0L;
@@ -1339,9 +1339,9 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
 			if (isNearLoot(p)) {
 				Double px=(double)p.getLocation().getX();
 		                Double pz=(double)p.getLocation().getZ();
-				String toAnnounce = ("@SatQ-Alerts player " + p.getName() + " is near the loot! their last know location was:  X: " + px.intValue() + "   Z: " + pz.intValue());
+				String toAnnounce = ("<@!675867882147676210> player " + p.getName() + " is near the loot! their last know location was:  X: " + px.intValue() + "   Z: " + pz.intValue());
 				if(System.getenv("DISCORD_HOOK_URL")!=null) {
-					sendDiscordMessage("<@675867882147676210> " + toAnnounce);
+					sendDiscordMessage("<@!675867882147676210> " + toAnnounce);
 				}
 			}
 		}
@@ -1473,7 +1473,7 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
 		toAnnounce = ("player " + player.getName() + " is near the loot! their last know location was:  X: " + playerx.intValue() + " Z:" + playerz.intValue());
 		announce(toAnnounce);
 if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage(("<@675867882147676210> " +  toAnnounce));
+			sendDiscordMessage(("<@!675867882147676210> " +  toAnnounce));
 		}
 		}
 		//System.out.println("You are near...");
@@ -1548,7 +1548,7 @@ if (result != "failed"){
 REDIS.set("LeaderBoard " + iter, "BetaTest Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " Sats " + sendLoot);
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("<@675867882147676210> " +  dateFormat.format(date) + " " + player.getName() + " WON " + "BetaTest Round " + REDIS.get("gameRound") + " with " + sendLoot + " SATS worth $" + df.format(amtUSD));
+			sendDiscordMessage("<@!675867882147676210> " +  dateFormat.format(date) + " " + player.getName() + " WON " + "BetaTest Round " + REDIS.get("gameRound") + " with " + sendLoot + " SATS worth $" + df.format(amtUSD));
 		}
 		}//betatest
 		if (!REDIS.exists("BetaTest")){
@@ -1574,7 +1574,7 @@ REDIS.set("LeaderBoard " + iter, "BetaTest Round " + REDIS.get("gameRound") + " 
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		REDIS.set("LivesLeft" +player.getUniqueId().toString(), Integer.toString(tempLivesWinningPlayer+1));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("@SatQ-Alerts " +  "WINNER - Beta Test Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " Sats " + totalLifeRate);
+			sendDiscordMessage("<@!675867882147676210> " +  "WINNER - Beta Test Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " Sats " + totalLifeRate);
 		}
 		}//betatest
 		if (!REDIS.exists("BetaTest")){
@@ -1582,7 +1582,7 @@ REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFo
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		REDIS.set("LivesLeft" +player.getUniqueId().toString(), Integer.toString(tempLivesWinningPlayer+1));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("<@675867882147676210> " +  "WINNER - Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " Sats " + totalLifeRate);
+			sendDiscordMessage("<@!675867882147676210> " +  "WINNER - Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " Sats " + totalLifeRate);
 		}
 		}//betatest
 	}
@@ -2099,7 +2099,7 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
 
     public String getExchangeRate(String crypto)
 	{
-	String price="10000.00000000";
+	String price= exRate.toString();
 	String rate = exRate.toString();
 	 try {
             
@@ -2122,6 +2122,18 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
             in.close();
             //System.out.println(response.toString());
 
+JSONParser parser = new JSONParser();
+            	final JSONObject jsonobj,jsonobj2;
+
+                jsonobj = (JSONObject) parser.parse(response.toString());
+                jsonobj2 = (JSONObject) parser.parse(jsonobj.get("ticker").toString());
+		//double val=Double.parseDouble(jsonobj2.get("price").toString());
+		
+		//ERROR HERE
+		
+		price=jsonobj2.get("price").toString();
+                //System.out.println(crypto + "price: "+price);
+
           } else {
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
             String inputLine;
@@ -2133,16 +2145,7 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
             in.close();
             //System.out.println(response.toString());
 		}
-		JSONParser parser = new JSONParser();
-            	final JSONObject jsonobj,jsonobj2;
-
-                jsonobj = (JSONObject) parser.parse(response.toString());
-                jsonobj2 = (JSONObject) parser.parse(jsonobj.get("ticker").toString());
-		//double val=Double.parseDouble(jsonobj2.get("price").toString());
 		
-
-		price=jsonobj2.get("price").toString();
-                //System.out.println(crypto + "price: "+price);
 
 
         } catch (Exception e) {
