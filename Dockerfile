@@ -26,6 +26,6 @@ COPY . /satoshiquest/
 RUN mvn clean compile assembly:single
 RUN cp /satoshiquest/target/SatoshiQuest.jar /spigot/plugins/SatoshiQuest.jar
 # Add the last version of NoCheatPlus
-# ADD http://ci.md-5.net/job/NoCheatPlus/lastSuccessfulBuild/artifact/target/NoCheatPlus.jar /spigot/plugins/NoCheatPlus.jar
+# ADD https://github.com/BitcoinJake09/SatoshiQuest/blob/master/Clearlag.jar /spigot/plugins/Clearlag.jar
 WORKDIR /spigot
-CMD java -jar spigot.jar
+CMD java -Xmx8192m -jar spigot.jar
