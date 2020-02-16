@@ -77,8 +77,10 @@ public class SatoshiQuest extends JavaPlugin {
   public static final String BITCOIN_NODE_USERNAME = System.getenv("BITCOIN_ENV_USERNAME");
   public static final String BITCOIN_NODE_PASSWORD = System.getenv("BITCOIN_ENV_PASSWORD");
   public static final String DISCORD_HOOK_URL = System.getenv("DISCORD_HOOK_URL");
-  public static final Long MINER_FEE =
-          System.getenv("MINER_FEE") != null ? Long.parseLong(System.getenv("MINER_FEE")) : 1000;
+  public static final String DISCORD_URL = System.getenv("DISCORD_URL");
+  public static final String DISCORD_HOOK_CHANNEL_ID = System.getenv("DISCORD_HOOK_CHANNEL_ID");
+  public static final double MINER_FEE =
+          System.getenv("MINER_FEE") != null ? Long.parseLong(System.getenv("MINER_FEE")) : 2.4;
 
   public static final String SERVER_NAME =
       System.getenv("SERVER_NAME") != null ? System.getenv("SERVER_NAME") : "SatoshiQuest";
@@ -88,6 +90,12 @@ public class SatoshiQuest extends JavaPlugin {
 
   public static final String TX_URL =
       System.getenv("TX_URL") != null ? System.getenv("TX_URL") : "https://www.blockchain.com/btc/tx/";
+
+  public static final String SERVER_WEBSITE =
+      System.getenv("SERVER_WEBSITE") != null ? System.getenv("SERVER_WEBSITE") : "http://AllAboutBTC.com/SatoshiQuest.html";
+//https://www.cryptonator.com/api/currencies
+  public static final String CRYPTONATOR_CRYPTO =
+      System.getenv("CRYPTONATOR_CRYPTO") != null ? System.getenv("CRYPTONATOR_CRYPTO") : "btc";
 
   // REDIS: Look for Environment variables on hostname and port, otherwise defaults to
   // localhost:6379
@@ -106,7 +114,7 @@ public class SatoshiQuest extends JavaPlugin {
       System.getenv("BUYIN_AMOUNT") != null ? Double.parseDouble(System.getenv("BUYIN_AMOUNT")) : 1.00;
 
   public static final Double MAX_WIN_AMOUNT =
-      System.getenv("MAX_WIN_AMOUNT") != null ? Double.parseDouble(System.getenv("BUYIN_AMOUNT")) : 200.00;
+      System.getenv("MAX_WIN_AMOUNT") != null ? Double.parseDouble(System.getenv("MAX_WIN_AMOUNT")) : 200.00;
 
   public static final int LIVES_PERBUYIN =
       System.getenv("LIVES_PERBUYIN") != null ? Integer.parseInt(System.getenv("LIVES_PERBUYIN")) : 1;
@@ -159,7 +167,7 @@ public class SatoshiQuest extends JavaPlugin {
 
   @Override
   public void onEnable() {
-    log("[startup] SatoshiQuest starting");
+    log("[startup] "+SERVER_NAME+" starting");
 	getServer().createWorld(new WorldCreator(SERVERDISPLAY_NAME));
 
 	WorldCreator nc = new WorldCreator(SERVERDISPLAY_NAME+"_nether");
@@ -266,8 +274,8 @@ public class SatoshiQuest extends JavaPlugin {
 
 	System.out.println("[Admin address] address: " + ADMIN_ADDRESS);      
         System.out.println("[world wallet] address: " + REDIS.get("nodeAddress"+SERVERDISPLAY_NAME));
-	boolean setFee = setSatByte(SERVERDISPLAY_NAME, 2.4);
-				System.out.println("set fee to 2.4sats/byte: "+setFee);
+	boolean setFee = setSatByte(SERVERDISPLAY_NAME, MINER_FEE);
+				System.out.println("set fee to "+MINER_FEE+""+DENOMINATION_NAME+"/byte: "+setFee);
 	//System.out.println("[world address] address: " + REDIS.get("nodeAddress"));
         //System.out.println("The loot pool is: " + (int)(wallet.getBalance(0)/DENOMINATION_FACTOR));
 
@@ -282,7 +290,7 @@ public class SatoshiQuest extends JavaPlugin {
 		REDIS.set("spawnCreated", "true");
 	System.out.println("[Spawn Created] : " + REDIS.get("spawnCreated"));      
 	}
-	//sendDiscordMessage("<@675867882147676210> Server is online - test");
+	//sendDiscordMessage("<@X> Server is online - test");
 	
 
 		
@@ -392,7 +400,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
 
     final JSONObject jsonObject = new JSONObject();
     jsonObject.put("jsonrpc", "1.0");
-    jsonObject.put("id", "satoshiquest");
+    jsonObject.put("id", SERVER_NAME);
     jsonObject.put("method", "createwallet");
     JSONArray params = new JSONArray();
     params.add(account_id);
@@ -455,7 +463,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
 
         final JSONObject jsonObject = new JSONObject();
         jsonObject.put("jsonrpc", "1.0");
-        jsonObject.put("id", "satoshiquest");
+        jsonObject.put("id", SERVER_NAME);
         jsonObject.put("method", "listwallets");
         JSONArray params = new JSONArray();
         //System.out.println(params);
@@ -513,7 +521,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
 
         final JSONObject jsonObject = new JSONObject();
         jsonObject.put("jsonrpc", "1.0");
-        jsonObject.put("id", "satoshiquest");
+        jsonObject.put("id", SERVER_NAME);
         jsonObject.put("method", "getwalletinfo");
         JSONArray params = new JSONArray();
         //System.out.println(params);
@@ -573,7 +581,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
 
     final JSONObject jsonObject = new JSONObject();
     jsonObject.put("jsonrpc", "1.0");
-    jsonObject.put("id", "satoshiquest");
+    jsonObject.put("id", SERVER_NAME);
     jsonObject.put("method", "loadwallet");
     JSONArray params = new JSONArray();
     params.add(account_id);
@@ -636,7 +644,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
     try {
       final JSONObject jsonObject = new JSONObject();
       jsonObject.put("jsonrpc", "1.0");
-      jsonObject.put("id", "satoshiquest");
+      jsonObject.put("id", SERVER_NAME);
       jsonObject.put("method", "getblockchaininfo");
       JSONArray params = new JSONArray();
       jsonObject.put("params", params);
@@ -649,7 +657,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
       con.setRequestProperty("Authorization", "Basic " + encoding);
 
       con.setRequestMethod("POST");
-      con.setRequestProperty("User-Agent", "satoshiquest plugin");
+      con.setRequestProperty("User-Agent", ""+SERVER_NAME+ " plugin");
       con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
       con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
       con.setDoOutput(true);
@@ -701,7 +709,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
 
         final JSONObject jsonObject = new JSONObject();
         jsonObject.put("jsonrpc", "1.0");
-        jsonObject.put("id", "satoshiquest");
+        jsonObject.put("id", SERVER_NAME);
         jsonObject.put("method", "getreceivedbyaddress");
         JSONArray params = new JSONArray();
 	params.add(address);
@@ -770,7 +778,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
 
         final JSONObject jsonObject = new JSONObject();
         jsonObject.put("jsonrpc", "1.0");
-        jsonObject.put("id", "satoshiquest");
+        jsonObject.put("id", SERVER_NAME);
         jsonObject.put("method", "getbalance");
         JSONArray params = new JSONArray();
 	params.add("*");
@@ -839,7 +847,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
 
         final JSONObject jsonObject = new JSONObject();
         jsonObject.put("jsonrpc", "1.0");
-        jsonObject.put("id", "satoshiquest");
+        jsonObject.put("id", SERVER_NAME);
         jsonObject.put("method", "getunconfirmedbalance");
         URL url = new URL("http://" + SatoshiQuest.BITCOIN_NODE_HOST + ":" + SatoshiQuest.BITCOIN_NODE_PORT + "/wallet/" + account_id);
         //System.out.println(url.toString());
@@ -902,7 +910,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
 
     final JSONObject jsonObject = new JSONObject();
     jsonObject.put("jsonrpc", "1.0");
-    jsonObject.put("id", "satoshiquest");
+    jsonObject.put("id", SERVER_NAME);
     jsonObject.put("method", "getaddressesbylabel");
     JSONArray params = new JSONArray();
     params.add(account_id);
@@ -972,7 +980,7 @@ try {
 
     final JSONObject jsonObject = new JSONObject();
     jsonObject.put("jsonrpc", "1.0");
-    jsonObject.put("id", "satoshiquest");
+    jsonObject.put("id", SERVER_NAME);
     jsonObject.put("method", "sendtoaddress");
     JSONArray params = new JSONArray();
     params.add(address);
@@ -1044,7 +1052,7 @@ try {
 
     final JSONObject jsonObject = new JSONObject();
     jsonObject.put("jsonrpc", "1.0");
-    jsonObject.put("id", "satoshiquest");
+    jsonObject.put("id", SERVER_NAME);
     jsonObject.put("method", "sendmany");
     JSONArray params = new JSONArray();
     params.add("");
@@ -1065,7 +1073,7 @@ try {
     params.add(addresses);
 
     params.add(6);
-    params.add("SatoshiQuest");//the comment :p
+    params.add(SERVER_NAME);//the comment :p
 
     //System.out.println(params);
     jsonObject.put("params", params);
@@ -1125,7 +1133,7 @@ try {
     JSONParser parser = new JSONParser();
     final JSONObject jsonObject = new JSONObject();
     jsonObject.put("jsonrpc", "1.0");
-    jsonObject.put("id", "satoshiquest");
+    jsonObject.put("id", SERVER_NAME);
     jsonObject.put("method", "settxfee");
     JSONArray params = new JSONArray();
     //System.out.println(sat);
@@ -1239,7 +1247,7 @@ try {
 		Score score5 = playSBoardObj.getScore(ChatColor.GREEN + "Balance: " + Long.toString(getBalance(player.getUniqueId().toString(),6)));
 		score5.setScore(5);
 
-		Score score4 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: " + Long.toString(lootBalance) + "sats");
+		Score score4 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: " + Long.toString(lootBalance) + DENOMINATION_NAME);
 		score4.setScore(4);
 
 		Score score3 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: $" + df.format(lootAmount));
@@ -1331,7 +1339,7 @@ try {
             //publish_stats();
 try {
 		long waitTime15 = 1000 * 60 * 15;
-if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
+if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 10500.00)) {
 		//announce player location in discord if near
 		World world = Bukkit.getServer().getWorld(SERVERDISPLAY_NAME);
 		File BaseFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "players");
@@ -1339,14 +1347,14 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
 			if (isNearLoot(p)) {
 				Double px=(double)p.getLocation().getX();
 		                Double pz=(double)p.getLocation().getZ();
-				String toAnnounce = ("<@!675867882147676210> player " + p.getName() + " is near the loot! their last know location was:  X: " + px.intValue() + "   Z: " + pz.intValue());
+				String toAnnounce = ("player " + p.getName() + " is near the loot! their last know location was:  X: " + px.intValue() + "   Z: " + pz.intValue());
 				if(System.getenv("DISCORD_HOOK_URL")!=null) {
-					sendDiscordMessage("<@!675867882147676210> " + toAnnounce);
+					sendDiscordMessage("<@!"+DISCORD_HOOK_CHANNEL_ID+"> " + toAnnounce);
 				}
 			}
 		}
 
-			exRate =  Double.parseDouble(getExchangeRate("btc"));
+			exRate =  Double.parseDouble(getExchangeRate(CRYPTONATOR_CRYPTO));
 			livesRate =  (long)((BUYIN_AMOUNT/(exRate*0.00000001))*0.90);
 			adminRate =  (long)((BUYIN_AMOUNT/(exRate*0.00000001))*0.10);
 			totalLifeRate = livesRate + adminRate;
@@ -1355,7 +1363,7 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
 			announce("Currently Bitcoin is: $"+ df.format(exRate));
 		        //System.out.println("Currently Bitcoin is: $"+ exRate);
 			announce("1 Life is: "+ totalLifeRate + " " +DENOMINATION_NAME);
-			announce("Active updates in the discord: https://discordapp.com/invite/S38Ser6");
+			announce("Active updates in the discord: "+DISCORD_URL);
 		        //System.out.println("1 Life is: "+ totalLifeRate + " " +DENOMINATION_NAME);
 			if ((System.getenv("DISCORD_HOOK_URL")!=null)&&(discordWait15 >= 3)) {
 			// announce loot in discord
@@ -1367,10 +1375,10 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
 			lootAmount = (double)(exRate * (lootBalance * 0.00000001));
 		}               
         		//System.out.print(df.format(lootAmount));
-			String lootAnnounce = ("Current BTC in loot: " +lootBalance + " sats! worth: $"+df.format(lootAmount)+" USD!");
-				sendDiscordMessage("1 Life is: "+ totalLifeRate + " sats");
+			String lootAnnounce = ("Current "+CRYPTONATOR_CRYPTO+" in loot: " +lootBalance + " "+DENOMINATION_NAME+"! worth: $"+df.format(lootAmount)+" USD!");
+				sendDiscordMessage("1 Life is: "+ totalLifeRate + " "+DENOMINATION_NAME);
 				sendDiscordMessage(lootAnnounce);
-				sendDiscordMessage("For more info check out http://AllAboutBTC.com/SatoshiQuest.html");
+				sendDiscordMessage("For more info check out "+SERVER_WEBSITE);
 				discordWait15=0;
 			} else {
 				discordWait15++;
@@ -1473,7 +1481,7 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 0)) {
 		toAnnounce = ("player " + player.getName() + " is near the loot! their last know location was:  X: " + playerx.intValue() + " Z:" + playerz.intValue());
 		announce(toAnnounce);
 if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage(("<@!675867882147676210> " +  toAnnounce));
+			sendDiscordMessage(("<@!"+DISCORD_HOOK_CHANNEL_ID+"> " +  toAnnounce));
 		}
 		}
 		//System.out.println("You are near...");
@@ -1545,17 +1553,17 @@ if (result != "failed"){
 		DecimalFormat df = new DecimalFormat("#.##");
         	System.out.print(df.format(amtUSD));
 		if (REDIS.exists("BetaTest")){
-REDIS.set("LeaderBoard " + iter, "BetaTest Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " Sats " + sendLoot);
+REDIS.set("LeaderBoard " + iter, "BetaTest Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " "+DENOMINATION_NAME+" " + sendLoot);
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("<@!675867882147676210> " +  dateFormat.format(date) + " " + player.getName() + " WON " + "BetaTest Round " + REDIS.get("gameRound") + " with " + sendLoot + " SATS worth $" + df.format(amtUSD));
+			sendDiscordMessage("<@!"+DISCORD_HOOK_CHANNEL_ID+"> " +  dateFormat.format(date) + " " + player.getName() + " WON " + "BetaTest Round " + REDIS.get("gameRound") + " with " + sendLoot + " "+DENOMINATION_NAME+ " worth $" + df.format(amtUSD));
 		}
 		}//betatest
 		if (!REDIS.exists("BetaTest")){
-REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " Sats " + sendLoot);
+REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " "+DENOMINATION_NAME+ " " + sendLoot);
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("<@675867882147676210> " +  dateFormat.format(date) + " " + player.getName() + " WON " + "Round " + REDIS.get("gameRound") + " with " + sendLoot + " SATS worth $" + df.format(amtUSD));
+			sendDiscordMessage("<@!"+DISCORD_HOOK_CHANNEL_ID+"> " +  dateFormat.format(date) + " " + player.getName() + " WON " + "Round " + REDIS.get("gameRound") + " with " + sendLoot + " "+DENOMINATION_NAME+ " worth $" + df.format(amtUSD));
 		}
 		}//betatest
 	}
@@ -1570,19 +1578,19 @@ if (result == "failed"){
 		DecimalFormat df = new DecimalFormat("#.##");
         	System.out.print(df.format(amtUSD));
 		if (REDIS.exists("BetaTest")){
-REDIS.set("LeaderBoard " + iter, "BetaTest Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " Sats " + totalLifeRate);
+REDIS.set("LeaderBoard " + iter, "BetaTest Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " "+DENOMINATION_NAME+ " " + totalLifeRate);
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		REDIS.set("LivesLeft" +player.getUniqueId().toString(), Integer.toString(tempLivesWinningPlayer+1));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("<@!675867882147676210> " +  "WINNER - Beta Test Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " Sats " + totalLifeRate);
+			sendDiscordMessage("<@!"+DISCORD_HOOK_CHANNEL_ID+"> " +  "WINNER - Beta Test Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " "+DENOMINATION_NAME+ " " + totalLifeRate);
 		}
 		}//betatest
 		if (!REDIS.exists("BetaTest")){
-REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " Sats " + totalLifeRate);
+REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " "+DENOMINATION_NAME+ " " + totalLifeRate);
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		REDIS.set("LivesLeft" +player.getUniqueId().toString(), Integer.toString(tempLivesWinningPlayer+1));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("<@!675867882147676210> " +  "WINNER - Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " Sats " + totalLifeRate);
+			sendDiscordMessage("<@!"+DISCORD_HOOK_CHANNEL_ID+"> " +  "WINNER - Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " "+DENOMINATION_NAME+ " " + totalLifeRate);
 		}
 		}//betatest
 	}
@@ -1969,7 +1977,7 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
 
           con.setRequestMethod("POST");
           con.setRequestProperty("Content-Type", "application/json");
-          con.setRequestProperty("Cookie", "satoshiquest=true");
+          con.setRequestProperty("Cookie", ""+SERVER_NAME+"=true");
           con.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
 
           con.setDoOutput(true);
