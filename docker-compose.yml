@@ -2,13 +2,12 @@ spigot:
   container_name: satoshiquest
   build: .
   volumes:
-    - "./world:/spigot/world"
-    - "./world_nether:/spigot/world_nether"
-    - "./world_the_end:/spigot/world_the_end"
+    - "/SatoshiQuest/spigot/world:/spigot/world"
+    - "/SatoshiQuest/spigot/world_nether:/spigot/world_nether"
+    - "/SatoshiQuest/spigot/world_the_end:/spigot/world_the_end"
     - "/SatoshiQuest/spigot/SatoshiQuest:/spigot/SatoshiQuest"
     - "/SatoshiQuest/spigot/SatoshiQuest_nether:/spigot/SatoshiQuest_nether"
     - "/SatoshiQuest/spigot/SatoshiQuest_the_end:/spigot/SatoshiQuest_the_end"
-    - "./target/SatoshiQuest.jar:/spigot/plugins/SatoshiQuest.jar"
   ports:
     - "25566:25566"
   env_file:
