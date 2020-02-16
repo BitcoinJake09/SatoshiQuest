@@ -20,9 +20,6 @@ public class ServerEvents implements Listener {
         ChatColor.GOLD
             + ChatColor.BOLD.toString()
             + SatoshiQuest.SERVERDISPLAY_NAME
-            + ChatColor.GRAY
-            + ChatColor.BOLD.toString()
-            + "Quest"
             + ChatColor.RESET
             + " - The server that runs on "
             + SatoshiQuest.DENOMINATION_NAME);

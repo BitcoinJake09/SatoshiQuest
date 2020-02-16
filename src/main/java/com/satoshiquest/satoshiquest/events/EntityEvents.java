@@ -152,7 +152,7 @@ public class EntityEvents implements Listener {
         Player player = event.getPlayer();
         String quitMessage = "left the game";
 	if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			satoshiQuest.sendDiscordMessage("Player " + player.getName() + " " + quitMessage);
+			satoshiQuest.sendDiscordMessage("Player " + player.getName() + " " + quitMessage +" with " + SatoshiQuest.REDIS.get("LivesLeft" + player.getUniqueId().toString()) + " lives");
 	}
     }
 
@@ -163,7 +163,7 @@ public class EntityEvents implements Listener {
     // On dev environment, admin gets op. In production, nobody gets op.
 
     player.setGameMode(GameMode.SURVIVAL);
-    player.setGameMode(GameMode.CREATIVE); // test for admin
+    //player.setGameMode(GameMode.CREATIVE); // test for admin
 	if (!SatoshiQuest.REDIS.exists("winner")) {
 	if (player.getWorld() == Bukkit.getServer().getWorld("world")) {
 	    Location location = Bukkit
@@ -301,7 +301,7 @@ player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
 if(System.getenv("DISCORD_HOOK_URL")!=null) {
 			satoshiQuest.sendDiscordMessage("Player " + player.getName() + " joined with " + SatoshiQuest.REDIS.get("LivesLeft" + event.getPlayer().getUniqueId().toString()) + " lives");
 		}
-player.sendMessage(ChatColor.WHITE + "More info: " + ChatColor.UNDERLINE + "http://AllAboutBTC.com/SatoshiQuest.html");
+player.sendMessage(ChatColor.WHITE + "More info: " + ChatColor.UNDERLINE + ""+satoshiQuest.SERVER_WEBSITE);
   }
 
 	@EventHandler
