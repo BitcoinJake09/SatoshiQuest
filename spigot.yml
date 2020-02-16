@@ -70,11 +70,11 @@ world-settings:
       misc: 4
       tick-inactive-villagers: true
     entity-tracking-range:
-      players: 32
-      animals: 32
-      monsters: 64
-      misc: 24
-      other: 24
+      players: 48
+      animals: 48
+      monsters: 48
+      misc: 32
+      other: 64
     ticks-per:
       hopper-transfer: 24
       hopper-check: 1
@@ -96,11 +96,11 @@ world-settings:
       other-multiplier: 0.0
     max-tnt-per-tick: 10
     max-tick-time:
-      tile: 8
-      entity: 16
+      tile: 50
+      entity: 50
     squid-spawn-range:
       min: 45.0
-    mob-spawn-range: 6
+    mob-spawn-range: 4
     growth:
       cactus-modifier: 100
       cane-modifier: 100
@@ -112,10 +112,10 @@ world-settings:
       netherwart-modifier: 100
       vine-modifier: 100
       cocoa-modifier: 100
-    item-despawn-rate: 1200
+    item-despawn-rate: 6000
     merge-radius:
-      item: 4
-      exp: 10
+      item: 2.5
+      exp: 2.5
     arrow-despawn-rate: 1200
     enable-zombie-pigmen-portal-spawns: true
     wither-spawn-sound-radius: 0
