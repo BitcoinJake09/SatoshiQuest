@@ -47,6 +47,7 @@ public class EntityEvents implements Listener {
   SatoshiQuest satoshiQuest;
   StringBuilder rawwelcome = new StringBuilder();
   String PROBLEM_MESSAGE = "Can't join right now. Come back later";
+  boolean isNewPlayer = false;
 
   public EntityEvents(SatoshiQuest plugin) {
     satoshiQuest = plugin;
@@ -73,6 +74,7 @@ public class EntityEvents implements Listener {
       Player player = event.getPlayer();
 	NodeWallet tempWallet=null;
 	if (!satoshiQuest.REDIS.exists("nodeAddress"+player.getUniqueId().toString())) {
+	isNewPlayer = true;
 	if (satoshiQuest.getWalletInfo(player.getUniqueId().toString())!=false) {
 		try {
 			tempWallet = satoshiQuest.loadWallet(player.getUniqueId().toString());
@@ -299,7 +301,12 @@ player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
     }
 
 if(System.getenv("DISCORD_HOOK_URL")!=null) {
+			if (isNewPlayer == true) {
+			satoshiQuest.announce("NEW Player " + player.getName() + " joined!");
+			satoshiQuest.sendDiscordMessage("NEW Player " + player.getName() + " joined!");
+			} else {
 			satoshiQuest.sendDiscordMessage("Player " + player.getName() + " joined with " + SatoshiQuest.REDIS.get("LivesLeft" + event.getPlayer().getUniqueId().toString()) + " lives");
+			}
 		}
 player.sendMessage(ChatColor.WHITE + "More info: " + ChatColor.UNDERLINE + ""+satoshiQuest.SERVER_WEBSITE);
   }
