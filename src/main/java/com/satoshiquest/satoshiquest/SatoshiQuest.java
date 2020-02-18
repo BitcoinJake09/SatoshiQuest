@@ -57,7 +57,9 @@ public class SatoshiQuest extends JavaPlugin {
   public static final UUID ADMIN_UUID =
       System.getenv("ADMIN_UUID") != null ? UUID.fromString(System.getenv("ADMIN_UUID")) : null;
  public static final String ADMIN_ADDRESS =
-      System.getenv("ADMIN_ADDRESS") != null ? System.getenv("ADMIN_ADDRESS"): "1AABTCMd4X2Gv5tX2bisLiBQDKch8yomNM";
+      System.getenv("ADMIN_ADDRESS") != null ? System.getenv("ADMIN_ADDRESS"): "1SatQHUuD7WVCT16cuNd35udrxr9q6GNY";
+ public static final String ADMIN2_ADDRESS =
+      System.getenv("ADMIN2_ADDRESS") != null ? System.getenv("ADMIN2_ADDRESS"): "noSet";
   public static final String BITCOIN_NODE_HOST =
       System.getenv("BITCOIN_NODE_HOST") != null
           ? System.getenv("BITCOIN_NODE_HOST")
@@ -272,7 +274,11 @@ public class SatoshiQuest extends JavaPlugin {
 	}//endAddress
 
 
-	System.out.println("[Admin address] address: " + ADMIN_ADDRESS);      
+	System.out.println("[Admin address] address: " + ADMIN_ADDRESS);
+	if (ADMIN2_ADDRESS != "noSet") {
+	System.out.println("[Admin2 address] address: " + ADMIN2_ADDRESS);
+	}
+      
         System.out.println("[world wallet] address: " + REDIS.get("nodeAddress"+SERVERDISPLAY_NAME));
 	boolean setFee = setSatByte(SERVERDISPLAY_NAME, MINER_FEE);
 				System.out.println("set fee to "+MINER_FEE+""+DENOMINATION_NAME+"/byte: "+setFee);
@@ -385,6 +391,14 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
       modCommands.put("spectate", new SpectateCommand(this));
       modCommands.put("emergencystop", new EmergencystopCommand());
       modCommands.put("motd", new MOTDCommand(this));
+
+	for(int timeout = 0;timeout<=100000;timeout++){
+		//System.out.println("[startup] timeout: " +timeout+"/100000");
+	}
+
+	if (REDIS.exists("winner")) {
+		REDIS.del("winner");
+	}
       System.out.println("[startup] finished");
 
     } catch (Exception e) {
@@ -1128,6 +1142,95 @@ if(con.getResponseCode()==200) {
     return "failed";
   }
 
+  public String sendMany2(String account_id, String address1, String address2, String address3, Long sat1, Long sat2, Long sat3) throws IOException, ParseException {
+try {
+    JSONParser parser = new JSONParser();
+
+    final JSONObject jsonObject = new JSONObject();
+    jsonObject.put("jsonrpc", "1.0");
+    jsonObject.put("id", SERVER_NAME);
+    jsonObject.put("method", "sendmany");
+    JSONArray params = new JSONArray();
+    params.add("");
+    final JSONObject addresses = new JSONObject();
+
+    //System.out.println(sat1);
+    BigDecimal decimalSat1 = new BigDecimal(sat1 * 0.00000001);
+    decimalSat1 = decimalSat1.setScale(8, BigDecimal.ROUND_DOWN);
+    //System.out.println(decimalSat1);
+    addresses.put(address1,decimalSat1);
+
+
+    //System.out.println(sat2);
+    BigDecimal decimalSat2 = new BigDecimal(sat2 * 0.00000001);
+    decimalSat2 = decimalSat2.setScale(8, BigDecimal.ROUND_DOWN);
+    //System.out.println(decimalSat2);
+    addresses.put(address2,decimalSat2);
+
+    BigDecimal decimalSat3 = new BigDecimal(sat3 * 0.00000001);
+    decimalSat3 = decimalSat3.setScale(8, BigDecimal.ROUND_DOWN);
+    //System.out.println(decimalSat2);
+    addresses.put(address3,decimalSat3);
+
+
+    params.add(addresses);
+
+    params.add(6);
+    params.add(SERVER_NAME);//the comment :p
+
+    //System.out.println(params);
+    jsonObject.put("params", params);
+    //System.out.println("Checking blockchain info...");
+    URL url = new URL("http://" + BITCOIN_NODE_HOST + ":" + BITCOIN_NODE_PORT + "/wallet/" + account_id);
+    //System.out.println(url.toString());
+    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+    String userPassword = BITCOIN_NODE_USERNAME + ":" + BITCOIN_NODE_PASSWORD;
+    String encoding = Base64.getEncoder().encodeToString(userPassword.getBytes());
+    con.setRequestProperty("Authorization", "Basic " + encoding);
+
+    con.setRequestMethod("POST");
+    con.setRequestProperty("User-Agent", "Mozilla/1.22 (compatible; MSIE 2.0; Windows 3.1)");
+    con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+    con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    con.setDoOutput(true);
+    OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
+    out.write(jsonObject.toString());
+    out.close();
+
+if(con.getResponseCode()==200) {
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        //System.out.println(response.toString());
+        JSONObject response_object = (JSONObject) parser.parse(response.toString());
+        //System.out.println(response_object);
+
+    return (String) response_object.get("result");
+ } else {
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        //System.out.println(response.toString());
+        JSONObject response_object = (JSONObject) parser.parse(response.toString());
+    return "failed";
+	}
+	} catch(Exception e) {
+		e.printStackTrace();
+	}
+    return "failed";
+  }
+
   public boolean setSatByte(String account_id, double sats) throws IOException, ParseException {
 try {
     JSONParser parser = new JSONParser();
@@ -1349,7 +1452,7 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 10500.00)) {
 		                Double pz=(double)p.getLocation().getZ();
 				String toAnnounce = ("player " + p.getName() + " is near the loot! their last know location was:  X: " + px.intValue() + "   Z: " + pz.intValue());
 				if(System.getenv("DISCORD_HOOK_URL")!=null) {
-					sendDiscordMessage("<@!"+DISCORD_HOOK_CHANNEL_ID+"> " + toAnnounce);
+					sendDiscordMessage("<@&"+DISCORD_HOOK_CHANNEL_ID+"> " + toAnnounce);
 				}
 			}
 		}
@@ -1481,7 +1584,7 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 10500.00)) {
 		toAnnounce = ("player " + player.getName() + " is near the loot! their last know location was:  X: " + playerx.intValue() + " Z:" + playerz.intValue());
 		announce(toAnnounce);
 if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage(("<@!"+DISCORD_HOOK_CHANNEL_ID+"> " +  toAnnounce));
+			sendDiscordMessage(("<@&"+DISCORD_HOOK_CHANNEL_ID+"> " +  toAnnounce));
 		}
 		}
 		//System.out.println("You are near...");
@@ -1509,13 +1612,13 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 
 	if ((playerx<lootX+0.8)&&(playerx>lootX-0.8) && (playerz<lootZ+0.8)&&(playerz>lootZ-0.8) && (playery<lootY+2)&&(playery>lootY-2) && (!REDIS.exists("winner"))) {
 		System.out.println(player.getDisplayName() + " won!");
-		REDIS.set("winner",player.getDisplayName());
+		REDIS.set("winner","true");
 		announce(player.getName() + " WON!");
 		REDIS.set("pushloot","true");
 		//sendloot to winner
 		long sendLoot = 0L;
 		String result = "failed";
-		//result = "test";
+		//result = "test"; // for testing comment out
 		try {
 		if (getBalance(SERVERDISPLAY_NAME,1) > 0) {
 			sendLoot = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * THIS_ROUND_WIN_PERC);
@@ -1556,14 +1659,14 @@ if (result != "failed"){
 REDIS.set("LeaderBoard " + iter, "BetaTest Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " "+DENOMINATION_NAME+" " + sendLoot);
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("<@!"+DISCORD_HOOK_CHANNEL_ID+"> " +  dateFormat.format(date) + " " + player.getName() + " WON " + "BetaTest Round " + REDIS.get("gameRound") + " with " + sendLoot + " "+DENOMINATION_NAME+ " worth $" + df.format(amtUSD));
+			sendDiscordMessage("<@&"+DISCORD_HOOK_CHANNEL_ID+"> " +  dateFormat.format(date) + " " + player.getName() + " WON " + "BetaTest Round " + REDIS.get("gameRound") + " with " + sendLoot + " "+DENOMINATION_NAME+ " worth $" + df.format(amtUSD));
 		}
 		}//betatest
 		if (!REDIS.exists("BetaTest")){
 REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " "+DENOMINATION_NAME+ " " + sendLoot);
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("<@!"+DISCORD_HOOK_CHANNEL_ID+"> " +  dateFormat.format(date) + " " + player.getName() + " WON " + "Round " + REDIS.get("gameRound") + " with " + sendLoot + " "+DENOMINATION_NAME+ " worth $" + df.format(amtUSD));
+			sendDiscordMessage("<@&"+DISCORD_HOOK_CHANNEL_ID+"> " +  dateFormat.format(date) + " " + player.getName() + " WON " + "Round " + REDIS.get("gameRound") + " with " + sendLoot + " "+DENOMINATION_NAME+ " worth $" + df.format(amtUSD));
 		}
 		}//betatest
 	}
@@ -1582,7 +1685,7 @@ REDIS.set("LeaderBoard " + iter, "BetaTest Round " + REDIS.get("gameRound") + " 
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		REDIS.set("LivesLeft" +player.getUniqueId().toString(), Integer.toString(tempLivesWinningPlayer+1));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("<@!"+DISCORD_HOOK_CHANNEL_ID+"> " +  "WINNER - Beta Test Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " "+DENOMINATION_NAME+ " " + totalLifeRate);
+			sendDiscordMessage("<@&"+DISCORD_HOOK_CHANNEL_ID+"> " +  "WINNER - Beta Test Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " "+DENOMINATION_NAME+ " " + totalLifeRate);
 		}
 		}//betatest
 		if (!REDIS.exists("BetaTest")){
@@ -1590,7 +1693,7 @@ REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFo
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		REDIS.set("LivesLeft" +player.getUniqueId().toString(), Integer.toString(tempLivesWinningPlayer+1));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("<@!"+DISCORD_HOOK_CHANNEL_ID+"> " +  "WINNER - Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " "+DENOMINATION_NAME+ " " + totalLifeRate);
+			sendDiscordMessage("<@&"+DISCORD_HOOK_CHANNEL_ID+"> " +  "WINNER - Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " "+DENOMINATION_NAME+ " " + totalLifeRate);
 		}
 		}//betatest
 	}
@@ -1635,6 +1738,8 @@ File BaseFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "players"
 	 p.getAdvancementProgress(a).revokeCriteria(c);
 			}
 		}
+		DecimalFormat df = new DecimalFormat("#.##");
+		p.kickPlayer("World Restarting! " +  dateFormat.format(date) + " " + player.getName() + " WON " + "Round " + REDIS.get("gameRound") + " with " + sendLoot + " "+DENOMINATION_NAME+ " worth $" + df.format(amtUSD));
 
             }
         
@@ -1660,7 +1765,7 @@ Bukkit.getServer().unloadWorld(Bukkit.getServer().getWorld(SERVERDISPLAY_NAME+"_
 		while(Bukkit.getServer().getWorld(SERVERDISPLAY_NAME+"_the_end") == null){
 		
 		}
-		REDIS.del("winner");
+
 //Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "restart");
 
 
