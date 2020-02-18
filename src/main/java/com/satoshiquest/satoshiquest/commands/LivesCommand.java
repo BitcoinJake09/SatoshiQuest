@@ -46,14 +46,23 @@ public class LivesCommand extends CommandAction {
 		int livesAmount = Integer.valueOf(args[0]);
 		Long sendLoot = satoshiQuest.livesRate * livesAmount;
 		Long sendAdmin = satoshiQuest.adminRate * livesAmount;
+		Long sendAdmin1 = sendAdmin / 2;
+		Long sendAdmin2 = sendAdmin - sendAdmin1;
 		Long totalBuyingBTC = satoshiQuest.totalLifeRate * livesAmount;
 		if (args.length == 1) {
 		player.sendMessage(ChatColor.YELLOW + "Buy " + livesAmount + " Lives for " + totalBuyingBTC + " with " + sendLoot + " going into the loot treasure and " + sendAdmin + " going to the admin");
 		}
 		if (args.length == 2) {
 			if (args[1].equalsIgnoreCase("buy")) {
+				String result = "failed";
 				try {
-					String result = satoshiQuest.sendMany(player.getUniqueId().toString(), 						satoshiQuest.REDIS.get("nodeAddress"+satoshiQuest.SERVERDISPLAY_NAME), satoshiQuest.ADMIN_ADDRESS, sendLoot, sendAdmin);
+					if (satoshiQuest.ADMIN2_ADDRESS != "noSet") {
+						result = satoshiQuest.sendMany2(player.getUniqueId().toString(), 							satoshiQuest.REDIS.get("nodeAddress"+satoshiQuest.SERVERDISPLAY_NAME), satoshiQuest.ADMIN_ADDRESS, satoshiQuest.ADMIN2_ADDRESS, sendLoot, sendAdmin1, sendAdmin2);				
+					} else {
+						result = satoshiQuest.sendMany(player.getUniqueId().toString(), 							satoshiQuest.REDIS.get("nodeAddress"+satoshiQuest.SERVERDISPLAY_NAME), satoshiQuest.ADMIN_ADDRESS, sendLoot, sendAdmin);
+					}
+
+					//end if multidev
 		      			Long newBalance = satoshiQuest.getBalance(player.getUniqueId().toString(),6);
 					if ((result != "failed") && (balance > newBalance)) {
 						String setLives = Integer.toString(((Integer.valueOf(satoshiQuest.REDIS.get("LivesLeft" +player.getUniqueId().toString()))) + (satoshiQuest.LIVES_PERBUYIN * livesAmount)));
@@ -63,7 +72,6 @@ public class LivesCommand extends CommandAction {
 						player.sendMessage(ChatColor.RED + "Buy lives failed, may be due to not enough confirmed balance. try /wallet to check.");
 					}
 					System.out.println("[LivesBuy] " + result);
-     					satoshiQuest.updateScoreboard(player);
 				} catch(Exception e) {
 					e.printStackTrace();
 				}
@@ -101,7 +109,11 @@ public class LivesCommand extends CommandAction {
 		}//end is args[0] > 0
 	 } //end isStringInt
 	}//end args length >0
-
+	try {
+	satoshiQuest.updateScoreboard(player);
+	} catch(Exception e) {
+		e.printStackTrace();
+	}
     return true;
   }
 
