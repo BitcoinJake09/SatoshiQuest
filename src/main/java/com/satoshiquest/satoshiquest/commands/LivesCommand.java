@@ -96,6 +96,7 @@ public class LivesCommand extends CommandAction {
 							String plusLives = Integer.toString((Integer.valueOf(satoshiQuest.REDIS.get("LivesLeft" +Bukkit.getServer().getPlayer(sendWho).getUniqueId())) + livesAmount));
 							satoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(), minusLives);
 							satoshiQuest.REDIS.set("LivesLeft" + Bukkit.getServer().getPlayer(sendWho).getUniqueId(),plusLives);
+							onlinePlayer.sendMessage(ChatColor.GREEN +""+player.getDisplayName()+ " Sent " + args[0] + " lives to you!");
 							}
 						} else {
 							player.sendMessage(ChatColor.RED + "You need 2 or more lives to be able to send to another player");
