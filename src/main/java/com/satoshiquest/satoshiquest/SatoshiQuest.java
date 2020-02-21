@@ -150,6 +150,7 @@ public class SatoshiQuest extends JavaPlugin {
 
   public Long wallet_balance_cache = 0L;
   public Long exTime15 = new Date().getTime();
+  public Long resetTimes = new Date().getTime();
   public int discordWait15 = 3;
   public Double exRate = 10500.00;
   public Long livesRate = 0L;
@@ -392,13 +393,9 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
       modCommands.put("emergencystop", new EmergencystopCommand());
       modCommands.put("motd", new MOTDCommand(this));
 
-	for(int timeout = 0;timeout<=100000;timeout++){
-		//System.out.println("[startup] timeout: " +timeout+"/100000");
-	}
 
-	if (REDIS.exists("winner")) {
-		REDIS.del("winner");
-	}
+
+	
       System.out.println("[startup] finished");
 
     } catch (Exception e) {
@@ -1500,6 +1497,41 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 10500.00)) {
         },
         0,
         1000L);
+
+    scheduler.scheduleSyncRepeatingTask(
+        this,
+        new Runnable() {
+          @Override
+          public void run() {
+            //publish_stats();
+try {
+		//resetTimes
+		//long waitTime15 = 1000 * 60 * 15;
+	if (REDIS.exists("resetWorlds")) {
+	resetTimes = new Date().getTime();
+	REDIS.del("resetWorlds");
+        System.out.println("[SERVER] reset triggered");
+	if(System.getenv("DISCORD_HOOK_URL")!=null) {
+		sendDiscordMessage("<@&"+DISCORD_HOOK_CHANNEL_ID+"> " + "World Reseting");
+				}
+	}
+	if ((new Date().getTime() >= ((resetTimes) + (1000 * 60 * 5))) && (REDIS.exists("winner"))){
+		REDIS.del("winner");
+        System.out.println("[SERVER] reset finished");
+if(System.getenv("DISCORD_HOOK_URL")!=null) {
+		sendDiscordMessage("<@&"+DISCORD_HOOK_CHANNEL_ID+"> " + "World Reset done!");
+				}
+	}
+
+
+
+} catch (Exception e) {
+			e.printStackTrace();
+		}
+          }
+        },
+        0,
+        1000L);
   }
 
   public void publish_stats() {
@@ -1613,22 +1645,23 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 	if ((playerx<lootX+0.8)&&(playerx>lootX-0.8) && (playerz<lootZ+0.8)&&(playerz>lootZ-0.8) && (playery<lootY+2)&&(playery>lootY-2) && (!REDIS.exists("winner"))) {
 		System.out.println(player.getDisplayName() + " won!");
 		REDIS.set("winner","true");
+		REDIS.set("resetWorlds","true");
 		announce(player.getName() + " WON!");
 		REDIS.set("pushloot","true");
 		//sendloot to winner
 		long sendLoot = 0L;
 		String result = "failed";
-		//result = "test"; // for testing comment out
+		result = "test"; // for testing comment out
 		try {
 		if (getBalance(SERVERDISPLAY_NAME,1) > 0) {
 			sendLoot = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * THIS_ROUND_WIN_PERC);
 			Long sendback = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * NEXT_ROUND_WIN_PERC);
 		if (REDIS.exists("ExternalAddress" +player.getUniqueId().toString())) {
-		result = sendMany(SERVERDISPLAY_NAME, REDIS.get("ExternalAddress" +player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback);
+		//result = sendMany(SERVERDISPLAY_NAME, REDIS.get("ExternalAddress" +player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback);
 		} 
 		if (result == "failed") {
 		player.sendMessage(ChatColor.YELLOW + "External OnWin address not set, or failed, trying in-game wallet.");
-		result = sendMany(SERVERDISPLAY_NAME, REDIS.get("nodeAddress"+player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback);
+		//result = sendMany(SERVERDISPLAY_NAME, REDIS.get("nodeAddress"+player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback);
 		}
 			System.out.println("won " + sendLoot + " LOOT! txid: " +result);
 		}
