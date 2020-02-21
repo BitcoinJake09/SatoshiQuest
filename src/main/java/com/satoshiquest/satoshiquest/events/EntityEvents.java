@@ -74,7 +74,6 @@ public class EntityEvents implements Listener {
       Player player = event.getPlayer();
 	NodeWallet tempWallet=null;
 	if (!satoshiQuest.REDIS.exists("nodeAddress"+player.getUniqueId().toString())) {
-	isNewPlayer = true;
 	if (satoshiQuest.getWalletInfo(player.getUniqueId().toString())!=false) {
 		try {
 			tempWallet = satoshiQuest.loadWallet(player.getUniqueId().toString());
@@ -197,6 +196,7 @@ public class EntityEvents implements Listener {
 		satoshiQuest.REDIS.del("LootAnnounced" +player.getUniqueId().toString());
 		}   
     if (!SatoshiQuest.REDIS.exists("LivesLeft" + player.getUniqueId().toString())) {
+		isNewPlayer = true;
 		SatoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(),"0");
 		if (SatoshiQuest.REDIS.exists("BetaTest")){
 		SatoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(),"1");
@@ -239,7 +239,6 @@ player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
       player.sendMessage(ChatColor.WHITE + "" + ChatColor.UNDERLINE + url);
 
     } else {
-
 	satoshiQuest.REDIS.set("nodeAddress"+ player.getUniqueId().toString(),satoshiQuest.getAccountAddress(player.getUniqueId().toString()));
 	player.sendMessage(ChatColor.GREEN + "Your Deposit address on this server: " + satoshiQuest.REDIS.get("nodeAddress"+ player.getUniqueId().toString()));
 
