@@ -1,25 +1,17 @@
-find . -type f -name "*.*" -exec sed -i'' -e 's/devaultquest/devaultquest/g' {} +
-
-find . -type f -name "*.*" -exec sed -i'' -e 's/DevaultQuest/DevaultQuest/g' {} +
-
-find . -type f -name "*.*" -exec sed -i'' -e 's/Devaultquest/Devaultquest/g' {} +
-
-find . -type f -name "*.*" -exec sed -i'' -e 's/devaultQuest/devaultQuest/g' {} +
-
-find . -type f -name "*.*" -exec sed -i'' -e 's/DEVAULTQUEST/DEVAULTQUEST/g' {} +
-
+find . -type f -name "*.*" -exec sed -i'' -e 's/satoshiquest/changeme/g' {} +
+find . -type f -name "*.*" -exec sed -i'' -e 's/SatoshiQuest/ChangeMe/g' {} +
+find . -type f -name "*.*" -exec sed -i'' -e 's/Satoshiquest/Changeme/g' {} +
+find . -type f -name "*.*" -exec sed -i'' -e 's/satoshiQuest/changeMe/g' {} +
+find . -type f -name "*.*" -exec sed -i'' -e 's/SATOSHIQUEST/CHANGEME/g' {} +
 shopt -s globstar
-
-find . * | rename 's/devaultquest/devaultquest/g'
-
+find . * | rename 's/satoshiquest/changeme/g'
 shopt -s globstar
-
-find . * | rename 's/DevaultQuest/DevaultQuest/g'
-
+find . * | rename 's/satoshiquest/changeme/g'
 shopt -s globstar
-
-find . * | rename 's/Devaultquest/devaultQuest/g'
-
+find . * | rename 's/SatoshiQuest/ChangeMe/g'
 shopt -s globstar
-
-find . * | rename 's/DEVAULTQUEST/DEVAULTQUEST/g'
+find . * | rename 's/Satoshiquest/Changeme/g'
+shopt -s globstar
+find . * | rename 's/satoshiQuest/changeMe/g'
+shopt -s globstar
+find . * | rename 's/SATOSHIQUEST/CHANGEME/g'
