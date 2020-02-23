@@ -195,6 +195,7 @@ public class EntityEvents implements Listener {
     if (satoshiQuest.REDIS.exists("LootAnnounced" +player.getUniqueId().toString())) {
 		satoshiQuest.REDIS.del("LootAnnounced" +player.getUniqueId().toString());
 		}   
+		isNewPlayer = false;
     if (!SatoshiQuest.REDIS.exists("LivesLeft" + player.getUniqueId().toString())) {
 		isNewPlayer = true;
 		SatoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(),"0");
