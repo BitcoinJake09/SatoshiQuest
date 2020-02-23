@@ -96,8 +96,8 @@ public class SatoshiQuest extends JavaPlugin {
   public static final String SERVER_WEBSITE =
       System.getenv("SERVER_WEBSITE") != null ? System.getenv("SERVER_WEBSITE") : "http://AllAboutBTC.com/SatoshiQuest.html";
 //https://www.cryptonator.com/api/currencies
-  public static final String CRYPTONATOR_CRYPTO =
-      System.getenv("CRYPTONATOR_CRYPTO") != null ? System.getenv("CRYPTONATOR_CRYPTO") : "btc";
+  public static final String COINGECKO_CRYPTO =
+      System.getenv("COINGECKO_CRYPTO") != null ? System.getenv("COINGECKO_CRYPTO") : "btc";
 
   // REDIS: Look for Environment variables on hostname and port, otherwise defaults to
   // localhost:6379
@@ -1454,7 +1454,7 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 10500.00)) {
 			}
 		}
 
-			exRate =  Double.parseDouble(getExchangeRate(CRYPTONATOR_CRYPTO));
+			exRate =  Double.parseDouble(getExchangeRate(COINGECKO_CRYPTO));
 			livesRate =  (long)((BUYIN_AMOUNT/(exRate*0.00000001))*0.90);
 			adminRate =  (long)((BUYIN_AMOUNT/(exRate*0.00000001))*0.10);
 			totalLifeRate = livesRate + adminRate;
@@ -1475,7 +1475,7 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 10500.00)) {
 			lootAmount = (double)(exRate * (lootBalance * 0.00000001));
 		}               
         		//System.out.print(df.format(lootAmount));
-			String lootAnnounce = ("Current "+CRYPTONATOR_CRYPTO+" in loot: " +lootBalance + " "+DENOMINATION_NAME+"! worth: $"+df.format(lootAmount)+" USD!");
+			String lootAnnounce = ("Current "+COINGECKO_CRYPTO+" in loot: " +lootBalance + " "+DENOMINATION_NAME+"! worth: $"+df.format(lootAmount)+" USD!");
 				sendDiscordMessage("1 Life is: "+ totalLifeRate + " "+DENOMINATION_NAME);
 				sendDiscordMessage(lootAnnounce);
 				sendDiscordMessage("For more info check out "+SERVER_WEBSITE);
@@ -2147,6 +2147,99 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
 
   }
 
+
+	public boolean isStringInt(String s)
+{
+    try
+    {
+        Integer.parseInt(s);
+        return true;
+    } catch (NumberFormatException ex)
+    {
+        return false;
+    }
+}
+	public static boolean isStringDouble(String s)
+{
+    try
+    {
+        Double.parseDouble(s);
+        return true;
+    } catch (NumberFormatException ex)
+    {
+        return false;
+    }
+}
+  public void crashtest() {
+    this.setEnabled(false);
+  }
+
+
+    public String getExchangeRate(String crypto)
+	{
+	String price= exRate.toString();
+	String rate = exRate.toString();
+	 try {
+            
+                URL url=new URL("https://api.coingecko.com/api/v3/simple/price?ids="+crypto+"&vs_currencies=USD&include_market_cap=false&include_24hr_vol=false&include_24hr_change=false&include_last_updated_at=false");
+                
+                //System.out.println(url.toString());
+                HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+                con.setRequestMethod("GET");
+                con.setRequestProperty("User-Agent", "Mozilla/1.22 (compatible; MSIE 2.0; Windows 3.1)");
+                con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+	StringBuffer response = new StringBuffer();
+    if(con.getResponseCode()==200) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+              response.append(inputLine);
+            }
+            in.close();
+            //System.out.println(response.toString());
+
+JSONParser parser = new JSONParser();
+            	final JSONObject jsonobj,jsonobj2;
+
+                jsonobj = (JSONObject) parser.parse(response.toString());
+                jsonobj2 = (JSONObject) parser.parse(jsonobj.get(crypto).toString());
+		//double val=Double.parseDouble(jsonobj2.get("price").toString());
+		
+		//ERROR HERE
+		
+		price=jsonobj2.get("usd").toString();
+                //System.out.println(crypto + "price: "+price);
+
+          } else {
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+            String inputLine;
+            response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+              response.append(inputLine);
+            }
+            in.close();
+            //System.out.println(response.toString());
+		}
+		
+
+
+        } catch (Exception e) {
+            System.out.println("[PRICE] problem updating price for "+crypto);
+                e.printStackTrace();
+            // wallet might be new and it's not listed on the blockchain yet
+        }
+	if (isStringDouble(price)) {
+		return price;
+	} else {
+		return rate;
+	}
+    }
+
+
+}
 /*
 {
   "last_message_id": "3343820033257021450",
@@ -2216,96 +2309,3 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
 
   }
 */
-	public boolean isStringInt(String s)
-{
-    try
-    {
-        Integer.parseInt(s);
-        return true;
-    } catch (NumberFormatException ex)
-    {
-        return false;
-    }
-}
-	public static boolean isStringDouble(String s)
-{
-    try
-    {
-        Double.parseDouble(s);
-        return true;
-    } catch (NumberFormatException ex)
-    {
-        return false;
-    }
-}
-  public void crashtest() {
-    this.setEnabled(false);
-  }
-
-
-    public String getExchangeRate(String crypto)
-	{
-	String price= exRate.toString();
-	String rate = exRate.toString();
-	 try {
-            
-                URL url=new URL("https://api.cryptonator.com/api/ticker/"+crypto+"-usd");
-                
-                //System.out.println(url.toString());
-                HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-                con.setRequestMethod("GET");
-                con.setRequestProperty("User-Agent", "Mozilla/1.22 (compatible; MSIE 2.0; Windows 3.1)");
-                con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-	StringBuffer response = new StringBuffer();
-    if(con.getResponseCode()==200) {
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            String inputLine;
-            response = new StringBuffer();
-
-            while ((inputLine = in.readLine()) != null) {
-              response.append(inputLine);
-            }
-            in.close();
-            //System.out.println(response.toString());
-
-JSONParser parser = new JSONParser();
-            	final JSONObject jsonobj,jsonobj2;
-
-                jsonobj = (JSONObject) parser.parse(response.toString());
-                jsonobj2 = (JSONObject) parser.parse(jsonobj.get("ticker").toString());
-		//double val=Double.parseDouble(jsonobj2.get("price").toString());
-		
-		//ERROR HERE
-		
-		price=jsonobj2.get("price").toString();
-                //System.out.println(crypto + "price: "+price);
-
-          } else {
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-            String inputLine;
-            response = new StringBuffer();
-
-            while ((inputLine = in.readLine()) != null) {
-              response.append(inputLine);
-            }
-            in.close();
-            //System.out.println(response.toString());
-		}
-		
-
-
-        } catch (Exception e) {
-            System.out.println("[PRICE] problem updating price for "+crypto);
-                e.printStackTrace();
-            // wallet might be new and it's not listed on the blockchain yet
-        }
-	if (isStringDouble(price)) {
-		return price;
-	} else {
-		return rate;
-	}
-    }
-
-
-}
-
