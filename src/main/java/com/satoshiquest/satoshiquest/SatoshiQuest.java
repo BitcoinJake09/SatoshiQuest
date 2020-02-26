@@ -97,7 +97,7 @@ public class SatoshiQuest extends JavaPlugin {
       System.getenv("SERVER_WEBSITE") != null ? System.getenv("SERVER_WEBSITE") : "http://AllAboutBTC.com/SatoshiQuest.html";
 //https://www.cryptonator.com/api/currencies
   public static final String COINGECKO_CRYPTO =
-      System.getenv("COINGECKO_CRYPTO") != null ? System.getenv("COINGECKO_CRYPTO") : "btc";
+      System.getenv("COINGECKO_CRYPTO") != null ? System.getenv("COINGECKO_CRYPTO") : "bitcoin";
 
   // REDIS: Look for Environment variables on hostname and port, otherwise defaults to
   // localhost:6379
