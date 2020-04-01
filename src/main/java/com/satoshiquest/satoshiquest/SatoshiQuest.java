@@ -97,7 +97,7 @@ public class SatoshiQuest extends JavaPlugin {
       System.getenv("SERVER_WEBSITE") != null ? System.getenv("SERVER_WEBSITE") : "http://AllAboutBTC.com/SatoshiQuest.html";
 //https://www.cryptonator.com/api/currencies
   public static final String COINGECKO_CRYPTO =
-      System.getenv("COINGECKO_CRYPTO") != null ? System.getenv("COINGECKO_CRYPTO") : "bitcoin";
+      System.getenv("COINGECKO_CRYPTO") != null ? System.getenv("COINGECKO_CRYPTO") : "btc";
 
   // REDIS: Look for Environment variables on hostname and port, otherwise defaults to
   // localhost:6379
@@ -288,7 +288,7 @@ public class SatoshiQuest extends JavaPlugin {
 
 
       if (BITCOIN_NODE_HOST != null) {
-        System.out.println("[startup] checking bitcoin node connection");
+        System.out.println("[startup] checking "+ COINGECKO_CRYPTO +" node connection");
         getBlockChainInfo();
       }
 	//REDIS.del("spawnCreated");
@@ -705,7 +705,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
         return new JSONObject();
     }
     } catch (IOException e) {
-      System.out.println("problem connecting with bitcoin node");
+      System.out.println("problem connecting with "+ COINGECKO_CRYPTO +" node");
       System.out.println(e);
       // Unable to call API?
     }
@@ -1460,7 +1460,7 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 10500.00)) {
 			totalLifeRate = livesRate + adminRate;
 			DecimalFormat df = new DecimalFormat("#.##");
 	        	//System.out.print(df.format(exRate));
-			announce("Currently Bitcoin is: $"+ df.format(exRate));
+			announce("Currently "+ COINGECKO_CRYPTO +" is: $"+ df.format(exRate));
 		        //System.out.println("Currently Bitcoin is: $"+ exRate);
 			announce("1 Life is: "+ totalLifeRate + " " +DENOMINATION_NAME);
 			announce("Active updates in the discord: "+DISCORD_URL);
@@ -1651,17 +1651,17 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 		//sendloot to winner
 		long sendLoot = 0L;
 		String result = "failed";
-		result = "test"; // for testing comment out
+		//result = "test"; // for testing comment out
 		try {
 		if (getBalance(SERVERDISPLAY_NAME,1) > 0) {
 			sendLoot = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * THIS_ROUND_WIN_PERC);
 			Long sendback = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * NEXT_ROUND_WIN_PERC);
 		if (REDIS.exists("ExternalAddress" +player.getUniqueId().toString())) {
-		//result = sendMany(SERVERDISPLAY_NAME, REDIS.get("ExternalAddress" +player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback);
+		result = sendMany(SERVERDISPLAY_NAME, REDIS.get("ExternalAddress" +player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback);
 		} 
 		if (result == "failed") {
 		player.sendMessage(ChatColor.YELLOW + "External OnWin address not set, or failed, trying in-game wallet.");
-		//result = sendMany(SERVERDISPLAY_NAME, REDIS.get("nodeAddress"+player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback);
+		result = sendMany(SERVERDISPLAY_NAME, REDIS.get("nodeAddress"+player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback);
 		}
 			System.out.println("won " + sendLoot + " LOOT! txid: " +result);
 		}
