@@ -49,11 +49,11 @@ String url = satoshiQuest.ADDRESS_URL + satoshiQuest.REDIS.get("nodeAddress"+ pl
       player.sendMessage(ChatColor.GREEN + "wallet balance with 1-conf+: " + balance1);
       player.sendMessage(ChatColor.DARK_GREEN + "wallet unconfirmed: " + unconfirmedBalance);
 	if (SatoshiQuest.REDIS.exists("txFee" + player.getUniqueId().toString())) {
-		player.sendMessage(ChatColor.GREEN + "player fee is set to " + SatoshiQuest.REDIS.get("txFee" + player.getUniqueId().toString()) + "sats/byte.");
+		player.sendMessage(ChatColor.GREEN + "player fee is set to " + SatoshiQuest.REDIS.get("txFee" + player.getUniqueId().toString()) + ""+ satoshiQuest.DENOMINATION_NAME +"/byte.");
 	}
 			DecimalFormat df = new DecimalFormat("#.##");
 	        	//System.out.print(df.format(exRate));
-	player.sendMessage(ChatColor.GREEN + "1 btc = $" + df.format(satoshiQuest.exRate));
+	player.sendMessage(ChatColor.GREEN + "1 " + satoshiQuest.COINGECKO_CRYPTO + " = $" + df.format(satoshiQuest.exRate));
 	if (satoshiQuest.REDIS.exists("ExternalAddress" +player.getUniqueId().toString())) {
 	player.sendMessage(ChatColor.GREEN + "On win address set to: " + satoshiQuest.REDIS.get("ExternalAddress" +player.getUniqueId().toString()));
 	} else {
