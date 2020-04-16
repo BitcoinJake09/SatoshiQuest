@@ -44,9 +44,9 @@ commands:
   tip:
     description: "Tip is used for player to player transactions"
     usage: "/tip <amount> <playername>"
-  send:
-    description: "Send is used for External transactions to an address"
-    usage: "/send <amount> <address>"
+  withdraw:
+    description: "withdraw is used for External transactions to an address"
+    usage: "/withdraw <amount> <address>"
   reset:
     description: "used to reset world variable like loot spawn and announce radius"
     usage: "/reset"
