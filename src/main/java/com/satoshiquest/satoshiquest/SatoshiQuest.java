@@ -377,7 +377,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
       commands.put("wallet", new WalletCommand(this));
       commands.put("SetFee", new SetFeeCommand(this));
       commands.put("tip", new TipCommand(this));
-      commands.put("send", new SendCommand(this));
+      commands.put("withdraw", new WithdrawCommand(this));
       commands.put("lives", new LivesCommand(this));
       commands.put("leaderboard", new LeaderBoardCommand(this));
       modCommands = new HashMap<String, CommandAction>();
