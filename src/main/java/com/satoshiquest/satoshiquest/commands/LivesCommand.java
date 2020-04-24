@@ -29,12 +29,22 @@ public class LivesCommand extends CommandAction {
 		e.printStackTrace();
 		player.sendMessage(ChatColor.RED + "There was a problem reading your wallet.");
     	}
+	if (satoshiQuest.didVote(player.getName()) == 0) {
 	player.sendMessage(ChatColor.GREEN + "Lives are $" + satoshiQuest.BUYIN_AMOUNT + " USD each in BTC. Most goes into Loot wallet which everyone searches for the treasure, once found that player will recive funds to their player wallet if no external wallet set and the world will reset for a new hunt. A little bit is set aside for further developent and hosting.");
+	player.sendMessage(ChatColor.AQUA + "You can also get 10% off lives here: " + satoshiQuest.VOTE_URL);
+	} else if (satoshiQuest.didVote(player.getName()) == 1) {
+player.sendMessage(ChatColor.AQUA + "THANK YOU FAR VOTING!");
+player.sendMessage(ChatColor.GREEN + "Lives are $" + (satoshiQuest.BUYIN_AMOUNT*0.9) + " USD each in BTC. Most goes into Loot wallet which everyone searches for the treasure, once found that player will recive funds to their player wallet if no external wallet set and the world will reset for a new hunt. A little bit is set aside for further developent and hosting.");
+	}
 	if (balance == 0) {
 		player.sendMessage(ChatColor.RED + "Looks like you dont have enough funds, try the (/wallet) command to check your balance and deposit address.");
 	}
 	player.sendMessage(ChatColor.YELLOW + "You can use the command (/Lives [Number]) like (/Lives 1) or (/Lives 2)");
+	if (satoshiQuest.didVote(player.getName()) == 0) {
 	player.sendMessage(ChatColor.YELLOW + "But to complete it you need to say buy to confirm so (/Lives 3 buy) will get you 3 lives for " + (3 * satoshiQuest.totalLifeRate));
+	} else if (satoshiQuest.didVote(player.getName()) == 1) {
+	player.sendMessage(ChatColor.YELLOW + "But to complete it you need to say buy to confirm so (/Lives 3 buy) will get you 3 lives for " + (3 * (satoshiQuest.totalLifeRate*0.9)));
+	}
 	player.sendMessage(ChatColor.GREEN + "Lives are transferable between players with (/Lives [Number] send [playername])");
      } else if ((satoshiQuest.isStringInt(args[0])) && (args.length <= 3)) {  //end help
 	if (Integer.parseInt(args[0]) > 0) {
@@ -49,6 +59,13 @@ public class LivesCommand extends CommandAction {
 		Long sendAdmin1 = sendAdmin / 2;
 		Long sendAdmin2 = sendAdmin - sendAdmin1;
 		Long totalBuyingBTC = satoshiQuest.totalLifeRate * livesAmount;
+		if (satoshiQuest.didVote(player.getName()) == 1) {
+		sendLoot = (long)(satoshiQuest.livesRate*0.9) * livesAmount;
+		sendAdmin = (long)(satoshiQuest.adminRate*0.9) * livesAmount;
+		sendAdmin1 = sendAdmin / 2;
+		sendAdmin2 = sendAdmin - sendAdmin1;
+		totalBuyingBTC = (long)(satoshiQuest.totalLifeRate*0.9) * livesAmount;
+		}
 		if (args.length == 1) {
 		player.sendMessage(ChatColor.YELLOW + "Buy " + livesAmount + " Lives for " + totalBuyingBTC + " with " + sendLoot + " going into the loot treasure and " + sendAdmin + " going to the admin");
 		}
