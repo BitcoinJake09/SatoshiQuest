@@ -65,6 +65,7 @@ player.sendMessage(ChatColor.GREEN + "Lives are $" + (satoshiQuest.BUYIN_AMOUNT*
 		sendAdmin1 = sendAdmin / 2;
 		sendAdmin2 = sendAdmin - sendAdmin1;
 		totalBuyingBTC = (long)(satoshiQuest.totalLifeRate*0.9) * livesAmount;
+			player.sendMessage(ChatColor.AQUA + "THANK YOU FOR VOTING!");
 		}
 		if (args.length == 1) {
 		player.sendMessage(ChatColor.YELLOW + "Buy " + livesAmount + " Lives for " + totalBuyingBTC + " with " + sendLoot + " going into the loot treasure and " + sendAdmin + " going to the admin");
