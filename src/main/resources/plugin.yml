@@ -53,6 +53,9 @@ commands:
   lives:
     description: "Get lives prices and buy or transfer lives to other players"
     usage: "/lives <help|orLives#> <buy>"
+  vote:
+    description: "shows where to vote for 10% off lives"
+    usage: "/vote"
   leaderboard:
     description: "Lists all round winners"
     usage: "/leaderboard"
