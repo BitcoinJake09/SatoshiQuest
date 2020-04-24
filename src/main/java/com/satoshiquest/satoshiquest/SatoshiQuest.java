@@ -139,6 +139,10 @@ public class SatoshiQuest extends JavaPlugin {
   public Long LOOT_RADIUS_MAX =
       System.getenv("LOOT_RADIUS_MAX") != null ? Long.parseLong(System.getenv("LOOT_RADIUS_MAX")) : 10000;
 
+public final static String VOTE_API_KEY = System.getenv("VOTE_API_KEY") != null ? System.getenv("VOTE_API_KEY") : null;
+
+public final static String VOTE_URL = System.getenv("VOTE_URL") != null ? System.getenv("VOTE_URL") : null;
+
   public static int rand(int min, int max) {
     return min + (int) (Math.random() * ((max - min) + 1));
   }
@@ -379,6 +383,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
       commands.put("tip", new TipCommand(this));
       commands.put("withdraw", new WithdrawCommand(this));
       commands.put("lives", new LivesCommand(this));
+      commands.put("vote", new VoteCommand(this));
       commands.put("leaderboard", new LeaderBoardCommand(this));
       modCommands = new HashMap<String, CommandAction>();
       modCommands.put("fixleaderboard", new FixLeaderBoardCommand(this));
@@ -394,7 +399,9 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
       modCommands.put("motd", new MOTDCommand(this));
 
 
-
+	if(System.getenv("VOTE_API_KEY")!=null) {
+		serverInfo();
+	}
 	
       System.out.println("[startup] finished");
 
@@ -1464,6 +1471,7 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 10500.00)) {
 		        //System.out.println("Currently Bitcoin is: $"+ exRate);
 			announce("1 Life is: "+ totalLifeRate + " " +DENOMINATION_NAME);
 			announce("Active updates in the discord: "+DISCORD_URL);
+			announce("Vote here for 10% off lives! " + VOTE_URL);
 		        //System.out.println("1 Life is: "+ totalLifeRate + " " +DENOMINATION_NAME);
 			if ((System.getenv("DISCORD_HOOK_URL")!=null)&&(discordWait15 >= 3)) {
 			// announce loot in discord
@@ -1479,6 +1487,7 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 10500.00)) {
 				sendDiscordMessage("1 Life is: "+ totalLifeRate + " "+DENOMINATION_NAME);
 				sendDiscordMessage(lootAnnounce);
 				sendDiscordMessage("For more info check out "+SERVER_WEBSITE);
+				sendDiscordMessage("Vote here for 10% off lives! " + VOTE_URL);
 				discordWait15=0;
 			} else {
 				discordWait15++;
@@ -1647,7 +1656,7 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 		REDIS.set("winner","true");
 		REDIS.set("resetWorlds","true");
 		announce(player.getName() + " WON!");
-		REDIS.set("pushloot","true");
+		//REDIS.set("pushloot","true");
 		//sendloot to winner
 		long sendLoot = 0L;
 		String result = "failed";
@@ -2024,9 +2033,23 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
 			tempblock.setType(Material.GOLD_BLOCK);
 	                tempblock = lootBlock.getWorld().getBlockAt((int)lootX+1, (int)lootY+4, (int)lootZ-1);
 			tempblock.setType(Material.GOLD_BLOCK);
-			
+
 	                tempblock = lootBlock.getWorld().getBlockAt((int)lootX, (int)lootY+4, (int)lootZ);
 			tempblock.setType(Material.GOLD_BLOCK);//loot cap block
+
+
+//hide top blocks xD
+	                tempblock = lootBlock.getWorld().getBlockAt((int)lootX+1, (int)lootY+5, (int)lootZ+1);
+			tempblock.setType(Material.GRASS);
+	                tempblock = lootBlock.getWorld().getBlockAt((int)lootX-1, (int)lootY+5, (int)lootZ-1);
+			tempblock.setType(Material.GRASS);
+	                tempblock = lootBlock.getWorld().getBlockAt((int)lootX-1, (int)lootY+5, (int)lootZ+1);
+			tempblock.setType(Material.DIRT);
+	                tempblock = lootBlock.getWorld().getBlockAt((int)lootX+1, (int)lootY+5, (int)lootZ-1);
+			tempblock.setType(Material.DIRT);
+			
+	                tempblock = lootBlock.getWorld().getBlockAt((int)lootX, (int)lootY+5, (int)lootZ);
+			tempblock.setType(Material.GRASS);//loot cap block
 
    }
   public boolean isModerator(Player player) {
@@ -2238,8 +2261,115 @@ JSONParser parser = new JSONParser();
 	}
     }
 
+  public int didVote(String playerName) {
+    if(System.getenv("VOTE_API_KEY")!=null) {
+      //System.out.println("[discord] "+content);
+      try {
+          //String json = "{\"content\":\""+content+"\"}";
 
-}
+          //JSONParser parser = new JSONParser();
+
+          //final JSONObject jsonObject = new JSONObject();
+          //jsonObject.put("content", content);
+          CookieHandler.setDefault(new CookieManager());
+
+          URL url = new URL("https://minecraft-mp.com/api/?object=votes&element=claim&key=" + VOTE_API_KEY + "&username=" + playerName + "");
+          HttpsURLConnection con = null;
+
+          System.setProperty("http.agent", "");
+
+          con = (HttpsURLConnection) url.openConnection();
+
+          con.setRequestMethod("POST");
+          con.setRequestProperty("Content-Type", "application/json");
+          con.setRequestProperty("Cookie", ""+SERVER_NAME+"=true");
+          con.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
+
+          con.setDoOutput(true);
+          //OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
+          //out.write(json);
+          //out.close();
+	if(con.getResponseCode()==200) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+              response.append(inputLine);
+            }
+            in.close();
+            //System.out.println(response.toString());
+            return Integer.parseInt(response.toString());
+          } else {
+            return 0;
+          }
+          
+
+      } catch (Exception e) {
+          e.printStackTrace();
+          return 0;
+      }
+    }
+    return 0;
+
+  }
+
+  public void serverInfo() {
+    if(System.getenv("VOTE_API_KEY")!=null) {
+      //System.out.println("[discord] "+content);
+      try {
+          //String json = "{\"content\":\""+content+"\"}";
+
+          //JSONParser parser = new JSONParser();
+
+          //final JSONObject jsonObject = new JSONObject();
+          //jsonObject.put("content", content);
+          CookieHandler.setDefault(new CookieManager());
+
+          URL url = new URL("https://minecraft-mp.com/api/?object=servers&element=detail&key="+VOTE_API_KEY+"");
+          HttpsURLConnection con = null;
+
+          System.setProperty("http.agent", "");
+
+          con = (HttpsURLConnection) url.openConnection();
+
+          con.setRequestMethod("POST");
+          con.setRequestProperty("Content-Type", "application/json");
+          con.setRequestProperty("Cookie", ""+SERVER_NAME+"=true");
+          con.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
+
+          con.setDoOutput(true);
+          //OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
+          //out.write(json);
+          //out.close();
+	if(con.getResponseCode()==200) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+              response.append(inputLine);
+            }
+            in.close();
+            System.out.println(response.toString());
+            //return true;
+          } else {
+            //return false;
+          }
+          
+
+      } catch (Exception e) {
+          e.printStackTrace();
+          //return false;
+      }
+    }
+    //return false;
+
+  }//EO voting
+
+}//EOF
+
+
 /*
 {
   "last_message_id": "3343820033257021450",
