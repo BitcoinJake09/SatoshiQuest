@@ -1,5 +1,9 @@
 How to run (for testing and development)
 =========================================
+
+to rename easy use the renameScript.sh
+open and Change the "CHANGEME"s accordingly
+
 1. run make
 --------------
 
