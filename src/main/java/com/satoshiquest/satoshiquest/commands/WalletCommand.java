@@ -7,6 +7,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import java.text.*;
+import java.math.BigDecimal;
 
 public class WalletCommand extends CommandAction {
   private SatoshiQuest satoshiQuest;
@@ -22,7 +23,7 @@ if (args[0].equalsIgnoreCase("help") || !(args.length >= 1)) {
 	      player.sendMessage(ChatColor.GREEN + "/wallet - Displays your SatoshiQuest wallet info.");
               player.sendMessage(ChatColor.GREEN + "/wallet <set> <address> - will set your own win address to an address of your choosing instead of the ingame wallet. ");
 	      player.sendMessage(ChatColor.GREEN + "/tip <amount> <playername> - Tip is used for player to player transactions.");
-	      player.sendMessage(ChatColor.GREEN + "/send <amount> <address> - Send is used for External transactions to an address.");
+	      player.sendMessage(ChatColor.GREEN + "/withdraw <amount> <address> - withdraw is used for External transactions to an address.");
 
 	      player.sendMessage(ChatColor.GREEN + "Your Deposit address on this server: " + satoshiQuest.getAccountAddress(player.getUniqueId().toString()));
 String url = satoshiQuest.ADDRESS_URL + satoshiQuest.REDIS.get("nodeAddress"+ player.getUniqueId().toString());
@@ -33,7 +34,7 @@ String url = satoshiQuest.ADDRESS_URL + satoshiQuest.REDIS.get("nodeAddress"+ pl
       player.sendMessage(ChatColor.GREEN + "/wallet - Displays your SatoshiQuest wallet info.");
               player.sendMessage(ChatColor.GREEN + "/wallet <set> <address> - will set your own win address to an address of your choosing instead of the ingame wallet. ");
 	      player.sendMessage(ChatColor.GREEN + "/tip <amount> <playername> - Tip is used for player to player transactions.");
-	      player.sendMessage(ChatColor.GREEN + "/send <amount> <address> - Send is used for External transactions to an address.");
+	      player.sendMessage(ChatColor.GREEN + "/withdraw <amount> <address> - withdraw is used for External transactions to an address.");
     }
 
     try {
@@ -42,16 +43,26 @@ String url = satoshiQuest.ADDRESS_URL + satoshiQuest.REDIS.get("nodeAddress"+ pl
 player.sendMessage(ChatColor.GREEN + "Your Deposit address on this server: " + satoshiQuest.getAccountAddress(player.getUniqueId().toString()));
 String url = satoshiQuest.ADDRESS_URL + satoshiQuest.REDIS.get("nodeAddress"+ player.getUniqueId().toString());
       player.sendMessage(ChatColor.WHITE + "" + ChatColor.UNDERLINE + url);
-      Long balance1 = satoshiQuest.getBalance(player.getUniqueId().toString(),1);
-      Long balance6 = satoshiQuest.getBalance(player.getUniqueId().toString(),6);
-      Long unconfirmedBalance = satoshiQuest.getUnconfirmedBalance(player.getUniqueId().toString());
-      player.sendMessage(ChatColor.GREEN + "wallet balance with 6-conf+: " + balance6);
-      player.sendMessage(ChatColor.GREEN + "wallet balance with 1-conf+: " + balance1);
-      player.sendMessage(ChatColor.DARK_GREEN + "wallet unconfirmed: " + unconfirmedBalance);
+      //Long balance1 = satoshiQuest.getBalance(player.getUniqueId().toString(),1);
+      Double playerCoinBalance1 = ((Double)(BigDecimal.valueOf(satoshiQuest.getBalance(player.getUniqueId().toString(),1)).doubleValue() * satoshiQuest.baseSat));
+      //Long balance6 = satoshiQuest.getBalance(player.getUniqueId().toString(),6);
+      Double playerCoinBalance6 = (Double)(BigDecimal.valueOf(satoshiQuest.getBalance(player.getUniqueId().toString(),6)).doubleValue() * satoshiQuest.baseSat);
+      
+      
+      //Long unconfirmedBalance = satoshiQuest.getUnconfirmedBalance(player.getUniqueId().toString());
+      Double playerCoinBalanceUnconfirmed = (Double)(BigDecimal.valueOf(satoshiQuest.getUnconfirmedBalance(player.getUniqueId().toString())).doubleValue() * satoshiQuest.baseSat);
+
+
+
+
+
+      player.sendMessage(ChatColor.GREEN + "wallet balance with 6-conf+: " + satoshiQuest.globalDecimalFormat.format(playerCoinBalance6));
+      player.sendMessage(ChatColor.GREEN + "wallet balance with 1-conf+: " + satoshiQuest.globalDecimalFormat.format(playerCoinBalance1));
+      player.sendMessage(ChatColor.DARK_GREEN + "wallet unconfirmed: " + satoshiQuest.globalDecimalFormat.format(playerCoinBalanceUnconfirmed));
 	if (SatoshiQuest.REDIS.exists("txFee" + player.getUniqueId().toString())) {
 		player.sendMessage(ChatColor.GREEN + "player fee is set to " + SatoshiQuest.REDIS.get("txFee" + player.getUniqueId().toString()) + ""+ satoshiQuest.DENOMINATION_NAME +"/byte.");
 	}
-			DecimalFormat df = new DecimalFormat("#.##");
+			DecimalFormat df = new DecimalFormat("0.00");
 	        	//System.out.print(df.format(exRate));
 	player.sendMessage(ChatColor.GREEN + "1 " + satoshiQuest.COINGECKO_CRYPTO + " = $" + df.format(satoshiQuest.exRate));
 	if (satoshiQuest.REDIS.exists("ExternalAddress" +player.getUniqueId().toString())) {

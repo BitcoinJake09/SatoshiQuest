@@ -27,17 +27,18 @@ if (args[0].equalsIgnoreCase("help") || !(args.length >= 1)) {
 
     //int MAX_SEND = 10000; // to be multiplied by DENOMINATION_FACTOR
     if (args.length == 2) {
-      for (char c : args[0].toCharArray()) {
+      final Long sat = satoshiQuest.convertCoinToSats(Double.parseDouble(args[0]));
+      for (char c : sat.toString().toCharArray()) {
         if (!Character.isDigit(c)) return false;
       }
-      if (args[0].length() > 8) {
-        // maximum send is 8 digits
+      if (args[0].length() > 10) {
+        // maximum send is 10 digits
         return false;
       }
-      final Long amount = Long.parseLong(args[0]);
-      final Long sat = amount * SatoshiQuest.DENOMINATION_FACTOR;
 
-      if (amount != 0) {
+
+
+      if (sat != 0) {
 
         for (final Player onlinePlayer : Bukkit.getOnlinePlayers()) {
           if (onlinePlayer.getName().equalsIgnoreCase(args[1])) {
@@ -57,24 +58,26 @@ if (args[0].equalsIgnoreCase("help") || !(args.length >= 1)) {
                         ChatColor.GREEN
                             + "You sent "
                             + ChatColor.LIGHT_PURPLE
-                            + amount
+                            + satoshiQuest.globalDecimalFormat.format(satoshiQuest.convertSatsToCoin(sat))
                             + " "
-                            + SatoshiQuest.DENOMINATION_NAME
+                            + SatoshiQuest.COINGECKO_CRYPTO
                             + ChatColor.GREEN
                             + " to user "
                             + ChatColor.BLUE
-                            + onlinePlayer.getName());
+                            + onlinePlayer.getName()
+			    + ChatColor.BLUE + " "+ satoshiQuest.TX_URL + didSend);
                     onlinePlayer.sendMessage(
                         ChatColor.GREEN
                             + "You got "
                             + ChatColor.LIGHT_PURPLE
-                            + amount
+                            + satoshiQuest.globalDecimalFormat.format(satoshiQuest.convertSatsToCoin(sat))
                             + " "
-                            + SatoshiQuest.DENOMINATION_NAME
+                            + SatoshiQuest.COINGECKO_CRYPTO
                             + ChatColor.GREEN
                             + " from user "
                             + ChatColor.BLUE
-                            + player.getName());
+                            + player.getName()
+			    + ChatColor.BLUE + " "+ satoshiQuest.TX_URL + didSend);
                   } else {
                     player.sendMessage(ChatColor.RED + "Tip failed.");
                   }

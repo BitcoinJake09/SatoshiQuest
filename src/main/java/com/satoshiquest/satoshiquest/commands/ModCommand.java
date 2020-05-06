@@ -84,6 +84,21 @@ public class ModCommand extends CommandAction {
 		}
 
 	return true;	
+	} else if(args[0].equalsIgnoreCase("expandingloot")) {
+	try{
+	if (!(SatoshiQuest.REDIS.exists("expandingloot"))){
+		SatoshiQuest.REDIS.set("expandingloot","true");
+		player.sendMessage(ChatColor.RED + "expandingloot is ON");
+	 } else {
+		SatoshiQuest.REDIS.del("expandingloot");
+		player.sendMessage(ChatColor.RED + "expandingloot is OFF");
+           }
+		} catch (NullPointerException nullPointer)
+		{
+                	System.out.println("expandingloot: "+nullPointer);
+		}
+
+	return true;	
 	} else {
             return false;
         }

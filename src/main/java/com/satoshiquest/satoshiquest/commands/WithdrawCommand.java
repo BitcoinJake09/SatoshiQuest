@@ -25,17 +25,18 @@ if (args[0].equalsIgnoreCase("help") || !(args.length >= 1)) {
       player.sendMessage(ChatColor.GREEN + "/withdraw <amount> <address> - withdraw is used for External transactions to an address.");
     }
     if (args.length == 2) {
-      for (char c : args[0].toCharArray()) {
+      final Long sat = satoshiQuest.convertCoinToSats(Double.parseDouble(args[0]));
+      for (char c : sat.toString().toCharArray()) {
         if (!Character.isDigit(c)) return false;
       }
-      if (args[0].length() > 8) {
-        // maximum send is 8 digits
+      if (args[0].length() > 10) {
+        // maximum send is 10 digits
         return false;
       }
-      final Long amount = Long.parseLong(args[0]);
-      final Long sat = amount * SatoshiQuest.DENOMINATION_FACTOR;
 
-      if (amount != 0) {
+
+
+      if (sat != 0) {
 
 
             if (!args[1].equalsIgnoreCase(player.getDisplayName())) {
@@ -52,14 +53,14 @@ if (args[0].equalsIgnoreCase("help") || !(args.length >= 1)) {
                         ChatColor.GREEN
                             + "Your withdraw "
                             + ChatColor.LIGHT_PURPLE
-                            + sat
+                            + satoshiQuest.globalDecimalFormat.format(satoshiQuest.convertSatsToCoin(sat))
                             + " "
-                            + SatoshiQuest.DENOMINATION_NAME
+                            + SatoshiQuest.COINGECKO_CRYPTO
                             + ChatColor.GREEN
                             + " to address "
                             + ChatColor.BLUE
                             + args[1].toString()
-			    + " with txid: " + didSend);
+			    + ChatColor.BLUE + " "+ satoshiQuest.TX_URL + didSend);
                   } else {
                     player.sendMessage(ChatColor.RED + "withdraw failed.");
                   }
