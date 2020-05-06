@@ -46,3 +46,16 @@ sudo iptables -t nat -L -n
 
 sudo iptables -t nat -A POSTROUTING --source 172.17.0.3 --destination 172.17.0.3 -p tcp --dport 25565 -j MASQUERADE
 
+----------------------
+to be added to the HUB with other servers enable Bungee and give the HUB operator the IP:PORT and Name to display
+Configuring your Spigot servers for BungeeCordPermalink
+
+    On your Spigot servers, navigate to the Spigot directory and open spigot.yml.
+
+    Change bungeecord: false to bungeecord: true. Save and exit.
+
+    Open server.properties.
+
+    Change online-mode=true to online-mode=false. Save and exit.
+
+    Restart the Spigot servers.
