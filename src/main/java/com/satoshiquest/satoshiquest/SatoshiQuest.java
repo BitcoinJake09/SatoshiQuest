@@ -74,6 +74,14 @@ public class SatoshiQuest extends JavaPlugin {
       System.getenv("DENOMINATION_FACTOR") != null
           ? Long.parseLong(System.getenv("DENOMINATION_FACTOR"))
           : 1L;
+  public static final Integer CRYPTO_DECIMALS =
+      System.getenv("CRYPTO_DECIMALS") != null
+          ? Integer.parseInt(System.getenv("CRYPTO_DECIMALS"))
+          : 8;
+  public static final Integer DISPLAY_DECIMALS =
+      System.getenv("DISPLAY_DECIMALS") != null
+          ? Integer.parseInt(System.getenv("DISPLAY_DECIMALS"))
+          : 8;
   public static final String DENOMINATION_NAME =
       System.getenv("DENOMINATION_NAME") != null ? System.getenv("DENOMINATION_NAME") : "Sats";
   public static final String BITCOIN_NODE_USERNAME = System.getenv("BITCOIN_ENV_USERNAME");
@@ -161,6 +169,14 @@ public final static String VOTE_URL = System.getenv("VOTE_URL") != null ? System
   public Long adminRate = 0L;
   public Long totalLifeRate = 0L;
   public boolean eventsLoaded = false;
+  public DecimalFormat globalDecimalFormat = new DecimalFormat("0.00000000");
+  public DecimalFormat displayDecimalFormat = new DecimalFormat("0.00000000");
+  public Double baseSat = oneSat();
+  public Double displaySats = howmanyDisplayDecimals();
+  public Long oneCoinSats = wholeCoin();
+  //public Long tests = convertCoinToSats(0.00125555); //test   F tempAmount : 125554.99999999997
+
+
 
   // when true, server is closed for maintenance and not allowing players to join in.
   public boolean maintenance_mode = false;
@@ -762,7 +778,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
             in.close();
             //System.out.println(response.toString());
             JSONObject response_object = (JSONObject) parser.parse(response.toString());
-	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * 100000000L;
+	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * oneCoinSats;
 	    final Long balance = d.longValue();
             //System.out.println(balance);
 	    return balance;
@@ -778,7 +794,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
             in.close();
             //System.out.println(response.toString());
             JSONObject response_object = (JSONObject) parser.parse(response.toString());
-	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * 100000000L;
+	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * oneCoinSats;
 	    final Long balance = d.longValue();
             //System.out.println(balance);
 	    return balance;
@@ -831,7 +847,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
             in.close();
             //System.out.println(response.toString());
             JSONObject response_object = (JSONObject) parser.parse(response.toString());
-	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * 100000000L;
+	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * oneCoinSats;
 	    final Long balance = d.longValue();
             //System.out.println(balance);
 	    return balance;
@@ -847,7 +863,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
             in.close();
             //System.out.println(response.toString());
             JSONObject response_object = (JSONObject) parser.parse(response.toString());
-	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * 100000000L;
+	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * oneCoinSats;
 	    final Long balance = d.longValue();
             //System.out.println(balance);
 	    return balance;
@@ -895,7 +911,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
             in.close();
             //System.out.println(response.toString());
             JSONObject response_object = (JSONObject) parser.parse(response.toString());
-	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * 100000000L;
+	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * oneCoinSats;
 	    final Long balance = d.longValue();
             //System.out.println(balance);
 	    return balance;
@@ -911,7 +927,7 @@ REDIS.set("LOOT_RADIUS_MAX",Long.toString((long)Math.round((Double.valueOf(REDIS
             in.close();
             //System.out.println(response.toString());
             JSONObject response_object = (JSONObject) parser.parse(response.toString());
-	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * 100000000L;
+	    Double d = Double.parseDouble(response_object.get("result").toString().trim()) * oneCoinSats;
 	    final Long balance = d.longValue();
             //System.out.println(balance);
 	    return balance;
@@ -1003,8 +1019,8 @@ try {
     JSONArray params = new JSONArray();
     params.add(address);
     //System.out.println(sat);
-    BigDecimal decimalSat = new BigDecimal(sat * 0.00000001);
-    decimalSat = decimalSat.setScale(8, BigDecimal.ROUND_DOWN);
+    BigDecimal decimalSat = new BigDecimal(sat * baseSat);
+    decimalSat = decimalSat.setScale(CRYPTO_DECIMALS, BigDecimal.ROUND_DOWN);
     //System.out.println(decimalSat);
     params.add(decimalSat);
     params.add(SERVERDISPLAY_NAME);
@@ -1077,15 +1093,15 @@ try {
     final JSONObject addresses = new JSONObject();
 
     //System.out.println(sat1);
-    BigDecimal decimalSat1 = new BigDecimal(sat1 * 0.00000001);
-    decimalSat1 = decimalSat1.setScale(8, BigDecimal.ROUND_DOWN);
+    BigDecimal decimalSat1 = new BigDecimal(sat1 * baseSat);
+    decimalSat1 = decimalSat1.setScale(CRYPTO_DECIMALS, BigDecimal.ROUND_DOWN);
     //System.out.println(decimalSat1);
     addresses.put(address1,decimalSat1);
 
 
     //System.out.println(sat2);
-    BigDecimal decimalSat2 = new BigDecimal(sat2 * 0.00000001);
-    decimalSat2 = decimalSat2.setScale(8, BigDecimal.ROUND_DOWN);
+    BigDecimal decimalSat2 = new BigDecimal(sat2 * baseSat);
+    decimalSat2 = decimalSat2.setScale(CRYPTO_DECIMALS, BigDecimal.ROUND_DOWN);
     //System.out.println(decimalSat2);
     addresses.put(address2,decimalSat2);
     params.add(addresses);
@@ -1159,20 +1175,20 @@ try {
     final JSONObject addresses = new JSONObject();
 
     //System.out.println(sat1);
-    BigDecimal decimalSat1 = new BigDecimal(sat1 * 0.00000001);
-    decimalSat1 = decimalSat1.setScale(8, BigDecimal.ROUND_DOWN);
+    BigDecimal decimalSat1 = new BigDecimal(sat1 * baseSat);
+    decimalSat1 = decimalSat1.setScale(CRYPTO_DECIMALS, BigDecimal.ROUND_DOWN);
     //System.out.println(decimalSat1);
     addresses.put(address1,decimalSat1);
 
 
     //System.out.println(sat2);
-    BigDecimal decimalSat2 = new BigDecimal(sat2 * 0.00000001);
-    decimalSat2 = decimalSat2.setScale(8, BigDecimal.ROUND_DOWN);
+    BigDecimal decimalSat2 = new BigDecimal(sat2 * baseSat);
+    decimalSat2 = decimalSat2.setScale(CRYPTO_DECIMALS, BigDecimal.ROUND_DOWN);
     //System.out.println(decimalSat2);
     addresses.put(address2,decimalSat2);
 
-    BigDecimal decimalSat3 = new BigDecimal(sat3 * 0.00000001);
-    decimalSat3 = decimalSat3.setScale(8, BigDecimal.ROUND_DOWN);
+    BigDecimal decimalSat3 = new BigDecimal(sat3 * baseSat);
+    decimalSat3 = decimalSat3.setScale(CRYPTO_DECIMALS, BigDecimal.ROUND_DOWN);
     //System.out.println(decimalSat2);
     addresses.put(address3,decimalSat3);
 
@@ -1245,7 +1261,7 @@ try {
     JSONArray params = new JSONArray();
     //System.out.println(sat);
     BigDecimal decimalSat = new BigDecimal(sats * 0.00001);
-    decimalSat = decimalSat.setScale(8, BigDecimal.ROUND_DOWN);
+    decimalSat = decimalSat.setScale(CRYPTO_DECIMALS, BigDecimal.ROUND_DOWN);
     //System.out.println(decimalSat);
     params.add(decimalSat);
     System.out.println(account_id + " set fee to: " + decimalSat);
@@ -1329,17 +1345,17 @@ try {
 
                 playSBoardObj.setDisplaySlot(DisplaySlot.SIDEBAR);
 
-                playSBoardObj.setDisplayName(ChatColor.GREEN + ChatColor.BOLD.toString() + "Satoshi" + ChatColor.GOLD + ChatColor.BOLD.toString() + "Quest");
+                playSBoardObj.setDisplayName(ChatColor.GOLD + ChatColor.BOLD.toString() +""+ SERVERDISPLAY_NAME);
 
 		if (isPlayersAroundLoot == false) {
 		long lootBalance = (long)(getBalance(SERVERDISPLAY_NAME,1) * THIS_ROUND_WIN_PERC);
-		double lootAmount =  (double)(exRate * (lootBalance * 0.00000001));
+		double lootAmount =  (double)(exRate * (lootBalance * baseSat));
 		//lootAmount = 211.37;  // for testing
 		if (lootAmount > MAX_WIN_AMOUNT) {
-			lootBalance = (long)((1 / (exRate/MAX_WIN_AMOUNT)) * 100000000);
-			lootAmount = (double)(exRate * (lootBalance * 0.00000001));
+			lootBalance = (long)((1 / (exRate/MAX_WIN_AMOUNT)) * oneCoinSats);
+			lootAmount = (double)(exRate * (lootBalance * baseSat));
 		}       
-		DecimalFormat df = new DecimalFormat("#.##");
+		DecimalFormat df = new DecimalFormat("0.00");
         	//System.out.print(df.format(lootAmount));
 		String whatRound = "Round " + REDIS.get("gameRound");
 				if (REDIS.exists("BetaTest")){
@@ -1350,12 +1366,19 @@ try {
 
                 Score score6 = playSBoardObj.getScore(ChatColor.GREEN + "Lives: " + REDIS.get("LivesLeft" + player.getUniqueId().toString()));
 		score6.setScore(6);
+		//BigDecimal.valueOf(getBalance(player.getUniqueId().toString(),6)).doubleValue()
 
-		Score score5 = playSBoardObj.getScore(ChatColor.GREEN + "Balance: " + Long.toString(getBalance(player.getUniqueId().toString(),6)));
-		score5.setScore(5);
+		Double playerCoinBalance = (Double)(BigDecimal.valueOf(getBalance(player.getUniqueId().toString(),6)).doubleValue() * baseSat);
+			Score score5 = playSBoardObj.getScore(ChatColor.GREEN + "Balance: " + displayDecimalFormat.format(playerCoinBalance) +" "+ COINGECKO_CRYPTO);
+			score5.setScore(5);
 
-		Score score4 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: " + Long.toString(lootBalance) + DENOMINATION_NAME);
-		score4.setScore(4);
+
+
+		Double lootCoinBalance = (Double)(BigDecimal.valueOf(lootBalance).doubleValue() * baseSat);
+			Score score4 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: " + displayDecimalFormat.format(lootCoinBalance) +" "+ COINGECKO_CRYPTO);
+			score4.setScore(4);
+
+
 
 		Score score3 = playSBoardObj.getScore(ChatColor.GREEN + "Loot: $" + df.format(lootAmount));
 		score3.setScore(3);
@@ -1462,29 +1485,29 @@ if((exTime15 <= ((new Date().getTime()) - waitTime15))||(exRate == 10500.00)) {
 		}
 
 			exRate =  Double.parseDouble(getExchangeRate(COINGECKO_CRYPTO));
-			livesRate =  (long)((BUYIN_AMOUNT/(exRate*0.00000001))*0.90);
-			adminRate =  (long)((BUYIN_AMOUNT/(exRate*0.00000001))*0.10);
+			livesRate =  (long)((BUYIN_AMOUNT/(exRate*baseSat))*0.90);
+			adminRate =  (long)((BUYIN_AMOUNT/(exRate*baseSat))*0.10);
 			totalLifeRate = livesRate + adminRate;
-			DecimalFormat df = new DecimalFormat("#.##");
+			DecimalFormat df = new DecimalFormat("0.00");
 	        	//System.out.print(df.format(exRate));
 			announce("Currently "+ COINGECKO_CRYPTO +" is: $"+ df.format(exRate));
 		        //System.out.println("Currently Bitcoin is: $"+ exRate);
-			announce("1 Life is: "+ totalLifeRate + " " +DENOMINATION_NAME);
+			announce(""+LIVES_PERBUYIN+" Life is: "+ globalDecimalFormat.format(convertSatsToCoin(totalLifeRate)) + " " +COINGECKO_CRYPTO);
 			announce("Active updates in the discord: "+DISCORD_URL);
 			announce("Vote here for 10% off lives! " + VOTE_URL);
 		        //System.out.println("1 Life is: "+ totalLifeRate + " " +DENOMINATION_NAME);
 			if ((System.getenv("DISCORD_HOOK_URL")!=null)&&(discordWait15 >= 3)) {
 			// announce loot in discord
 			long lootBalance = (long)(getBalance(SERVERDISPLAY_NAME,1) * THIS_ROUND_WIN_PERC);
-			double lootAmount =  (double)(exRate * (lootBalance * 0.00000001));
+			double lootAmount =  (double)(exRate * (lootBalance * baseSat));
 			//lootAmount = 211.37; // for testing
 			if (lootAmount > MAX_WIN_AMOUNT) {
-			lootBalance = (long)((1 / (exRate/MAX_WIN_AMOUNT)) * 100000000);
-			lootAmount = (double)(exRate * (lootBalance * 0.00000001));
+			lootBalance = (long)((1 / (exRate/MAX_WIN_AMOUNT)) * oneCoinSats);
+			lootAmount = (double)(exRate * (lootBalance * baseSat));
 		}               
         		//System.out.print(df.format(lootAmount));
-			String lootAnnounce = ("Current "+COINGECKO_CRYPTO+" in loot: " +lootBalance + " "+DENOMINATION_NAME+"! worth: $"+df.format(lootAmount)+" USD!");
-				sendDiscordMessage("1 Life is: "+ totalLifeRate + " "+DENOMINATION_NAME);
+			String lootAnnounce = ("Current "+COINGECKO_CRYPTO+" in loot: " + globalDecimalFormat.format(convertSatsToCoin(lootBalance)) +"! worth: $"+df.format(lootAmount)+" USD!");
+				sendDiscordMessage(""+LIVES_PERBUYIN+" Life is: "+ globalDecimalFormat.format(convertSatsToCoin(totalLifeRate)) + " "+COINGECKO_CRYPTO);
 				sendDiscordMessage(lootAnnounce);
 				sendDiscordMessage("For more info check out "+SERVER_WEBSITE);
 				sendDiscordMessage("Vote here for 10% off lives! " + VOTE_URL);
@@ -1656,7 +1679,9 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 		REDIS.set("winner","true");
 		REDIS.set("resetWorlds","true");
 		announce(player.getName() + " WON!");
-		//REDIS.set("pushloot","true");
+		if (REDIS.exists("expandingloot")) {
+			REDIS.set("pushloot","true");
+		}
 		//sendloot to winner
 		long sendLoot = 0L;
 		String result = "failed";
@@ -1672,7 +1697,7 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 		player.sendMessage(ChatColor.YELLOW + "External OnWin address not set, or failed, trying in-game wallet.");
 		result = sendMany(SERVERDISPLAY_NAME, REDIS.get("nodeAddress"+player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback);
 		}
-			System.out.println("won " + sendLoot + " LOOT! txid: " +result);
+			System.out.println("won " + sendLoot + " LOOT! txid: " +TX_URL+result);
 		}
 		} catch (Exception exs) {
 			System.out.println(exs);
@@ -1688,24 +1713,24 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 
   	leaderBoardList = REDIS.keys("LeaderBoard *");
 
-		double amtUSD = (double)(exRate * (sendLoot * 0.00000001));
+		double amtUSD = (double)(exRate * (sendLoot * baseSat));
 if (result != "failed"){
 	int iter=1;
 		for (String templeaderBoardList : leaderBoardList) {
 		announce(iter+") "+ REDIS.get(templeaderBoardList));
 		iter++;
 		}
-		DecimalFormat df = new DecimalFormat("#.##");
+		DecimalFormat df = new DecimalFormat("0.00");
         	System.out.print(df.format(amtUSD));
 		if (REDIS.exists("BetaTest")){
-REDIS.set("LeaderBoard " + iter, "BetaTest Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " "+DENOMINATION_NAME+" " + sendLoot);
+REDIS.set("LeaderBoard " + iter, "BetaTest Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " "+COINGECKO_CRYPTO+" " + sendLoot);
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
 			sendDiscordMessage("<@&"+DISCORD_HOOK_CHANNEL_ID+"> " +  dateFormat.format(date) + " " + player.getName() + " WON " + "BetaTest Round " + REDIS.get("gameRound") + " with " + sendLoot + " "+DENOMINATION_NAME+ " worth $" + df.format(amtUSD));
 		}
 		}//betatest
 		if (!REDIS.exists("BetaTest")){
-REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " "+DENOMINATION_NAME+ " " + sendLoot);
+REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " "+COINGECKO_CRYPTO+ " " + sendLoot);
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
 			sendDiscordMessage("<@&"+DISCORD_HOOK_CHANNEL_ID+"> " +  dateFormat.format(date) + " " + player.getName() + " WON " + "Round " + REDIS.get("gameRound") + " with " + sendLoot + " "+DENOMINATION_NAME+ " worth $" + df.format(amtUSD));
@@ -1720,22 +1745,22 @@ if (result == "failed"){
 		announce(iter+") "+ REDIS.get(templeaderBoardList));
 		iter++;
 		}
-		DecimalFormat df = new DecimalFormat("#.##");
+		DecimalFormat df = new DecimalFormat("0.00");
         	System.out.print(df.format(amtUSD));
 		if (REDIS.exists("BetaTest")){
-REDIS.set("LeaderBoard " + iter, "BetaTest Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " "+DENOMINATION_NAME+ " " + totalLifeRate);
+REDIS.set("LeaderBoard " + iter, "BetaTest Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " "+LIVES_PERBUYIN+" life worth $" + df.format(BUYIN_AMOUNT) + " "+COINGECKO_CRYPTO+ " " + totalLifeRate);
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
-		REDIS.set("LivesLeft" +player.getUniqueId().toString(), Integer.toString(tempLivesWinningPlayer+1));
+		REDIS.set("LivesLeft" +player.getUniqueId().toString(), Integer.toString(tempLivesWinningPlayer+LIVES_PERBUYIN));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("<@&"+DISCORD_HOOK_CHANNEL_ID+"> " +  "WINNER - Beta Test Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " "+DENOMINATION_NAME+ " " + totalLifeRate);
+			sendDiscordMessage("<@&"+DISCORD_HOOK_CHANNEL_ID+"> " +  "WINNER - Beta Test Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " "+LIVES_PERBUYIN+" life worth $" + df.format(BUYIN_AMOUNT) + " "+DENOMINATION_NAME+ " " + totalLifeRate);
 		}
 		}//betatest
 		if (!REDIS.exists("BetaTest")){
-REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " "+DENOMINATION_NAME+ " " + totalLifeRate);
+REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " "+LIVES_PERBUYIN+" life worth $" + df.format(BUYIN_AMOUNT) + " "+COINGECKO_CRYPTO+ " " + totalLifeRate);
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
-		REDIS.set("LivesLeft" +player.getUniqueId().toString(), Integer.toString(tempLivesWinningPlayer+1));
+		REDIS.set("LivesLeft" +player.getUniqueId().toString(), Integer.toString(tempLivesWinningPlayer+LIVES_PERBUYIN));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("<@&"+DISCORD_HOOK_CHANNEL_ID+"> " +  "WINNER - Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " 1 life worth $" + df.format(1.00) + " "+DENOMINATION_NAME+ " " + totalLifeRate);
+			sendDiscordMessage("<@&"+DISCORD_HOOK_CHANNEL_ID+"> " +  "WINNER - Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " "+LIVES_PERBUYIN+" life worth $" + df.format(BUYIN_AMOUNT) + " "+COINGECKO_CRYPTO+ " " + totalLifeRate);
 		}
 		}//betatest
 	}
@@ -1780,8 +1805,8 @@ File BaseFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "players"
 	 p.getAdvancementProgress(a).revokeCriteria(c);
 			}
 		}
-		DecimalFormat df = new DecimalFormat("#.##");
-		p.kickPlayer("World Restarting! " +  dateFormat.format(date) + " " + player.getName() + " WON " + "Round " + REDIS.get("gameRound") + " with " + sendLoot + " "+DENOMINATION_NAME+ " worth $" + df.format(amtUSD));
+		DecimalFormat df = new DecimalFormat("0.00");
+		p.kickPlayer("World Restarting! " +  dateFormat.format(date) + " " + player.getName() + " WON " + "Round " + REDIS.get("gameRound") + " with " + sendLoot + " "+COINGECKO_CRYPTO+ " worth $" + df.format(amtUSD));
 
             }
         
@@ -2040,16 +2065,16 @@ Bukkit.getServer().getWorld(SERVERDISPLAY_NAME).setSpawnLocation(setSpawnBlock.g
 
 //hide top blocks xD
 	                tempblock = lootBlock.getWorld().getBlockAt((int)lootX+1, (int)lootY+5, (int)lootZ+1);
-			tempblock.setType(Material.GRASS);
+			tempblock.setType(Material.DIRT);
 	                tempblock = lootBlock.getWorld().getBlockAt((int)lootX-1, (int)lootY+5, (int)lootZ-1);
-			tempblock.setType(Material.GRASS);
+			tempblock.setType(Material.STONE);
 	                tempblock = lootBlock.getWorld().getBlockAt((int)lootX-1, (int)lootY+5, (int)lootZ+1);
 			tempblock.setType(Material.DIRT);
 	                tempblock = lootBlock.getWorld().getBlockAt((int)lootX+1, (int)lootY+5, (int)lootZ-1);
 			tempblock.setType(Material.DIRT);
 			
 	                tempblock = lootBlock.getWorld().getBlockAt((int)lootX, (int)lootY+5, (int)lootZ);
-			tempblock.setType(Material.GRASS);//loot cap block
+			tempblock.setType(Material.STONE);//loot cap block
 
    }
   public boolean isModerator(Player player) {
@@ -2313,6 +2338,91 @@ JSONParser parser = new JSONParser();
     return 0;
 
   }
+  public Long convertCoinToSats(Double wholeCoinAmount) {
+	Double tempAmount=wholeCoinAmount;
+	Long oneCoin=1L;
+	for (int x=1; x<=CRYPTO_DECIMALS; x++) {
+            //System.out.println(oneCoin);
+		//tempAmount=tempAmount*10;
+		oneCoin=oneCoin*10L;
+	}
+        BigDecimal decimalSat = new BigDecimal(tempAmount * oneCoin);
+        //System.out.println("tempAmount : "+decimalSat);
+	return (Long.parseLong(decimalSat.toString()));
+  }
+
+  public Double convertSatsToCoin(Long satsIn) {
+	Long tempAmount=satsIn;
+	Double oneCoin=1.0;
+	for (int x=1; x<=CRYPTO_DECIMALS; x++) {
+            //System.out.println(oneCoin);
+		//tempAmount=tempAmount*10;
+		oneCoin=oneCoin*0.1;
+	}
+        BigDecimal decimalSat = new BigDecimal(tempAmount * oneCoin);
+        //System.out.println("tempAmount : "+decimalSat);
+	return (Double.parseDouble(decimalSat.toString()));
+  }
+
+  public Long wholeCoin() {
+	Long oneCoin=1L;
+	for (int x=1; x<=CRYPTO_DECIMALS; x++) {
+            //System.out.println(oneCoin);
+		oneCoin=oneCoin*10L;
+	}
+        System.out.println("total "+DENOMINATION_NAME+" in 1 coin: "+oneCoin);
+	return oneCoin;
+  }
+
+  public Double oneSat() {
+	String DCF = "0.";
+	for (int y=1; y<=CRYPTO_DECIMALS; y++) {
+		DCF = DCF + "0";
+	}
+        System.out.println(DCF);
+	DecimalFormat numberFormat = new DecimalFormat(DCF);
+	globalDecimalFormat = numberFormat;
+	Double oneSats=1.0;
+	for (int x=1; x<=CRYPTO_DECIMALS; x++) {
+            //System.out.println(numberFormat.format(oneSats));
+		oneSats=oneSats*0.1;
+	}
+        System.out.println("Lowest Crypto Decimal set: "+globalDecimalFormat.format(oneSats));
+	return oneSats;
+  }
+  public Double howmanyDisplayDecimals() {
+	String DCF = "0.";
+	for (int y=1; y<=DISPLAY_DECIMALS; y++) {
+		DCF = DCF + "0";
+	}
+        System.out.println(DCF);
+	DecimalFormat numberFormat = new DecimalFormat(DCF);
+	displayDecimalFormat = numberFormat;
+	Double oneSats=1.0;
+	for (int x=1; x<=DISPLAY_DECIMALS; x++) {
+            //System.out.println(numberFormat.format(oneSats));
+		oneSats=oneSats*0.1;
+	}
+        System.out.println("Lowest Display Decimal set: "+displayDecimalFormat.format(oneSats));
+	return oneSats;
+  }
+/* CRYPTO_DECIMALS @8
+satoshiquest | [22:46:35 INFO]: #.00000000
+satoshiquest | [22:46:35 INFO]: Lowest Decimal set: .00000001
+satoshiquest | [22:46:35 INFO]: total Sats in 1 coin: 100000000
+
+CRYPTO_DECIMALS @6
+satoshiquest | [22:44:49 INFO]: #.000000
+satoshiquest | [22:44:49 INFO]: Lowest Decimal set: .000001
+satoshiquest | [22:44:49 INFO]: total Sats in 1 coin: 1000000
+
+CRYPTO_DECIMALS @2
+satoshiquest | [22:48:40 INFO]: #.00
+satoshiquest | [22:48:40 INFO]: Lowest Decimal set: .01
+satoshiquest | [22:48:40 INFO]: total Sats in 1 coin: 100
+
+*/
+
 
   public void serverInfo() {
     if(System.getenv("VOTE_API_KEY")!=null) {
