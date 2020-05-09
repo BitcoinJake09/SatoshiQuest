@@ -20,7 +20,7 @@ public class WalletCommand extends CommandAction {
       CommandSender sender, Command cmd, String label, String[] args, Player player) {
 try {
 if (args[0].equalsIgnoreCase("help") || !(args.length >= 1)) {
-	      player.sendMessage(ChatColor.GREEN + "/wallet - Displays your SatoshiQuest wallet info.");
+	      player.sendMessage(ChatColor.GREEN + "/wallet - Displays your wallet info.");
               player.sendMessage(ChatColor.GREEN + "/wallet <set> <address> - will set your own win address to an address of your choosing instead of the ingame wallet. ");
 	      player.sendMessage(ChatColor.GREEN + "/tip <amount> <playername> - Tip is used for player to player transactions.");
 	      player.sendMessage(ChatColor.GREEN + "/withdraw <amount> <address> - withdraw is used for External transactions to an address.");
@@ -31,7 +31,7 @@ String url = satoshiQuest.ADDRESS_URL + satoshiQuest.REDIS.get("nodeAddress"+ pl
 	}
 } catch (Exception e) {
       //e.printStackTrace();
-      player.sendMessage(ChatColor.GREEN + "/wallet - Displays your SatoshiQuest wallet info.");
+      player.sendMessage(ChatColor.GREEN + "/wallet - Displays your wallet info.");
               player.sendMessage(ChatColor.GREEN + "/wallet <set> <address> - will set your own win address to an address of your choosing instead of the ingame wallet. ");
 	      player.sendMessage(ChatColor.GREEN + "/tip <amount> <playername> - Tip is used for player to player transactions.");
 	      player.sendMessage(ChatColor.GREEN + "/withdraw <amount> <address> - withdraw is used for External transactions to an address.");

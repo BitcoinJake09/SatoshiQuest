@@ -32,25 +32,25 @@ public class SetFeeCommand extends CommandAction {
     public boolean run(CommandSender sender, Command cmd, String label, String[] args, Player player) {
 	if (args.length == 1) {
 		if (args[0].equalsIgnoreCase("help")) {
-			sender.sendMessage(ChatColor.GREEN + "please use a satoshi amount between 1.2 - 15 satoshis/byte.");
+			sender.sendMessage(ChatColor.GREEN + "please use a "+satoshiQuest.DENOMINATION_NAME+" amount between "+satoshiQuest.MIN_FEE+" - "+satoshiQuest.MAX_FEE+" "+satoshiQuest.DENOMINATION_NAME+"s/byte.");
 			sender.sendMessage(ChatColor.GREEN + "/setfee <#>");
 			return false;
 		}
 		try {
 		if ((satoshiQuest.isStringDouble(args[0])) || (satoshiQuest.isStringInt(args[0]))) {
-			if ((Double.parseDouble(args[0]) <= 15) && (Double.parseDouble(args[0]) >= 1.2)) {
+			if ((Double.parseDouble(args[0]) <= satoshiQuest.MAX_FEE) && (Double.parseDouble(args[0]) >= 1.2)) {
 				boolean setFee = satoshiQuest.setSatByte(player.getUniqueId().toString(), Double.parseDouble(args[0]));
-				System.out.println("set to " + args[0] + "sats/byte: "+setFee);
+				System.out.println("set to " + args[0] + ""+satoshiQuest.DENOMINATION_NAME+"s/byte: "+setFee);
 				SatoshiQuest.REDIS.set("txFee" + player.getUniqueId().toString(),args[0]);
-				sender.sendMessage(ChatColor.GREEN + "Your wallet fee has been set to " + args[0] + "s/b");
+				sender.sendMessage(ChatColor.GREEN + "Your wallet fee has been set to " + args[0] + ""+satoshiQuest.DENOMINATION_NAME+"s/b");
 				return true;
 			} else {
-				sender.sendMessage(ChatColor.RED + "failed, please use a satoshi amount between 1.2 - 15 satoshis/byte.");
+				sender.sendMessage(ChatColor.RED + "failed, please use a "+satoshiQuest.DENOMINATION_NAME+" amount between "+satoshiQuest.MIN_FEE+" - "+satoshiQuest.MAX_FEE+" "+satoshiQuest.DENOMINATION_NAME+"s/byte.");
 				sender.sendMessage(ChatColor.GREEN + "/setfee <#>");
 				return false;
 			}
 		} else {
-			sender.sendMessage(ChatColor.RED + "failed, please use a satoshi amount between 1.2 - 15 satoshis/byte.");
+			sender.sendMessage(ChatColor.RED + "failed, please use a "+satoshiQuest.DENOMINATION_NAME+" amount between "+satoshiQuest.MIN_FEE+" - "+satoshiQuest.MAX_FEE+" "+satoshiQuest.DENOMINATION_NAME+"s/byte.");
 			sender.sendMessage(ChatColor.GREEN + "/setfee <#>");
 			return false;
 		}
@@ -59,7 +59,7 @@ public class SetFeeCommand extends CommandAction {
 		player.sendMessage(ChatColor.RED + "There was a problem updating your fee.");
     	}
 	} else if (args.length == 0) {
-		sender.sendMessage(ChatColor.GREEN + "please use a satoshi amount between 1.2 - 15 satoshis/byte.");
+		sender.sendMessage(ChatColor.GREEN + "please use a "+satoshiQuest.DENOMINATION_NAME+" amount between "+satoshiQuest.MIN_FEE+" - "+satoshiQuest.MAX_FEE+" "+satoshiQuest.DENOMINATION_NAME+"s/byte.");
 		sender.sendMessage(ChatColor.GREEN + "/setfee <#>");
 		return false;
 	}

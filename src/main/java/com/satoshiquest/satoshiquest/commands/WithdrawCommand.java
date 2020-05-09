@@ -46,6 +46,7 @@ if (args[0].equalsIgnoreCase("help") || !(args.length >= 1)) {
 
                 if (balance >= sat) {
                   // TODO: Pay to user address
+    		boolean setFee = satoshiQuest.setSatByte(player.getUniqueId().toString(), Double.parseDouble(SatoshiQuest.REDIS.get("txFee" + player.getUniqueId().toString())));
 		  String didSend = satoshiQuest.sendToAddress(player.getUniqueId().toString(),args[1].toString(), sat);
                   if (didSend != "failed") {
                     satoshiQuest.updateScoreboard(player);
@@ -55,10 +56,10 @@ if (args[0].equalsIgnoreCase("help") || !(args.length >= 1)) {
                             + ChatColor.LIGHT_PURPLE
                             + satoshiQuest.globalDecimalFormat.format(satoshiQuest.convertSatsToCoin(sat))
                             + " "
-                            + SatoshiQuest.COINGECKO_CRYPTO
+                            + SatoshiQuest.CRYPTO_TICKER
                             + ChatColor.GREEN
                             + " to address "
-                            + ChatColor.BLUE
+                            + ChatColor.YELLOW
                             + args[1].toString()
 			    + ChatColor.BLUE + " "+ satoshiQuest.TX_URL + didSend);
                   } else {

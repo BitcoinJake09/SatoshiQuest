@@ -31,11 +31,11 @@ public class LivesCommand extends CommandAction {
 		player.sendMessage(ChatColor.RED + "There was a problem reading your wallet.");
     	}
 	if (satoshiQuest.didVote(player.getName()) == 0) {
-	player.sendMessage(ChatColor.GREEN + "Lives are $" + satoshiQuest.BUYIN_AMOUNT + " USD for " + satoshiQuest.LIVES_PERBUYIN + " in "+SatoshiQuest.COINGECKO_CRYPTO+". Most goes into Loot wallet which everyone searches for the treasure, once found that player will recive funds to their player wallet if no external wallet set and the world will reset for a new hunt. A little bit is set aside for further developent and hosting.");
+	player.sendMessage(ChatColor.GREEN + "Lives are $" + satoshiQuest.BUYIN_AMOUNT + " USD for " + satoshiQuest.LIVES_PERBUYIN + " in "+SatoshiQuest.CRYPTO_TICKER+". Most goes into Loot wallet which everyone searches for the treasure, once found that player will recive funds to their player wallet if no external wallet set and the world will reset for a new hunt. A little bit is set aside for further developent and hosting.");
 	player.sendMessage(ChatColor.AQUA + "You can also get 10% off lives here: " + satoshiQuest.VOTE_URL);
 	} else if (satoshiQuest.didVote(player.getName()) == 1) {
 player.sendMessage(ChatColor.AQUA + "THANK YOU FAR VOTING!");
-player.sendMessage(ChatColor.GREEN + "Lives are $" + (satoshiQuest.BUYIN_AMOUNT*0.9) + " USD for " + satoshiQuest.LIVES_PERBUYIN + " in "+SatoshiQuest.COINGECKO_CRYPTO+". Most goes into Loot wallet which everyone searches for the treasure, once found that player will recive funds to their player wallet if no external wallet set and the world will reset for a new hunt. A little bit is set aside for further developent and hosting.");
+player.sendMessage(ChatColor.GREEN + "Lives are $" + (satoshiQuest.BUYIN_AMOUNT*0.9) + " USD for " + satoshiQuest.LIVES_PERBUYIN + " in "+SatoshiQuest.CRYPTO_TICKER+". Most goes into Loot wallet which everyone searches for the treasure, once found that player will recive funds to their player wallet if no external wallet set and the world will reset for a new hunt. A little bit is set aside for further developent and hosting.");
 	}
 	if (balance == 0) {
 		player.sendMessage(ChatColor.RED + "Looks like you dont have enough funds, try the (/wallet) command to check your balance and deposit address.");
