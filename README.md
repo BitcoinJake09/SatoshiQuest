@@ -33,6 +33,9 @@ An example configuration would be:
     - CRYPTO_DECIMALS=8
     - DISPLAY_DECIMALS=6
     - VOTE_URL
+    - MIN_FEE=1.2
+    - MAX_FEE=15
+    - CRYPTO_TICKER=BTC
     - VOTE_API_KEY
     - DISCORD_URL
     - DISCORD_HOOK_CHANNEL_ID
