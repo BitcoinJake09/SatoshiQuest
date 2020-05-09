@@ -132,9 +132,9 @@ public class EntityEvents implements Listener {
 	SatoshiQuest.REDIS.del("toldNether3" + event.getPlayer().getUniqueId().toString());
 	}
 	if (!SatoshiQuest.REDIS.exists("txFee" + event.getPlayer().getUniqueId().toString())){
-		boolean setFee = satoshiQuest.setSatByte(event.getPlayer().getUniqueId().toString(), 1.2);
+		boolean setFee = satoshiQuest.setSatByte(event.getPlayer().getUniqueId().toString(), satoshiQuest.MIN_FEE);
 		//System.out.println("no fee set, set to 1.2sats/byte. "+setFee);
-		SatoshiQuest.REDIS.set("txFee" + event.getPlayer().getUniqueId().toString(),"1.2");
+		SatoshiQuest.REDIS.set("txFee" + event.getPlayer().getUniqueId().toString(),satoshiQuest.MIN_FEE.toString());
 	} else 	if (SatoshiQuest.REDIS.exists("txFee" + event.getPlayer().getUniqueId().toString())) {
 		boolean setFee = satoshiQuest.setSatByte(event.getPlayer().getUniqueId().toString(), Double.parseDouble(SatoshiQuest.REDIS.get("txFee" + event.getPlayer().getUniqueId().toString())));
 		//System.out.println("player fee is set to " + SatoshiQuest.REDIS.get("txFee" + event.getPlayer().getUniqueId().toString()) + "sats/byte.");
@@ -280,14 +280,14 @@ player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
     try {
       player.sendMessage(
               "The loot pool is: "
-                      + Long.toString((long)(satoshiQuest.getBalance(satoshiQuest.SERVERDISPLAY_NAME,1) * satoshiQuest.THIS_ROUND_WIN_PERC))
+                      + satoshiQuest.globalDecimalFormat.format(satoshiQuest.convertSatsToCoin((long)(satoshiQuest.getBalance(satoshiQuest.SERVERDISPLAY_NAME,1) * satoshiQuest.THIS_ROUND_WIN_PERC)))
                       + " "
-                      + satoshiQuest.DENOMINATION_NAME);
+                      + satoshiQuest.CRYPTO_TICKER);
 	player.sendMessage(
               "The loot pool unconfirmed is: "
-                      + Long.toString((long)(satoshiQuest.getBalance(satoshiQuest.SERVERDISPLAY_NAME,0) * satoshiQuest.THIS_ROUND_WIN_PERC))
+                      + satoshiQuest.globalDecimalFormat.format(satoshiQuest.convertSatsToCoin((long)(satoshiQuest.getBalance(satoshiQuest.SERVERDISPLAY_NAME,0) * satoshiQuest.THIS_ROUND_WIN_PERC)))
                       + " "
-                      + satoshiQuest.DENOMINATION_NAME);
+                      + satoshiQuest.CRYPTO_TICKER);
     } catch(Exception e) {
       e.printStackTrace();
     }
