@@ -18,20 +18,20 @@ public class TipCommand extends CommandAction {
       CommandSender sender, Command cmd, String label, String[] args, final Player player) {
 	try {
 if (args[0].equalsIgnoreCase("help") || !(args.length >= 1)) {
-	      player.sendMessage(ChatColor.GREEN + "/tip <amount> <playername> - Tip is used for player to player transactions.");
+	      player.sendMessage(ChatColor.GREEN + "/tip <playername>  <amount> - Tip is used for player to player transactions.");
 	}
 	} catch (Exception e) {
       //e.printStackTrace();
-      player.sendMessage(ChatColor.GREEN + "/tip <amount> <playername> - Tip is used for player to player transactions.");
+      player.sendMessage(ChatColor.GREEN + "/tip <playername> <amount> - Tip is used for player to player transactions.");
     }
 
     //int MAX_SEND = 10000; // to be multiplied by DENOMINATION_FACTOR
     if (args.length == 2) {
-      final Long sat = satoshiQuest.convertCoinToSats(Double.parseDouble(args[0]));
+      final Long sat = satoshiQuest.convertCoinToSats(Double.parseDouble(args[1]));
       for (char c : sat.toString().toCharArray()) {
         if (!Character.isDigit(c)) return false;
       }
-      if (args[0].length() > 10) {
+      if (args[1].length() > 10) {
         // maximum send is 10 digits
         return false;
       }
@@ -41,12 +41,12 @@ if (args[0].equalsIgnoreCase("help") || !(args.length >= 1)) {
       if (sat != 0) {
 
         for (final Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-          if (onlinePlayer.getName().equalsIgnoreCase(args[1])) {
-            if (!args[1].equalsIgnoreCase(player.getDisplayName())) {
+          if (onlinePlayer.getName().equalsIgnoreCase(args[0])) {
+            if (!args[0].equalsIgnoreCase(player.getDisplayName())) {
               try {
                 
 
-                Long balance = satoshiQuest.getBalance(player.getUniqueId().toString(),1);
+                Long balance = satoshiQuest.getBalance(player.getUniqueId().toString(),satoshiQuest.CONFS_TARGET);
 
                 if (balance >= sat) {
                   // TODO: Pay to user address

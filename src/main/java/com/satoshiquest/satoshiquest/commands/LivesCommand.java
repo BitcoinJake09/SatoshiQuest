@@ -24,7 +24,7 @@ public class LivesCommand extends CommandAction {
       if ((args[0].equalsIgnoreCase("help"))||(args.length == 0)) {
 	try {
       		satoshiQuest.getWalletInfo(player.getUniqueId().toString());
-		balance = satoshiQuest.getBalance(player.getUniqueId().toString(),1);
+		balance = satoshiQuest.getBalance(player.getUniqueId().toString(),satoshiQuest.CONFS_TARGET);
 		player.sendMessage(ChatColor.GREEN + "wallet balance: " + balance);
 	} catch (Exception e) {
 		e.printStackTrace();
@@ -34,7 +34,7 @@ public class LivesCommand extends CommandAction {
 	player.sendMessage(ChatColor.GREEN + "Lives are $" + satoshiQuest.BUYIN_AMOUNT + " USD for " + satoshiQuest.LIVES_PERBUYIN + " in "+SatoshiQuest.CRYPTO_TICKER+". Most goes into Loot wallet which everyone searches for the treasure, once found that player will recive funds to their player wallet if no external wallet set and the world will reset for a new hunt. A little bit is set aside for further developent and hosting.");
 	player.sendMessage(ChatColor.AQUA + "You can also get 10% off lives here: " + satoshiQuest.VOTE_URL);
 	} else if (satoshiQuest.didVote(player.getName()) == 1) {
-player.sendMessage(ChatColor.AQUA + "THANK YOU FAR VOTING!");
+player.sendMessage(ChatColor.AQUA + "THANK YOU FOR VOTING!");
 player.sendMessage(ChatColor.GREEN + "Lives are $" + (satoshiQuest.BUYIN_AMOUNT*0.9) + " USD for " + satoshiQuest.LIVES_PERBUYIN + " in "+SatoshiQuest.CRYPTO_TICKER+". Most goes into Loot wallet which everyone searches for the treasure, once found that player will recive funds to their player wallet if no external wallet set and the world will reset for a new hunt. A little bit is set aside for further developent and hosting.");
 	}
 	if (balance == 0) {
@@ -51,7 +51,7 @@ player.sendMessage(ChatColor.GREEN + "Lives are $" + (satoshiQuest.BUYIN_AMOUNT*
      } else if ((satoshiQuest.isStringInt(args[0])) && (args.length <= 3)) {  //end help
 	if (Integer.parseInt(args[0]) > 0) {
 		try {
-     			balance = satoshiQuest.getBalance(player.getUniqueId().toString(),6);
+     			balance = satoshiQuest.getBalance(player.getUniqueId().toString(),satoshiQuest.CONFS_TARGET);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -82,7 +82,8 @@ player.sendMessage(ChatColor.GREEN + "Lives are $" + (satoshiQuest.BUYIN_AMOUNT*
 					}
 
 					//end if multidev
-		      			Long newBalance = satoshiQuest.getBalance(player.getUniqueId().toString(),6);
+		      			Long newBalance = satoshiQuest.getBalance(player.getUniqueId().toString(),satoshiQuest.CONFS_TARGET);
+			    		boolean setFee = satoshiQuest.setSatByte(player.getUniqueId().toString(), Double.parseDouble(SatoshiQuest.REDIS.get("txFee" + player.getUniqueId().toString())));
 					if ((result != "failed") && (balance > newBalance)) {
 						String setLives = Integer.toString(((Integer.valueOf(satoshiQuest.REDIS.get("LivesLeft" +player.getUniqueId().toString()))) + (satoshiQuest.LIVES_PERBUYIN * livesAmount)));
 						satoshiQuest.REDIS.set("LivesLeft" +player.getUniqueId().toString(), setLives);
