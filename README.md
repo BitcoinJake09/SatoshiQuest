@@ -32,6 +32,8 @@ An example configuration would be:
     - SERVER_NAME=SatoshiQuest
     - CRYPTO_DECIMALS=8
     - DISPLAY_DECIMALS=6
+    - USD_DECIMALS=0.000
+    - CONFS_TARGET=1
     - VOTE_URL
     - MIN_FEE=1.2
     - MAX_FEE=15
