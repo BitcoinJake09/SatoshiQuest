@@ -98,9 +98,9 @@ public class SatoshiQuest extends JavaPlugin {
   public static final String DISCORD_URL = System.getenv("DISCORD_URL");
   public static final String DISCORD_HOOK_CHANNEL_ID = System.getenv("DISCORD_HOOK_CHANNEL_ID");
   public static final Double MIN_FEE =
-          System.getenv("MIN_FEE") != null ? Long.parseLong(System.getenv("MIN_FEE")) : 1.2;
+          System.getenv("MIN_FEE") != null ? Double.parseDouble(System.getenv("MIN_FEE")) : 1.2;
   public static final Double MAX_FEE =
-          System.getenv("MAX_FEE") != null ? Long.parseLong(System.getenv("MAX_FEE")) : 15.0;
+          System.getenv("MAX_FEE") != null ? Double.parseDouble(System.getenv("MAX_FEE")) : 15.0;
 
   public static final String SERVER_NAME =
       System.getenv("SERVER_NAME") != null ? System.getenv("SERVER_NAME") : "SatoshiQuest";
@@ -1737,6 +1737,7 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 		//result = "test"; // for testing comment out
 		try {
 		if (getBalance(SERVERDISPLAY_NAME,1) > 0) {
+//satoshiQuest.globalDecimalFormat.format(((Double)(BigDecimal.valueOf(totalBuyingBTC).doubleValue() * satoshiQuest.baseSat)))
 			sendLoot = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * THIS_ROUND_WIN_PERC);
 			Long sendback = (long)((double)getBalance(SERVERDISPLAY_NAME,1) * NEXT_ROUND_WIN_PERC);
 		if (REDIS.exists("ExternalAddress" +player.getUniqueId().toString())) {
@@ -1746,7 +1747,7 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 		player.sendMessage(ChatColor.YELLOW + "External OnWin address not set, or failed, trying in-game wallet.");
 		result = sendMany(SERVERDISPLAY_NAME, REDIS.get("nodeAddress"+player.getUniqueId().toString()), REDIS.get("nodeAddress"+SERVERDISPLAY_NAME), sendLoot, sendback);
 		}
-			System.out.println("won " + sendLoot + " LOOT! txid: " +TX_URL+result);
+			System.out.println("won " + globalDecimalFormat.format(((Double)(BigDecimal.valueOf(sendLoot).doubleValue() * baseSat))) + " LOOT! txid: " +TX_URL+result);
 		}
 		} catch (Exception exs) {
 			System.out.println(exs);
@@ -1758,7 +1759,7 @@ if(System.getenv("DISCORD_HOOK_URL")!=null) {
 	}
 	DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
 	Date date = new Date();
-	System.out.println(dateFormat.format(date) + " " + player.getName() + " " + sendLoot);
+	System.out.println(dateFormat.format(date) + " " + player.getName() + " " + globalDecimalFormat.format(((Double)(BigDecimal.valueOf(sendLoot).doubleValue() * baseSat))));
 
   	leaderBoardList = REDIS.keys("LeaderBoard *");
 
@@ -1772,17 +1773,17 @@ if (result != "failed"){
 		DecimalFormat df = new DecimalFormat(USD_DECIMALS);
         	System.out.print(df.format(amtUSD));
 		if (REDIS.exists("BetaTest")){
-REDIS.set("LeaderBoard " + iter, "BetaTest Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " "+CRYPTO_TICKER+" " + sendLoot);
+REDIS.set("LeaderBoard " + iter, "BetaTest Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " "+CRYPTO_TICKER+" " + globalDecimalFormat.format(((Double)(BigDecimal.valueOf(sendLoot).doubleValue() * baseSat))));
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("<@&"+DISCORD_HOOK_CHANNEL_ID+"> " +  dateFormat.format(date) + " " + player.getName() + " WON " + "BetaTest Round " + REDIS.get("gameRound") + " with " + sendLoot + " "+DENOMINATION_NAME+ " worth $" + df.format(amtUSD));
+			sendDiscordMessage("<@&"+DISCORD_HOOK_CHANNEL_ID+"> " +  dateFormat.format(date) + " " + player.getName() + " WON " + "BetaTest Round " + REDIS.get("gameRound") + " with " + globalDecimalFormat.format(((Double)(BigDecimal.valueOf(sendLoot).doubleValue() * baseSat))) + " "+CRYPTO_TICKER+ " worth $" + df.format(amtUSD));
 		}
 		}//betatest
 		if (!REDIS.exists("BetaTest")){
-REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " "+CRYPTO_TICKER+ " " + sendLoot);
+REDIS.set("LeaderBoard " + iter, "Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " $" + df.format(amtUSD) + " "+CRYPTO_TICKER+ " " + globalDecimalFormat.format(((Double)(BigDecimal.valueOf(sendLoot).doubleValue() * baseSat))));
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("<@&"+DISCORD_HOOK_CHANNEL_ID+"> " +  dateFormat.format(date) + " " + player.getName() + " WON " + "Round " + REDIS.get("gameRound") + " with " + sendLoot + " "+DENOMINATION_NAME+ " worth $" + df.format(amtUSD));
+			sendDiscordMessage("<@&"+DISCORD_HOOK_CHANNEL_ID+"> " +  dateFormat.format(date) + " " + player.getName() + " WON " + "Round " + REDIS.get("gameRound") + " with " + globalDecimalFormat.format(((Double)(BigDecimal.valueOf(sendLoot).doubleValue() * baseSat))) + " "+CRYPTO_TICKER+ " worth $" + df.format(amtUSD));
 		}
 		}//betatest
 	}
@@ -1801,7 +1802,7 @@ REDIS.set("LeaderBoard " + iter, "BetaTest Round " + REDIS.get("gameRound") + " 
 		announce("NEW! " +iter+") "+ REDIS.get("LeaderBoard " + iter));
 		REDIS.set("LivesLeft" +player.getUniqueId().toString(), Integer.toString(tempLivesWinningPlayer+LIVES_PERBUYIN));
 		if(System.getenv("DISCORD_HOOK_URL")!=null) {
-			sendDiscordMessage("<@&"+DISCORD_HOOK_CHANNEL_ID+"> " +  "WINNER - Beta Test Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " "+LIVES_PERBUYIN+" life worth $" + df.format(BUYIN_AMOUNT) + " "+DENOMINATION_NAME+ " " + totalLifeRate);
+			sendDiscordMessage("<@&"+DISCORD_HOOK_CHANNEL_ID+"> " +  "WINNER - Beta Test Round " + REDIS.get("gameRound") + " " +dateFormat.format(date) + " " + player.getName() + " "+LIVES_PERBUYIN+" life worth $" + df.format(BUYIN_AMOUNT) + " "+CRYPTO_TICKER+ " " + totalLifeRate);
 		}
 		}//betatest
 		if (!REDIS.exists("BetaTest")){
@@ -1855,7 +1856,7 @@ File BaseFolder = new File(Bukkit.getWorlds().get(0).getWorldFolder(), "players"
 			}
 		}
 		DecimalFormat df = new DecimalFormat(USD_DECIMALS);
-		p.kickPlayer("World Restarting! " +  dateFormat.format(date) + " " + player.getName() + " WON " + "Round " + REDIS.get("gameRound") + " with " + sendLoot + " "+CRYPTO_TICKER+ " worth $" + df.format(amtUSD));
+		p.kickPlayer("World Restarting! " +  dateFormat.format(date) + " " + player.getName() + " WON " + "Round " + REDIS.get("gameRound") + " with " + globalDecimalFormat.format(((Double)(BigDecimal.valueOf(sendLoot).doubleValue() * baseSat))) + " "+CRYPTO_TICKER+ " worth $" + df.format(amtUSD));
 
             }
         
