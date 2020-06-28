@@ -9,7 +9,7 @@
 # 
 # IRC: #spigot @ irc.spi.gt ( http://www.spigotmc.org/pages/irc/ )
 # Forums: http://www.spigotmc.org/
-api-version: 1.13
+api-version: 1.16
 config-version: 11
 settings:
   debug: false

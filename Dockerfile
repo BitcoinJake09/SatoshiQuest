@@ -14,7 +14,7 @@ RUN mkdir -p /spigot/plugins
 WORKDIR /build
 # DOWNLOAD AND BUILD SPIGOT
 ADD https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar /build/BuildTools.jar
-RUN cd /build && java -jar BuildTools.jar --rev 1.13.2
+RUN cd /build && java -jar BuildTools.jar --rev 1.16.1
 RUN cp /build/Spigot/Spigot-Server/target/spigot-*.jar /spigot/spigot.jar
 WORKDIR /spigot
 RUN echo "eula=true" > eula.txt
