@@ -72,12 +72,12 @@ Configuring your Spigot servers for BungeeCordPermalink
 How to run without docker
 
 =========================================
-1. Download [Spigot 1.13.2](https://getbukkit.org/get/QMerkBxNGNl3EnQl8gACGfWuJnJtJuWB)
-2. Start server with ```java -jar Spigot-1.13.2.jar```
+1. Download [Spigot 1.16.1](https://getbukkit.org/get/fDoqnvFqdhjFcURmY7Oqtzu0giKFAiyY)
+2. Start server with ```java -jar Spigot-1.16.1.jar```
     Restart the Spigot servers.
 3. Copy SatoshiQuest.jar to plugin folder
 4. Set EULA.txt to true
 5. Edit and run setenv.sh script
 6. Make sure you have Bitcoin and Redis server running.
 7. Edit server.properties to point to your local IP
-8. Start server with ```java -jar Spigot-1.13.2.jar```
+8. Start server with ```java -jar Spigot-1.16.1.jar```
