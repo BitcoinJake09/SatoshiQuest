@@ -534,15 +534,16 @@ if (isAtSpawn(player) == false) {
         Player player = event.getPlayer();
 
         if (event.getCause() == PlayerTeleportEvent.TeleportCause.NETHER_PORTAL) {
-            event.useTravelAgent(true);
-            event.getPortalTravelAgent().setCanCreatePortal(true);
+            //event.useTravelAgent(true);
+            //event.getPortalTravelAgent().setCanCreatePortal(true);
             Location location;
             if (player.getWorld() == Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME)) {
                  location = new Location(Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME+"_nether"), event.getFrom().getBlockX() / 8, event.getFrom().getBlockY(), event.getFrom().getBlockZ() / 8);
             } else {
                 location = new Location(Bukkit.getServer().getWorld(satoshiQuest.SERVERDISPLAY_NAME), event.getFrom().getBlockX() * 8, event.getFrom().getBlockY(), event.getFrom().getBlockZ() * 8);
             }
-            event.setTo(event.getPortalTravelAgent().findOrCreate(location));
+            //System.out.println("nether test:" + location);
+            event.setTo(location);
         }
 
         if (event.getCause() == PlayerTeleportEvent.TeleportCause.END_PORTAL) {
