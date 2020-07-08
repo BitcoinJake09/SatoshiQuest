@@ -93,4 +93,4 @@ InGame mod/admin commands:
 
 /mod expandingloot -will allow loot to expand further after each round won
 
-/mod add <playername> -mods a player
+/mod add playername -mods a player
