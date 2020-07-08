@@ -81,3 +81,11 @@ How to run without docker
 6. Make sure you have Bitcoin and Redis server running.
 7. Edit server.properties to point to your local IP
 8. Start server with ```java -jar Spigot-1.16.1.jar```
+
+
+InGame mod/admin commands:
+/mod list -list of mods
+/mod flag -locks spawn even when players have lives i think?
+/mod beta -gives new players 1 free life and shows beta on rounds
+/mod expandingloot -will allow loot to expand further after each round won
+/mod add <playername> -mods a player
